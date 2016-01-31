@@ -3,25 +3,25 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "lightcream", ".", "{2B8DA9BE-F21B-401F-823D-BA69594A3233}"
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "LightService", ".", "{2B8DA9BE-F21B-401F-823D-BA69594A3233}"
 	ProjectSection(WebsiteProperties) = preProject
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_50947"
-		Debug.AspNetCompiler.PhysicalPath = "..\lightcream\"
+		Debug.AspNetCompiler.PhysicalPath = "..\LightService\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_50947\"
 		Debug.AspNetCompiler.Updateable = "true"
 		Debug.AspNetCompiler.ForceOverwrite = "true"
 		Debug.AspNetCompiler.FixedNames = "false"
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.VirtualPath = "/localhost_50947"
-		Release.AspNetCompiler.PhysicalPath = "..\lightcream\"
+		Release.AspNetCompiler.PhysicalPath = "..\LightService\"
 		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_50947\"
 		Release.AspNetCompiler.Updateable = "true"
 		Release.AspNetCompiler.ForceOverwrite = "true"
 		Release.AspNetCompiler.FixedNames = "false"
 		Release.AspNetCompiler.Debug = "False"
 		VWDPort = "50947"
-		SlnRelativePath = "..\lightcream\"
+		SlnRelativePath = "..\LightService\"
 	EndProjectSection
 EndProject
 Global

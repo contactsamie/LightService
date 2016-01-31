@@ -1,10 +1,6 @@
-
+//var q = require("q");
 
 var light = (function () {
-
-
-    var q = require("q");
-
     var GLOBAL = {};
     GLOBAL.players = {};
     GLOBAL.playersDef = [];
@@ -30,6 +26,8 @@ var light = (function () {
             }, e, context, "service-throws");
         }
     };
+
+    GLOBAL.servicePipes = [];
 
     var setUpEventSubscriberBase = function (name, id, o) {
         setUpEventSubscriberBase.ref = setUpEventSubscriberBase.ref || 0;
@@ -98,22 +96,55 @@ var light = (function () {
         return item;
     };
 
-    var createServiceDefinitionFromSuppliedFn = function (context, whois, definition,name) {
+    /*
+     !!!!!!!!!!!!!!!!
+    */
 
+    var createServiceDefinitionFromSuppliedFn = function (context, whois, definitionOrDefinitionType, definition, name) {
         setUpServiceEvent(whois, "before", name);
         setUpServiceEvent(whois, "after", name);
         setUpServiceEvent(whois, "error", name);
         setUpServiceEvent(whois, "success", name);
 
-        whois.redefinition = function (arg, callerContext) {
+        return function (arg, callerContext) {
             var result;
             context.callerContext = callerContext;
             GLOBAL.utility.tryCatch(context, function () { return whois["before"].notify(); }, function () { }, function () { });
 
-            GLOBAL.utility.tryCatch(context, function () {               
-                
-                result = definition.call(GLOBAL.system, arg);
+            GLOBAL.utility.tryCatch(context, function () {
+                var tmpDefinition;
+                var selectedPipe = "none";
 
+                var length = GLOBAL.servicePipes.length;
+                for (var j = 0; j < length; j++) {
+                    var pipe = GLOBAL.servicePipes[j];
+
+                    if (definition && definitionOrDefinitionType) {
+                        if (pipe.name === definitionOrDefinitionType) {
+                            tmpDefinition = pipe.definition.call(GLOBAL.system, definition);
+                            selectedPipe = pipe.name;
+                            break;
+                        }
+                    } else {
+                        if (pipe.condition.call(GLOBAL.system, definitionOrDefinitionType)) {
+                            tmpDefinition = pipe.definition.call(GLOBAL.system, definitionOrDefinitionType);
+                            selectedPipe = pipe.name;
+                            break;
+                        }
+                    }
+                }
+
+                tmpDefinition = typeof tmpDefinition === "function" ? tmpDefinition : function () { };
+
+                GLOBAL.system["$$currentContext"] = {
+                    servicePipes: GLOBAL.servicePipes,
+                    definition: definition,
+                    serviceName: name,
+                    pipeName: selectedPipe,
+                    arg: arg
+                };
+
+                result = tmpDefinition.call(GLOBAL.system, arg);
                 return result;
             }, function (o) {
                 return whois["success"].notify(o, context, "service-success");
@@ -126,7 +157,7 @@ var light = (function () {
         }
     };
 
-    var service = function (name, definition) {
+    var service = function (name, definitionOrDefinitionType, definition) {
         var context = {
             name: name, step: function (o) {
                 self["event"].notify(name, context, "service-call");
@@ -140,7 +171,7 @@ var light = (function () {
         };
         whois.position = GLOBAL.playersDef.length + 1;
 
-        createServiceDefinitionFromSuppliedFn(context, whois, definition, name);
+        whois.redefinition = createServiceDefinitionFromSuppliedFn(context, whois, definitionOrDefinitionType, definition, name);
 
         whois.me = name;
         GLOBAL.players[name] = whois;
@@ -155,14 +186,24 @@ var light = (function () {
     setUpSystemEvent(self, "event", "$system");
     self.version = 1;
     self.startService = function (name, f) {
-
-       typeof f=="function" && f.call(GLOBAL.system, whois(name));
-
+        typeof f === "function" && f.call(GLOBAL.system, whois(name));
     };
+
+    self.servicePipe = function (name, condition, definition) {
+        GLOBAL.servicePipes.push({
+            name: name,// todo check for unique name
+            condition: condition,
+            definition: definition
+        });
+    }
+
     self.service = service;
 
     return self;
 })();
+
+// default function servicePipe plugin
+light.servicePipe("default", function (definition) { return typeof definition === "function"; }, function (definition) { return definition; });
 
 if (typeof module !== "undefined" && ('exports' in module)) {
     module.exports = light;
