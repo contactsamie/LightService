@@ -203,7 +203,7 @@ var light = (function () {
 })();
 
 // default function servicePipe plugin
-light.servicePipe("default", function (definition) { return typeof definition === "function"; }, function (definition) { return definition; });
+light.servicePipe("$$default", function (definition) { return typeof definition === "function"; }, function (definition) { return definition; });
 
 if (typeof module !== "undefined" && ('exports' in module)) {
     module.exports = light;
