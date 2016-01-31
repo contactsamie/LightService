@@ -235,7 +235,7 @@ describe('light', function () {
     };
     it('native tests', function () {
         light(function () {
-            light.advance.test(testObj, function () {
+            light.advance.testService(testObj, function () {
                 var test = this.sample2;
                 var path = [];
                 test.before(function () { path.push("before"); });
@@ -252,7 +252,7 @@ describe('light', function () {
 
     it('native tests 2', function () {
         light(function () {
-            light.advance.test(testObj, function () {
+            light.advance.testService(testObj, function () {
                 var test = this.sample2;
                 var answer = test();
                 expect(answer).toBe(5);
@@ -264,7 +264,7 @@ describe('light', function () {
     });
 
     it('native tests 2', function () {
-        light.advance.test(testObj, function () {
+        light.advance.testService(testObj, function () {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(5);

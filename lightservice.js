@@ -12,6 +12,7 @@ var light = (function () {
         _light["event"].notify(e, context, notificationInfo);
         if (typeof o === "function") {
             try { o(e, context, notificationInfo); } catch (ex) {
+                console.error("SUPRESSED ERROR : " + ex);
             }
         }
     };
@@ -102,7 +103,53 @@ var light = (function () {
     /*
      !!!!!!!!!!!!!!!!
     */
+    var getApplicableServicePipe = function (context, serviceItem, definitionOrDefinitionType, definition, name, arg) {
+        var testServicePipe = GLOBAL._TEST_OBJECTS_&&GLOBAL._TEST_OBJECTS_[name]&& GLOBAL._TEST_OBJECTS_[name].servicePipe;
 
+        var testServicePipeCondition = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].servicePipeCondition;
+
+        var tmpDefinition;
+        if (testServicePipe && testServicePipeCondition) {
+            if (testServicePipeCondition.call(GLOBAL.system, actualDefinition)) {
+                GLOBAL.system.$$currentContext = {
+                    servicePipes: GLOBAL.servicePipes,
+                    definition: actualDefinition,
+                    serviceName: name,
+                    pipeName: pipe.name,
+                    arg: arg
+                };
+                tmpDefinition = testServicePipe.call(GLOBAL.system, actualDefinition);
+            }
+        } else {
+            var isAMatch = false;
+            var length = GLOBAL.servicePipes.length;
+            for (var j = 0; j < length; j++) {
+                var pipe = GLOBAL.servicePipes[j];
+                var pipeType = (definition && definitionOrDefinitionType) ? definitionOrDefinitionType : false;
+                var actualDefinition = pipeType ? definition : definitionOrDefinitionType;
+                isAMatch = pipeType ? (pipe.name === pipeType) : pipe.condition.call(GLOBAL.system, actualDefinition);
+
+                if (isAMatch) {
+                    //pipe plugin context
+                    GLOBAL.system.$$currentContext = {
+                        servicePipes: GLOBAL.servicePipes,
+                        definition: actualDefinition,
+                        serviceName: name,
+                        pipeName: pipe.name,
+                        arg: arg
+                    };
+
+                    //context are definition other services
+                    //events listening are not available in service defibition****
+
+                    tmpDefinition = (testServicePipe || pipe.definition).call(GLOBAL.system, actualDefinition);
+
+                    break;
+                }
+            }
+        }
+        return tmpDefinition;
+    };
     var runSuppliedServiceFunction = function (context, serviceItem, definitionOrDefinitionType, definition, name, arg) {
         //start testing
         if (GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].service) {
@@ -115,38 +162,12 @@ var light = (function () {
         }
         //end testing
 
-        var tmpDefinition;
-        var isAMatch = false;
+        var tmpDefinition = getApplicableServicePipe(context, serviceItem, definitionOrDefinitionType, definition, name, arg);
 
-        var length = GLOBAL.servicePipes.length;
-        for (var j = 0; j < length; j++) {
-            var pipe = GLOBAL.servicePipes[j];
-            var pipeType = (definition && definitionOrDefinitionType) ? definitionOrDefinitionType : false;
-            var actualDefinition = pipeType ? definition : definitionOrDefinitionType;
-            isAMatch = pipeType ? (pipe.name === pipeType) : pipe.condition.call(GLOBAL.system, actualDefinition);
-
-            if (isAMatch) {
-                //pipe plugin context
-                GLOBAL.system.$$currentContext = {
-                    servicePipes: GLOBAL.servicePipes,
-                    definition: actualDefinition,
-                    serviceName: name,
-                    pipeName: pipe.name,
-                    arg: arg
-                };
-
-                //context are definition other services
-                //events listening are not available in service defibition****
-
-                tmpDefinition = pipe.definition.call(GLOBAL.system, actualDefinition);
-
-                break;
-            }
-        }
         //expecting function from pipe plugin
         if (typeof tmpDefinition !== "function") {
             var message = "Cannot process service '" + name + "' "
-            message = message + (isAMatch ? "'" + definitionOrDefinitionType + "' service pipe must return a function" : "no matching service pipe  exists ");
+            message = message + (tmpDefinition ? "'" + definitionOrDefinitionType + "' service pipe must return a function" : "no matching service pipe  exists ");
             console.error(message);
             throw message;
         }
@@ -228,7 +249,7 @@ var light = (function () {
     _light.service = defineService;
 
     _light.advance = {
-        test: function (setup, f) {
+        testService: function (setup, f) {
             GLOBAL._TEST_OBJECTS_ = setup;
             f.call(GLOBAL.players, setup);
             GLOBAL._TEST_OBJECTS_ = undefined
