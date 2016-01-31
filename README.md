@@ -1,6 +1,6 @@
 LightService
 
-LightService is an EAAS Library 
+LightService is an Service Framework 
 
 GOALS: 
 
