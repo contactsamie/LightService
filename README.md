@@ -1,6 +1,8 @@
 LightService
 
-GOALS:
+LightService is an EAAS Library (i.e Every Thing As A Service)
+
+GOALS: 
 
 This provides a convinient and consistent interface for service consumption
 
@@ -9,6 +11,13 @@ It provides a way for client to define services and also specify how those servi
 It also provides event propagation and handling interfaces
 
 Finally , it provides native logging and testing capabilites
+
+All in an assync environment
+
+FURTHER GOALS:
+
+Easy Drop-in .NET intergration
+
 
 
 
