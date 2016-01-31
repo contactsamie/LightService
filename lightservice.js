@@ -122,6 +122,10 @@ var light = (function () {
                     pipeName: pipe.name,
                     arg: arg
                 };
+
+                //context are definition other services
+                //events listening are not available in service defibition****
+
                 tmpDefinition = pipe.definition.call(GLOBAL.system, actualDefinition);               
 
                     break;
@@ -189,13 +193,21 @@ var light = (function () {
             return serviceItem.redefinition(arg, context);
         }
     };
-    var _light = {};
 
-    setUpSystemEvent(_light, "event", "$system");
-    _light.version = 1;
-    _light.startService = function (name, f) {
-        typeof f === "function" && f.call(GLOBAL.system, getServiceByName(name));
+    //context are invocable other services
+
+    var _light = function (f) {
+        typeof f === "function" && f.call(GLOBAL.players, null);
     };
+
+    _light.startService = function (name, f) {
+        typeof f === "function" && f.call(GLOBAL.players, getServiceByName(name));
+    };
+
+  _light.version = 1;
+    setUpSystemEvent(_light, "event", "$system");
+  
+   
 
     _light.servicePipe = function (name, condition, definition) {
         GLOBAL.servicePipes.push({
@@ -211,7 +223,22 @@ var light = (function () {
 })();
 
 // default function servicePipe plugin
+
+
+
 light.servicePipe("$$default", function (definition) { return typeof definition === "function"; }, function (definition) { return definition; });
+
+
+
+//light.servicePipe("dom", function (definition) { return true; }, function (definition) {
+//    return function () {
+//     document.body.innerHTML=   definition();
+//    }
+//});
+
+//light.service("setThings", "dom", function () { return "<bold>wooooooooooooo</bold>";  });
+
+
 
 if (typeof module !== "undefined" && ('exports' in module)) {
     module.exports = light;

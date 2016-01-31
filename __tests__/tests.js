@@ -12,7 +12,7 @@ light.event(function (e, context, notificationInfo) { });
 light.service("test", function (arg) { });
 light.service("test-2", function (arg) { });
 light.service("test-2b2", function (arg) { });
-light.service("test-error", function (arg) { throw "error occured"; });
+light.service("test_error", function (arg) { throw "error occured"; });
 light.service("sample1", function (arg) { return arg.x * arg.y; });
 light.service("sample2", function (arg) {
     return this.sample1({ x: 2, y: 3 });
@@ -146,7 +146,7 @@ describe('light', function () {
     });
 
     it('should allow event subscription 4', function () {
-        light.startService("test-error", function (test) {
+        light.startService("test_error", function (test) {
             var path = [];
             test.error(function () { path.push("error"); });
             test();
@@ -155,7 +155,7 @@ describe('light', function () {
     });
 
     it('should allow event subscription 6', function () {
-        light.startService("test-error", function (test) {
+        light.startService("test_error", function (test) {
             var path = [];
             test.before(function () { path.push("before"); });
             test.after(function () { path.push("after"); });
@@ -168,7 +168,7 @@ describe('light', function () {
         });
     });
 
-    it('should run', function () {
+    it('should run 1', function () {
         light.startService("sample2", function (test) {
             var path = [];
             test.before(function () { path.push("before"); });
@@ -179,6 +179,49 @@ describe('light', function () {
             expect(path[1]).toBe("after");
             expect(path.length).toBe(2);
             expect(answer).toBe(6);
+        });
+    });
+
+    it('should run 2', function () {
+        light.startService("sample1", function (test) {
+            var path = [];
+            test.before(function () { path.push("before"); });
+            test.after(function () { path.push("after"); });
+            test.error(function (o) { path.push("error"); console.log(o); });
+            var answer = test({ x: 2, y: 3 });
+            expect(path[0]).toBe("before");
+            expect(path[1]).toBe("after");
+            expect(path.length).toBe(2);
+            expect(answer).toBe(6);
+        });
+    });
+
+    it('using new api', function () {
+        light(function () {
+            var test = this.test_error;
+            var path = [];
+            test.before(function () { path.push("before"); });
+            test.after(function () { path.push("after"); });
+            test.error(function () { path.push("error"); });
+            test();
+            expect(path[0]).toBe("before");
+            expect(path[1]).toBe("error");
+            expect(path[2]).toBe("after");
+            expect(path.length).toBe(3);
+        });
+    });
+
+    it('event listening are not available in service definition', function () {
+        light.service("sample_no_event", function (arg) {
+            expect(this.sample1.before).toBe(undefined);
+            expect(this.sample1.error).toBe(undefined);
+            expect(this.sample1.after).toBe(undefined);
+
+            return this.sample1({ x: 2, y: 3 });
+        });
+
+        light(function () {
+            this.sample_no_event();
         });
     });
 });
