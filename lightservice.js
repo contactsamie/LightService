@@ -2,7 +2,8 @@
 
 var light = (function () {
     var GLOBAL = {};
-    GLOBAL.players = {};
+    GLOBAL._TEST_OBJECTS_;
+    GLOBAL.players = function () { };
     GLOBAL.playersDef = [];
     GLOBAL.eventSubscribers = {};
     GLOBAL.system = {};
@@ -96,13 +97,24 @@ var light = (function () {
         return item;
     };
     function parseJSON(data) {
-        return JSON && JSON.parse ? JSON.parse( data ) : (new Function("return " + data))(); 
+        return JSON && JSON.parse ? JSON.parse(data) : (new Function("return " + data))();
     }
     /*
      !!!!!!!!!!!!!!!!
     */
 
     var runSuppliedServiceFunction = function (context, serviceItem, definitionOrDefinitionType, definition, name, arg) {
+        //start testing
+        if (GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].service) {
+            if (GLOBAL._TEST_OBJECTS_[name].type) {
+                definitionOrDefinitionType = GLOBAL._TEST_OBJECTS_[name].type;
+                definition = GLOBAL._TEST_OBJECTS_[name].service;
+            } else {
+                definitionOrDefinitionType = GLOBAL._TEST_OBJECTS_[name].service;
+            }
+        }
+        //end testing
+
         var tmpDefinition;
         var isAMatch = false;
 
@@ -111,8 +123,8 @@ var light = (function () {
             var pipe = GLOBAL.servicePipes[j];
             var pipeType = (definition && definitionOrDefinitionType) ? definitionOrDefinitionType : false;
             var actualDefinition = pipeType ? definition : definitionOrDefinitionType;
-             isAMatch = pipeType ? (pipe.name === pipeType) : pipe.condition.call(GLOBAL.system, actualDefinition);
-            
+            isAMatch = pipeType ? (pipe.name === pipeType) : pipe.condition.call(GLOBAL.system, actualDefinition);
+
             if (isAMatch) {
                 //pipe plugin context
                 GLOBAL.system.$$currentContext = {
@@ -126,10 +138,10 @@ var light = (function () {
                 //context are definition other services
                 //events listening are not available in service defibition****
 
-                tmpDefinition = pipe.definition.call(GLOBAL.system, actualDefinition);               
+                tmpDefinition = pipe.definition.call(GLOBAL.system, actualDefinition);
 
-                    break;
-                }            
+                break;
+            }
         }
         //expecting function from pipe plugin
         if (typeof tmpDefinition !== "function") {
@@ -139,7 +151,7 @@ var light = (function () {
             throw message;
         }
 
-        return tmpDefinition.call(GLOBAL.system, arg);       
+        return tmpDefinition.call(GLOBAL.system, arg);
     };
 
     var createServiceDefinitionFromSuppliedFn = function (context, serviceItem, definitionOrDefinitionType, definition, name) {
@@ -154,10 +166,8 @@ var light = (function () {
             GLOBAL.utility.tryCatch(context, function () { return serviceItem["before"].notify(); }, function () { }, function () { });
 
             GLOBAL.utility.tryCatch(context, function () {
-
                 result = runSuppliedServiceFunction(context, serviceItem, definitionOrDefinitionType, definition, name, arg);
                 return result;
-                
             }, function (o) {
                 return serviceItem["success"].notify(o, context, "service-success");
             }, function (o) {
@@ -204,10 +214,8 @@ var light = (function () {
         typeof f === "function" && f.call(GLOBAL.players, getServiceByName(name));
     };
 
-  _light.version = 1;
+    _light.version = 1;
     setUpSystemEvent(_light, "event", "$system");
-  
-   
 
     _light.servicePipe = function (name, condition, definition) {
         GLOBAL.servicePipes.push({
@@ -219,16 +227,20 @@ var light = (function () {
 
     _light.service = defineService;
 
+    _light.advance = {
+        test: function (setup, f) {
+            GLOBAL._TEST_OBJECTS_ = setup;
+            f.call(GLOBAL.players, setup);
+            GLOBAL._TEST_OBJECTS_ = undefined
+        }
+    };
+
     return _light;
 })();
 
 // default function servicePipe plugin
 
-
-
 light.servicePipe("$$default", function (definition) { return typeof definition === "function"; }, function (definition) { return definition; });
-
-
 
 //light.servicePipe("dom", function (definition) { return true; }, function (definition) {
 //    return function () {
@@ -237,8 +249,6 @@ light.servicePipe("$$default", function (definition) { return typeof definition 
 //});
 
 //light.service("setThings", "dom", function () { return "<bold>wooooooooooooo</bold>";  });
-
-
 
 if (typeof module !== "undefined" && ('exports' in module)) {
     module.exports = light;

@@ -23,7 +23,6 @@ describe('light', function () {
         expect(light.version).toBe(1);
     });
 
-
     it('using new api', function () {
         light(function () {
             var test = this.test_error;
@@ -226,5 +225,54 @@ describe('light', function () {
         });
     });
 
-   
+    var testObj = {
+        sample1: {
+            type: undefined,
+            service: function (arg) {
+                return arg.x + arg.y;
+            }
+        }
+    };
+    it('native tests', function () {
+        light(function () {
+            light.advance.test(testObj, function () {
+                var test = this.sample2;
+                var path = [];
+                test.before(function () { path.push("before"); });
+                test.after(function () { path.push("after"); });
+                test.error(function (o) { path.push("error"); console.log(o); });
+                var answer = test();
+                expect(path[0]).toBe("before");
+                expect(path[1]).toBe("after");
+                expect(path.length).toBe(2);
+                expect(answer).toBe(5);
+            });
+        });
+    });
+
+    it('native tests 2', function () {
+        light(function () {
+            light.advance.test(testObj, function () {
+                var test = this.sample2;
+                var answer = test();
+                expect(answer).toBe(5);
+            });
+            var test = this.sample2;
+            var answer = test();
+            expect(answer).toBe(6);
+        });
+    });
+
+    it('native tests 2', function () {
+        light.advance.test(testObj, function () {
+            var test = this.sample2;
+            var answer = test();
+            expect(answer).toBe(5);
+        });
+        light(function () {
+            var test = this.sample2;
+            var answer = test();
+            expect(answer).toBe(6);
+        });
+    });
 });
