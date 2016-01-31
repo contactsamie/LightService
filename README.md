@@ -4,7 +4,7 @@ LightService is an EAAS Library (i.e Every Thing As A Service)
 
 GOALS: 
 
-This provides a convinient and consistent interface for service consumption
+This provides a Simple, convinient and consistent interface for service consumption
 
 It provides a way for client to define services and also specify how those service definition should be interpreted
 
