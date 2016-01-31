@@ -12,7 +12,7 @@ It also provides event propagation and handling interfaces
 
 Finally , it provides native logging and testing capabilites
 
-All in an assync environment
+All in async
 
 It favours function argument as an object over argument as params
 
