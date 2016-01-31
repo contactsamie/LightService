@@ -1,5 +1,5 @@
 # LightService
 
-npm install lightservice
+# npm install lightservice
 
-Install-Package LightService
+# Install-Package LightService
