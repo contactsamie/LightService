@@ -8,7 +8,7 @@ var light = (function () {
     GLOBAL.system = {};
     GLOBAL.utility = {};
     GLOBAL.utility.execSurpressError = function (o, e, context, notificationInfo) {
-        self["event"].notify(e, context, notificationInfo);
+        _light["event"].notify(e, context, notificationInfo);
         if (typeof o === "function") {
             try { o(e, context, notificationInfo); } catch (ex) {
             }
@@ -91,105 +91,108 @@ var light = (function () {
         that[event].notify = GLOBAL.eventSubscribers[id].notify;
     };
 
-    var whois = function (name) {
+    var getServiceByName = function (name) {
         var item = GLOBAL.players[name];
         return item;
     };
-
+    function parseJSON(data) {
+        return JSON && JSON.parse ? JSON.parse( data ) : (new Function("return " + data))(); 
+    }
     /*
      !!!!!!!!!!!!!!!!
     */
 
-    var createServiceDefinitionFromSuppliedFn = function (context, whois, definitionOrDefinitionType, definition, name) {
-        setUpServiceEvent(whois, "before", name);
-        setUpServiceEvent(whois, "after", name);
-        setUpServiceEvent(whois, "error", name);
-        setUpServiceEvent(whois, "success", name);
+    var runSuppliedServiceFunction = function (context, serviceItem, definitionOrDefinitionType, definition, name, arg) {
+        var tmpDefinition;
+        var selectedPipe;
+
+        var length = GLOBAL.servicePipes.length;
+        for (var j = 0; j < length; j++) {
+            var pipe = GLOBAL.servicePipes[j];
+            var pipeType = (definition && definitionOrDefinitionType) ? definitionOrDefinitionType : false;
+            var actualDefinition = pipeType ? definition : definitionOrDefinitionType;
+            var isAMatch = pipeType ? (pipe.name === pipeType) : pipe.condition.call(GLOBAL.system, actualDefinition);
+            
+            if (isAMatch) {
+                    tmpDefinition = pipe.definition.call(GLOBAL.system, actualDefinition);
+                    selectedPipe = pipe.name;
+                    break;
+                }            
+        }
+        //expecting function from pipe plugin
+        tmpDefinition = typeof tmpDefinition === "function" ? tmpDefinition : function () { };
+
+        GLOBAL.system["$$currentContext"] = {
+            servicePipes: GLOBAL.servicePipes,
+            definition: actualDefinition,
+            serviceName: name,
+            pipeName: selectedPipe,
+            arg: arg
+        };
+
+        return tmpDefinition.call(GLOBAL.system, arg);       
+    };
+
+    var createServiceDefinitionFromSuppliedFn = function (context, serviceItem, definitionOrDefinitionType, definition, name) {
+        setUpServiceEvent(serviceItem, "before", name);
+        setUpServiceEvent(serviceItem, "after", name);
+        setUpServiceEvent(serviceItem, "error", name);
+        setUpServiceEvent(serviceItem, "success", name);
 
         return function (arg, callerContext) {
             var result;
             context.callerContext = callerContext;
-            GLOBAL.utility.tryCatch(context, function () { return whois["before"].notify(); }, function () { }, function () { });
+            GLOBAL.utility.tryCatch(context, function () { return serviceItem["before"].notify(); }, function () { }, function () { });
 
             GLOBAL.utility.tryCatch(context, function () {
-                var tmpDefinition;
-                var selectedPipe = "none";
 
-                var length = GLOBAL.servicePipes.length;
-                for (var j = 0; j < length; j++) {
-                    var pipe = GLOBAL.servicePipes[j];
-
-                    if (definition && definitionOrDefinitionType) {
-                        if (pipe.name === definitionOrDefinitionType) {
-                            tmpDefinition = pipe.definition.call(GLOBAL.system, definition);
-                            selectedPipe = pipe.name;
-                            break;
-                        }
-                    } else {
-                        if (pipe.condition.call(GLOBAL.system, definitionOrDefinitionType)) {
-                            tmpDefinition = pipe.definition.call(GLOBAL.system, definitionOrDefinitionType);
-                            selectedPipe = pipe.name;
-                            break;
-                        }
-                    }
-                }
-
-                tmpDefinition = typeof tmpDefinition === "function" ? tmpDefinition : function () { };
-
-                GLOBAL.system["$$currentContext"] = {
-                    servicePipes: GLOBAL.servicePipes,
-                    definition: definition,
-                    serviceName: name,
-                    pipeName: selectedPipe,
-                    arg: arg
-                };
-
-                result = tmpDefinition.call(GLOBAL.system, arg);
+                result = runSuppliedServiceFunction(context, serviceItem, definitionOrDefinitionType, definition, name, arg);
                 return result;
+                
             }, function (o) {
-                return whois["success"].notify(o, context, "service-success");
+                return serviceItem["success"].notify(o, context, "service-success");
             }, function (o) {
-                return whois["error"].notify(o, context, "service-error");
+                return serviceItem["error"].notify(o, context, "service-error");
             });
 
-            GLOBAL.utility.tryCatch(context, function () { return whois["after"].notify(); }, function () { }, function () { });
+            GLOBAL.utility.tryCatch(context, function () { return serviceItem["after"].notify(); }, function () { }, function () { });
             return result;
         }
     };
 
-    var service = function (name, definitionOrDefinitionType, definition) {
+    var defineService = function (name, definitionOrDefinitionType, definition) {
         var context = {
             name: name, step: function (o) {
-                self["event"].notify(name, context, "service-call");
+                _light["event"].notify(name, context, "service-call");
                 this.steps.push(o);
             },
             steps: []
         };
-        var whois = function (arg) {
+        var serviceItem = function (arg) {
             arg = arg || {};
-            return whois.redefinition(arg);
+            return serviceItem.redefinition(arg);
         };
-        whois.position = GLOBAL.playersDef.length + 1;
+        serviceItem.position = GLOBAL.playersDef.length + 1;
 
-        whois.redefinition = createServiceDefinitionFromSuppliedFn(context, whois, definitionOrDefinitionType, definition, name);
+        serviceItem.redefinition = createServiceDefinitionFromSuppliedFn(context, serviceItem, definitionOrDefinitionType, definition, name);
 
-        whois.me = name;
-        GLOBAL.players[name] = whois;
+        serviceItem.me = name;
+        GLOBAL.players[name] = serviceItem;
         GLOBAL.playersDef.push(GLOBAL.players[name]);
         GLOBAL.system[name] = function (arg) {
             context.step(name);
-            return whois.redefinition(arg, context);
+            return serviceItem.redefinition(arg, context);
         }
     };
-    var self = {};
+    var _light = {};
 
-    setUpSystemEvent(self, "event", "$system");
-    self.version = 1;
-    self.startService = function (name, f) {
-        typeof f === "function" && f.call(GLOBAL.system, whois(name));
+    setUpSystemEvent(_light, "event", "$system");
+    _light.version = 1;
+    _light.startService = function (name, f) {
+        typeof f === "function" && f.call(GLOBAL.system, getServiceByName(name));
     };
 
-    self.servicePipe = function (name, condition, definition) {
+    _light.servicePipe = function (name, condition, definition) {
         GLOBAL.servicePipes.push({
             name: name,// todo check for unique name
             condition: condition,
@@ -197,9 +200,9 @@ var light = (function () {
         });
     }
 
-    self.service = service;
+    _light.service = defineService;
 
-    return self;
+    return _light;
 })();
 
 // default function servicePipe plugin
