@@ -23,6 +23,36 @@ describe('light', function () {
         expect(light.version).toBe(1);
     });
 
+
+    it('using new api', function () {
+        light(function () {
+            var test = this.test_error;
+            var path = [];
+            test.before(function () { path.push("before"); });
+            test.after(function () { path.push("after"); });
+            test.error(function () { path.push("error"); });
+            test();
+            expect(path[0]).toBe("before");
+            expect(path[1]).toBe("error");
+            expect(path[2]).toBe("after");
+            expect(path.length).toBe(3);
+        });
+    });
+
+    it('event listening are not available in service definition', function () {
+        light.service("sample_no_event", function (arg) {
+            expect(this.sample1.before).toBe(undefined);
+            expect(this.sample1.error).toBe(undefined);
+            expect(this.sample1.after).toBe(undefined);
+
+            return this.sample1({ x: 2, y: 3 });
+        });
+
+        light(function () {
+            this.sample_no_event();
+        });
+    });
+
     it('should allow event subscription - forEachSubscriber', function () {
         light.startService("test-2", function (test) {
             var path = [];
@@ -196,32 +226,5 @@ describe('light', function () {
         });
     });
 
-    it('using new api', function () {
-        light(function () {
-            var test = this.test_error;
-            var path = [];
-            test.before(function () { path.push("before"); });
-            test.after(function () { path.push("after"); });
-            test.error(function () { path.push("error"); });
-            test();
-            expect(path[0]).toBe("before");
-            expect(path[1]).toBe("error");
-            expect(path[2]).toBe("after");
-            expect(path.length).toBe(3);
-        });
-    });
-
-    it('event listening are not available in service definition', function () {
-        light.service("sample_no_event", function (arg) {
-            expect(this.sample1.before).toBe(undefined);
-            expect(this.sample1.error).toBe(undefined);
-            expect(this.sample1.after).toBe(undefined);
-
-            return this.sample1({ x: 2, y: 3 });
-        });
-
-        light(function () {
-            this.sample_no_event();
-        });
-    });
+   
 });
