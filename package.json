@@ -1,12 +1,12 @@
 {
-  "name": "lightcream",
+  "name": "lightservice",
   "version": "1.0.0",
   "description": "",
   "main": "gulpfile.js",
   "scripts": {
     "test": "jest"
   },
-  "author": "sam <contactsamie@gmail.com> (http://www.interfacesamuel.com/)",
+  "author": "sam <contactsamie@gmail.com> Samuel",
   "license": "MIT",
   "devDependencies": {
     "jest-cli": "^0.8.2"
