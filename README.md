@@ -14,6 +14,8 @@ Finally , it provides native logging and testing capabilites
 
 All in an assync environment
 
+It favours function argument as an object over argument as params
+
 FURTHER GOALS:
 
 Easy Drop-in .NET intergration
