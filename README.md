@@ -1,6 +1,6 @@
 LightService
 
-LightService is an EAAS Library (i.e Every Thing As A Service)
+LightService is an EAAS Library 
 
 GOALS: 
 
