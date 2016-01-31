@@ -104,31 +104,36 @@ var light = (function () {
 
     var runSuppliedServiceFunction = function (context, serviceItem, definitionOrDefinitionType, definition, name, arg) {
         var tmpDefinition;
-        var selectedPipe;
+        var isAMatch = false;
 
         var length = GLOBAL.servicePipes.length;
         for (var j = 0; j < length; j++) {
             var pipe = GLOBAL.servicePipes[j];
             var pipeType = (definition && definitionOrDefinitionType) ? definitionOrDefinitionType : false;
             var actualDefinition = pipeType ? definition : definitionOrDefinitionType;
-            var isAMatch = pipeType ? (pipe.name === pipeType) : pipe.condition.call(GLOBAL.system, actualDefinition);
+             isAMatch = pipeType ? (pipe.name === pipeType) : pipe.condition.call(GLOBAL.system, actualDefinition);
             
             if (isAMatch) {
-                    tmpDefinition = pipe.definition.call(GLOBAL.system, actualDefinition);
-                    selectedPipe = pipe.name;
+                //pipe plugin context
+                GLOBAL.system.$$currentContext = {
+                    servicePipes: GLOBAL.servicePipes,
+                    definition: actualDefinition,
+                    serviceName: name,
+                    pipeName: pipe.name,
+                    arg: arg
+                };
+                tmpDefinition = pipe.definition.call(GLOBAL.system, actualDefinition);               
+
                     break;
                 }            
         }
         //expecting function from pipe plugin
-        tmpDefinition = typeof tmpDefinition === "function" ? tmpDefinition : function () { };
-
-        GLOBAL.system["$$currentContext"] = {
-            servicePipes: GLOBAL.servicePipes,
-            definition: actualDefinition,
-            serviceName: name,
-            pipeName: selectedPipe,
-            arg: arg
-        };
+        if (typeof tmpDefinition !== "function") {
+            var message = "Cannot process service '" + name + "' "
+            message = message + (isAMatch ? "'" + definitionOrDefinitionType + "' service pipe must return a function" : "no matching service pipe  exists ");
+            console.error(message);
+            throw message;
+        }
 
         return tmpDefinition.call(GLOBAL.system, arg);       
     };
