@@ -3,8 +3,8 @@
 var light = (function () {
     var GLOBAL = {};
     GLOBAL._TEST_OBJECTS_;
-    GLOBAL.players = function () { };
-    GLOBAL.playersDef = [];
+    GLOBAL.actors = function () { };
+    GLOBAL.actorsDef = [];
     GLOBAL.eventSubscribers = {};
     GLOBAL.system = {};
     GLOBAL.utility = {};
@@ -94,7 +94,7 @@ var light = (function () {
     };
 
     var getServiceByName = function (name) {
-        var item = GLOBAL.players[name];
+        var item = GLOBAL.actors[name];
         return item;
     };
     function parseJSON(data) {
@@ -212,13 +212,13 @@ var light = (function () {
             arg = arg || {};
             return serviceItem.redefinition(arg);
         };
-        serviceItem.position = GLOBAL.playersDef.length + 1;
+        serviceItem.position = GLOBAL.actorsDef.length + 1;
 
         serviceItem.redefinition = createServiceDefinitionFromSuppliedFn(context, serviceItem, definitionOrDefinitionType, definition, name);
 
         serviceItem.me = name;
-        GLOBAL.players[name] = serviceItem;
-        GLOBAL.playersDef.push(GLOBAL.players[name]);
+        GLOBAL.actors[name] = serviceItem;
+        GLOBAL.actorsDef.push(GLOBAL.actors[name]);
         GLOBAL.system[name] = function (arg) {
             context.step(name);
             return serviceItem.redefinition(arg, context);
@@ -228,11 +228,11 @@ var light = (function () {
     //context are invocable other services
 
     var _light = function (f) {
-        typeof f === "function" && f.call(GLOBAL.players, null);
+        typeof f === "function" && f.call(GLOBAL.actors, null);
     };
 
     _light.startService = function (name, f) {
-        typeof f === "function" && f.call(GLOBAL.players, getServiceByName(name));
+        typeof f === "function" && f.call(GLOBAL.actors, getServiceByName(name));
     };
 
     _light.version = 1;
@@ -251,7 +251,7 @@ var light = (function () {
     _light.advance = {
         testService: function (setup, f) {
             GLOBAL._TEST_OBJECTS_ = setup;
-            f.call(GLOBAL.players, setup);
+            f.call(GLOBAL.actors, setup);
             GLOBAL._TEST_OBJECTS_ = undefined
         }
     };
