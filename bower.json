@@ -1,0 +1,21 @@
+{
+  "name": "lightservice",
+  "description": "",
+  "main": "lightservice.js",
+  "authors": [
+    "sam <contactsamie@gmail.com> Samuel"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/contactsamie/LightService",
+  "moduleType": [
+    "amd",
+    "node"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
