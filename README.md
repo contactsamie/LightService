@@ -25,3 +25,5 @@ and try some level of isomorphic javascripting
 npm install lightservice
 
 Install-Package LightService
+
+[![Join the chat at https://gitter.im/contactsamie/LightService](https://badges.gitter.im/contactsamie/LightService.svg)](https://gitter.im/contactsamie/LightService?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
