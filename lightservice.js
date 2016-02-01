@@ -278,11 +278,11 @@ var light = (function () {
     };
 
     var _light = function (f) {
-        typeof f === "function" && f.call(GLOBAL.actors, chain);
+        typeof f === "function" && f.call(GLOBAL.actors, chain());
     };
 
     _light.startService = function (name, f) {
-        typeof f === "function" && f.call(GLOBAL.actors, chain);
+        typeof f === "function" && f.call(GLOBAL.actors, chain());
     };
 
     _light.version = 1;
@@ -301,7 +301,7 @@ var light = (function () {
     _light.advance = {
         testService: function (setup, f) {
             GLOBAL._TEST_OBJECTS_ = setup;
-            f.call(GLOBAL.actors, chain);
+            f.call(GLOBAL.actors, chain());
             GLOBAL._TEST_OBJECTS_ = undefined
         }
     };

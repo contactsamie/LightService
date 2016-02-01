@@ -681,26 +681,26 @@ describe('light', function () {
 
     it('should run with chain', function () {
         light.startService("sample21", function (chain) {
-            var answer = chain().sample2().chainResult();
+            var answer = chain.sample2().chainResult();
             expect(answer).toBe(6);
         });
     });
     it('should run with chain', function () {
         light.startService("sample22", function (chain) {
-            var answer = chain().sample1({ x: 2, y: 3 }).chainResult();
+            var answer = chain.sample1({ x: 2, y: 3 }).chainResult();
             expect(answer).toBe(6);
         });
     });
 
     it('should run with chain', function () {
         light.startService("sample23", function (chain) {
-            var answer = chain().sample1({ x: 2, y: 3 }).sample2().chainResult();
+            var answer = chain.sample1({ x: 2, y: 3 }).sample2().chainResult();
             expect(answer).toBe(6);
         });
     });
     it('should run with chain', function () {
         light.startService("sample24", function (chain) {
-            var answer = chain().sample2().sample1({ x: 2, y: 3 }).chainResult();
+            var answer = chain.sample2().sample1({ x: 2, y: 3 }).chainResult();
             expect(answer).toBe(6);
         });
     });
@@ -712,7 +712,7 @@ describe('light', function () {
         return this.c1({ x: 5 + arg.y });
     });
     light.service("c3", function (arg, chain) {
-        return chain().c2({ y: arg.z }).chainResult();
+        return chain.c2({ y: arg.z }).chainResult();
     });
     light.service("c4", function (arg, chain) {
         return { z: arg.w };
@@ -733,32 +733,32 @@ describe('light', function () {
 
     it('default behaviour', function () {
         light(function (chain) {
-            var answer = chain().c1({ x: 20 }).chainResult();
+            var answer = chain.c1({ x: 20 }).chainResult();
             expect(answer).toBe(22);
         });
     });
     it('simple arg passing', function () {
         light(function (chain) {
-            var answer = chain().c5({ x: 10 }).c1().chainResult();
+            var answer = chain.c5({ x: 10 }).c1().chainResult();
             expect(answer).toBe(12);
         });
     });
 
     it('method can accept argument as usual', function () {
         light(function (chain) {
-            var answer = chain().c5({ x: 10 }).c6().c1().chainResult();
+            var answer = chain.c5({ x: 10 }).c6().c1().chainResult();
             expect(answer).toBe(112);
         });
     });
     it('previous results should be passed into new method', function () {
         light(function (chain) {
-            var answer = chain().c7().c5().c6().c1().chainResult();
+            var answer = chain.c7().c5().c6().c1().chainResult();
             expect(answer).toBe(103);
         });
     });
     it('passing arg overrides previous result', function () {
         light(function (chain) {
-            var answer = chain().c7().c5().c6().c1().c5({ x: 10 }).c6().c1().chainResult();
+            var answer = chain.c7().c5().c6().c1().c5({ x: 10 }).c6().c1().chainResult();
             expect(answer).toBe(112);
         });
     });
@@ -774,18 +774,18 @@ describe('light', function () {
         };
 
         light.advance.testService(testType1, function (chain) {
-            var answer = chain().c7().c5().c6().c1().chainResult();
+            var answer = chain.c7().c5().c6().c1().chainResult();
             expect(answer).toBe(114);
         });
 
         light(function (chain) {
-            var answer = chain().c7().c5().c6().c1().chainResult();
+            var answer = chain.c7().c5().c6().c1().chainResult();
             expect(answer).toBe(103);
         });
     });
 
     light.service("c8", function (arg, chain) {
-        return chain().c7().c5().c6().chainResult();
+        return chain.c7().c5().c6().chainResult();
     });
 
     it('test service in a chain', function () {
@@ -799,12 +799,12 @@ describe('light', function () {
         };
 
         light.advance.testService(testType1, function (chain) {
-            var answer = chain().c8().c1().chainResult();
+            var answer = chain.c8().c1().chainResult();
             expect(answer).toBe(114);
         });
 
         light(function (chain) {
-            var answer = chain().c8().c1().chainResult();
+            var answer = chain.c8().c1().chainResult();
             expect(answer).toBe(103);
         });
     });
