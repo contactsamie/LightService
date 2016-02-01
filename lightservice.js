@@ -112,9 +112,6 @@ var light = (function () {
         var testServicePipeCondition = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].servicePipeCondition;
         var pipeName = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].pipeName;
 
-        
-
-
         var tmpDefinition;
         if (testServicePipe) {
             GLOBAL.system.$$currentContext = {
@@ -137,7 +134,7 @@ var light = (function () {
             for (var j = 0; j < length; j++) {
                 var pipe = GLOBAL.servicePipes[j];
 
-                isAMatch = pipeType ? (pipe.name === pipeType) : (testServicePipeCondition||pipe.condition).call(GLOBAL.system, actualDefinition);
+                isAMatch = pipeType ? (pipe.name === pipeType) : (testServicePipeCondition || pipe.condition).call(GLOBAL.system, actualDefinition);
 
                 if (isAMatch) {
                     GLOBAL.system.$$currentContext = {
@@ -148,7 +145,7 @@ var light = (function () {
                         arg: arg
                     };
 
-                    tmpDefinition =  pipe.definition.call(GLOBAL.system, actualDefinition);
+                    tmpDefinition = pipe.definition.call(GLOBAL.system, actualDefinition);
 
                     break;
                 }

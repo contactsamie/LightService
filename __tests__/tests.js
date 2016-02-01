@@ -276,9 +276,7 @@ describe('light', function () {
         });
     });
 
-   
     it('native tests pipes 1', function () {
-
         var testType1 = {
             sample1: {
                 servicePipeCondition: function (definition) {
@@ -293,7 +291,7 @@ describe('light', function () {
                 }
             }
         };
-        
+
         light.advance.testService(testType1, function () {
             var test = this.sample2;
             var answer = test();
@@ -306,12 +304,7 @@ describe('light', function () {
         });
     });
 
-
-
-
-
     it('can use default function pipe 1', function () {
-
         var testType1 = {
             sample1: {
                 servicePipeCondition: function (definition) {
@@ -340,7 +333,6 @@ describe('light', function () {
     });
 
     it('can use default function pipe 2', function () {
-
         var testType1 = {
             sample1: {
                 //servicePipeCondition: function (definition) {
@@ -349,7 +341,7 @@ describe('light', function () {
                 servicePipe: function (definition) {
                     return definition;
                 },
-                pipeName: "testType1", 
+                pipeName: "testType1",
                 service: function (arg) {
                     return arg.x + arg.y;
                 }
@@ -368,9 +360,7 @@ describe('light', function () {
         });
     });
 
-
     it('can use default function pipe 3', function () {
-
         var testType1 = {
             sample1: {
                 servicePipeCondition: function (definition) {
@@ -379,7 +369,7 @@ describe('light', function () {
                 //servicePipe: function (definition) {
                 //    return definition;
                 //},
-                pipeName: "testType1", 
+                pipeName: "testType1",
                 service: function (arg) {
                     return arg.x + arg.y;
                 }
@@ -399,7 +389,6 @@ describe('light', function () {
     });
 
     it('can use default function pipe 4', function () {
-
         var testType1 = {
             sample1: {
                 //servicePipeCondition: function (definition) {
@@ -427,7 +416,6 @@ describe('light', function () {
         });
     });
     it('can use default function pipe 5', function () {
-
         var testType1 = {
             sample1: {
                 servicePipeCondition: function (definition) {
@@ -455,14 +443,12 @@ describe('light', function () {
         });
     });
 
-
     it('can use default function pipe 6', function () {
-
         var testType1 = {
             sample1: {
                 servicePipe: function (definition) {
                     return function (arg) {
-                    return    definition(arg) + 10;
+                        return definition(arg) + 10;
                     };
                 },
                 pipeName: "testType1",
@@ -484,10 +470,7 @@ describe('light', function () {
         });
     });
 
-
-
     it('can use default function pipe 7', function () {
-
         var testType1 = {
             sample1: {
                 servicePipe: function (definition) {
@@ -511,10 +494,7 @@ describe('light', function () {
         });
     });
 
-
-
     it('can use default function pipe 8', function () {
-
         var testType1 = {
             sample1: {
                 servicePipe: function (definition) {
@@ -537,11 +517,7 @@ describe('light', function () {
         });
     });
 
-    
-
-
     it('can use default function pipe 9', function () {
-
         var testType1 = {
             sample1: {
                 servicePipe: function (definition) {
@@ -567,11 +543,7 @@ describe('light', function () {
         });
     });
 
-
-
-
     it('can use default function pipe 10', function () {
-
         var testType1 = {
             sample1: {
                 servicePipeCondition: function (definition) {
@@ -596,8 +568,27 @@ describe('light', function () {
         });
     });
 
+    it('can use default function pipe 11', function () {
+        var testType1 = {
+            sample1: {
+                servicePipeCondition: function (definition) {
+                    return typeof definition === "string";
+                },
+                service: function (arg) {
+                    return arg.x + arg.y;
+                }
+            }
+        };
 
-
-
-
+        light.advance.testService(testType1, function () {
+            var test = this.sample2;
+            var answer = test();
+            expect(answer).toBe(undefined);
+        });
+        light(function () {
+            var test = this.sample2;
+            var answer = test();
+            expect(answer).toBe(6);
+        });
+    });
 });
