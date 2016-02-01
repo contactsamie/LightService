@@ -285,7 +285,7 @@ describe('light', function () {
                 servicePipe: function (definition) {
                     return definition;
                 },
-                pipeName: "testType1",
+                //pipeName: "testType1",
                 service: function (arg) {
                     return arg.x + arg.y;
                 }
@@ -341,7 +341,7 @@ describe('light', function () {
                 servicePipe: function (definition) {
                     return definition;
                 },
-                pipeName: "testType1",
+                //pipeName: "testType2",
                 service: function (arg) {
                     return arg.x + arg.y;
                 }
@@ -369,7 +369,7 @@ describe('light', function () {
                 //servicePipe: function (definition) {
                 //    return definition;
                 //},
-                pipeName: "testType1",
+                //pipeName: "testType3",
                 service: function (arg) {
                     return arg.x + arg.y;
                 }
@@ -397,7 +397,7 @@ describe('light', function () {
                 //servicePipe: function (definition) {
                 //    return definition;
                 //},
-                pipeName: "testType1",
+                //pipeName: "testType4",
                 service: function (arg) {
                     return arg.x + arg.y;
                 }
@@ -451,7 +451,6 @@ describe('light', function () {
                         return definition(arg) + 10;
                     };
                 },
-                pipeName: "testType1",
                 service: function (arg) {
                     return arg.x + arg.y;
                 }
@@ -477,8 +476,7 @@ describe('light', function () {
                     return function (arg) {
                         return definition(arg) + 10;
                     };
-                },
-                pipeName: "testType1"
+                }
             }
         };
 
@@ -549,7 +547,6 @@ describe('light', function () {
                 servicePipeCondition: function (definition) {
                     return typeof definition === "string";
                 },
-                pipeName: "testType1",
                 service: function (arg) {
                     return arg.x + arg.y;
                 }
