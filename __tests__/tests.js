@@ -588,4 +588,86 @@ describe('light', function () {
             expect(answer).toBe(6);
         });
     });
+
+
+
+    light.servicePipe("pipeRegular", function (definition) {
+        return typeof definition === "function";
+    }, function (definition) {
+        return definition
+    });
+
+    light.servicePipe("pipeChange", function (definition) {
+        return typeof definition === "function";
+    }, function (definition) {
+        return function (arg) {
+           return definition(arg) + 10;
+        };
+    });
+
+    light.servicePipe("pipeWrong", function (definition) {
+        return typeof definition === "string";
+    }, function (definition) {
+        return definition() + 10;
+    });
+
+    it('can use default function pipe 12', function () {
+        var testType1 = {
+            sample1: {
+                pipeName:"pipeRegular"
+            }
+        };
+
+        light.advance.testService(testType1, function () {
+            var test = this.sample2;
+            var answer = test();
+            expect(answer).toBe(6);
+        });
+        light(function () {
+            var test = this.sample2;
+            var answer = test();
+            expect(answer).toBe(6);
+        });
+    });
+
+
+    it('can use default function pipe 12', function () {
+        var testType1 = {
+            sample1: {
+                pipeName: "pipeChange"
+            }
+        };
+
+        light.advance.testService(testType1, function () {
+            var test = this.sample2;
+            var answer = test();
+            expect(answer).toBe(16);
+        });
+        light(function () {
+            var test = this.sample2;
+            var answer = test();
+            expect(answer).toBe(6);
+        });
+    });
+
+
+    it('can use default function pipe 12', function () {
+        var testType1 = {
+            sample1: {
+                pipeName: "pipeWrong"
+            }
+        };
+
+        light.advance.testService(testType1, function () {
+            var test = this.sample2;
+            var answer = test();
+            expect(answer).toBe(undefined);
+        });
+        light(function () {
+            var test = this.sample2;
+            var answer = test();
+            expect(answer).toBe(6);
+        });
+    });
+
 });

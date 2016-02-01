@@ -2,6 +2,8 @@
 
 var light = (function () {
     var GLOBAL = {};
+
+    GLOBAL.DEFAULT_PIPE_NAME = "$$default";
     GLOBAL._TEST_OBJECTS_;
     GLOBAL.actors = function () { };
     GLOBAL.actorsDef = [];
@@ -104,21 +106,26 @@ var light = (function () {
      !!!!!!!!!!!!!!!!
     */
     var getApplicableServicePipe = function (context, serviceItem, definitionOrDefinitionType, definition, name, arg) {
-        var pipeType = (definition && definitionOrDefinitionType) ? definitionOrDefinitionType : false;
-        var actualDefinition = pipeType ? definition : definitionOrDefinitionType;
+        var pipeType = definitionOrDefinitionType ;
+        var actualDefinition =  definition ;
 
+      var pipeName = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].pipeName;
+
+      if (pipeName) {
+          pipeType = pipeName;
+      }
         var testServicePipe = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].servicePipe;
 
         var testServicePipeCondition = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].servicePipeCondition;
-        var pipeName = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].pipeName;
+       
 
         var tmpDefinition;
-        if (testServicePipe) {
+        if (testServicePipe && !pipeName) {
             GLOBAL.system.$$currentContext = {
                 servicePipes: GLOBAL.servicePipes,
                 definition: actualDefinition,
                 serviceName: name,
-                pipeName: pipeName,
+                pipeName: undefined,
                 arg: arg
             };
             if (testServicePipeCondition) {
@@ -134,7 +141,7 @@ var light = (function () {
             for (var j = 0; j < length; j++) {
                 var pipe = GLOBAL.servicePipes[j];
 
-                isAMatch = pipeType ? (pipe.name === pipeType) : (testServicePipeCondition || pipe.condition).call(GLOBAL.system, actualDefinition);
+                isAMatch = pipeType &&(pipe.name === pipeType) && (testServicePipeCondition || pipe.condition).call(GLOBAL.system, actualDefinition);
 
                 if (isAMatch) {
                     GLOBAL.system.$$currentContext = {
@@ -145,7 +152,7 @@ var light = (function () {
                         arg: arg
                     };
 
-                    tmpDefinition = pipe.definition.call(GLOBAL.system, actualDefinition);
+                    tmpDefinition = (testServicePipe || pipe.definition).call(GLOBAL.system, actualDefinition);
 
                     break;
                 }
@@ -154,17 +161,14 @@ var light = (function () {
         return tmpDefinition;
     };
     var runSuppliedServiceFunction = function (context, serviceItem, definitionOrDefinitionType, definition, name, arg) {
-        //start testing
-        if (GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].service) {
-            if (GLOBAL._TEST_OBJECTS_[name].type) {
-                definitionOrDefinitionType = GLOBAL._TEST_OBJECTS_[name].type;
-                definition = GLOBAL._TEST_OBJECTS_[name].service;
-            } else {
-                definitionOrDefinitionType = GLOBAL._TEST_OBJECTS_[name].service;
-            }
-        }
-        //end testing
 
+        //start testing
+        if (GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].service) {            
+            definitionOrDefinitionType = GLOBAL._TEST_OBJECTS_[name].type || definitionOrDefinitionType; 
+            definition = GLOBAL._TEST_OBJECTS_[name].service || definition;              
+        }
+
+        //end testing
         var tmpDefinition = getApplicableServicePipe(context, serviceItem, definitionOrDefinitionType, definition, name, arg);
 
         //expecting function from pipe plugin
@@ -204,6 +208,12 @@ var light = (function () {
     };
 
     var defineService = function (name, definitionOrDefinitionType, definition) {
+
+        if (!definition) {
+            definition = definitionOrDefinitionType;
+            definitionOrDefinitionType = GLOBAL.DEFAULT_PIPE_NAME;
+        } 
+
         var context = {
             name: name, step: function (o) {
                 _light["event"].notify(name, context, "service-call");
@@ -259,12 +269,14 @@ var light = (function () {
         }
     };
 
+
+    _light.servicePipe(GLOBAL.DEFAULT_PIPE_NAME, function (definition) { return typeof definition === "function"; }, function (definition) { return definition; });
+
     return _light;
 })();
 
 // default function servicePipe plugin
 
-light.servicePipe("$$default", function (definition) { return typeof definition === "function"; }, function (definition) { return definition; });
 
 //light.servicePipe("dom", function (definition) { return true; }, function (definition) {
 //    return function () {
