@@ -9,12 +9,12 @@ light.event(function (e, context,notificationInfo) {
 });*/
 light.event(function (e, context, notificationInfo) { });
 
-light.service("test", function (arg) { });
-light.service("test-2", function (arg) { });
-light.service("test-2b2", function (arg) { });
-light.service("test_error", function (arg) { throw "error occured"; });
-light.service("sample1", function (arg) { return arg.x * arg.y; });
-light.service("sample2", function (arg) {
+light.service("test", function (arg, chain) { });
+light.service("test-2", function (arg, chain) { });
+light.service("test-2b2", function (arg, chain) { });
+light.service("test_error", function (arg, chain) { throw "error occured"; });
+light.service("sample1", function (arg, chain) { return arg.x * arg.y; });
+light.service("sample2", function (arg, chain) {
     return this.sample1({ x: 2, y: 3 });
 });
 
@@ -24,7 +24,7 @@ describe('light', function () {
     });
 
     it('using new api', function () {
-        light(function () {
+        light(function (chain) {
             var test = this.test_error;
             var path = [];
             test.before(function () { path.push("before"); });
@@ -47,13 +47,15 @@ describe('light', function () {
             return this.sample1({ x: 2, y: 3 });
         });
 
-        light(function () {
+        light(function (chain) {
             this.sample_no_event();
         });
     });
 
     it('should allow event subscription - forEachSubscriber', function () {
-        light.startService("test-2", function (test) {
+        light.startService("test-2", function (chain) {
+            var test = this["test-2"];
+
             var path = [];
 
             var subs = "";
@@ -78,14 +80,16 @@ describe('light', function () {
     });
 
     it('should allow light definition', function () {
-        light.startService("test", function (test) {
+        light.startService("test", function (chain) {
+            var test = this.test;
             expect(test.me).toBe("test");
             expect(test.position).toBe(1);
         });
     });
 
     it('should allow event subscription 1', function () {
-        light.startService("test", function (test) {
+        light.startService("test", function (chain) {
+            var test = this.test;
             var path = [];
             test.before(function () { path.push("before"); });
             test();
@@ -94,7 +98,8 @@ describe('light', function () {
         });
     });
     it('should allow event subscription 2', function () {
-        light.startService("test", function (test) {
+        light.startService("test", function (chain) {
+            var test = this.test;
             var path = [];
             test.after(function () {
                 path.push("after1");
@@ -106,7 +111,8 @@ describe('light', function () {
     });
 
     it('should allow event subscription 2', function () {
-        light.startService("test", function (test) {
+        light.startService("test", function (chain) {
+            var test = this.test;
             var path = [];
             test.after(function () {
                 path.push("after2");
@@ -123,7 +129,8 @@ describe('light', function () {
     });
 
     it('should allow event subscription - forEachSubscriber ', function () {
-        light.startService("test-2b2", function (test) {
+        light.startService("test-2b2", function (chain) {
+            var test = this["test-2b2"];
             var path = [];
 
             var subs = "";
@@ -153,7 +160,8 @@ describe('light', function () {
     });
 
     it('should allow event subscription 3', function () {
-        light.startService("test", function (test) {
+        light.startService("test", function (chain) {
+            var test = this.test;
             var path = [];
             test.error(function () { path.push("error"); });
             test();
@@ -162,7 +170,8 @@ describe('light', function () {
     });
 
     it('should allow event subscription 5', function () {
-        light.startService("test", function (test) {
+        light.startService("test", function (chain) {
+            var test = this.test;
             var path = [];
             test.before(function () { path.push("before"); });
             test.after(function () { path.push("after"); });
@@ -175,7 +184,8 @@ describe('light', function () {
     });
 
     it('should allow event subscription 4', function () {
-        light.startService("test_error", function (test) {
+        light.startService("test_error", function (chain) {
+            var test = this["test_error"];
             var path = [];
             test.error(function () { path.push("error"); });
             test();
@@ -184,7 +194,8 @@ describe('light', function () {
     });
 
     it('should allow event subscription 6', function () {
-        light.startService("test_error", function (test) {
+        light.startService("test_error", function (chain) {
+            var test = this["test_error"];
             var path = [];
             test.before(function () { path.push("before"); });
             test.after(function () { path.push("after"); });
@@ -198,7 +209,8 @@ describe('light', function () {
     });
 
     it('should run 1', function () {
-        light.startService("sample2", function (test) {
+        light.startService("sample2", function (chain) {
+            var test = this.sample2;
             var path = [];
             test.before(function () { path.push("before"); });
             test.after(function () { path.push("after"); });
@@ -212,7 +224,8 @@ describe('light', function () {
     });
 
     it('should run 2', function () {
-        light.startService("sample1", function (test) {
+        light.startService("sample1", function (chain) {
+            var test = this.sample1;
             var path = [];
             test.before(function () { path.push("before"); });
             test.after(function () { path.push("after"); });
@@ -234,8 +247,8 @@ describe('light', function () {
         }
     };
     it('native tests', function () {
-        light(function () {
-            light.advance.testService(testObj, function () {
+        light(function (chain) {
+            light.advance.testService(testObj, function (chain) {
                 var test = this.sample2;
                 var path = [];
                 test.before(function () { path.push("before"); });
@@ -251,8 +264,8 @@ describe('light', function () {
     });
 
     it('native tests 2', function () {
-        light(function () {
-            light.advance.testService(testObj, function () {
+        light(function (chain) {
+            light.advance.testService(testObj, function (chain) {
                 var test = this.sample2;
                 var answer = test();
                 expect(answer).toBe(5);
@@ -264,12 +277,12 @@ describe('light', function () {
     });
 
     it('native tests 2', function () {
-        light.advance.testService(testObj, function () {
+        light.advance.testService(testObj, function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(5);
         });
-        light(function () {
+        light(function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(6);
@@ -292,12 +305,12 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function () {
+        light.advance.testService(testType1, function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(5);
         });
-        light(function () {
+        light(function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(6);
@@ -325,7 +338,7 @@ describe('light', function () {
             var answer = test();
             expect(answer).toBe(5);
         });
-        light(function () {
+        light(function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(6);
@@ -348,12 +361,12 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function () {
+        light.advance.testService(testType1, function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(5);
         });
-        light(function () {
+        light(function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(6);
@@ -381,7 +394,7 @@ describe('light', function () {
             var answer = test();
             expect(answer).toBe(5);
         });
-        light(function () {
+        light(function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(6);
@@ -404,12 +417,12 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function () {
+        light.advance.testService(testType1, function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(5);
         });
-        light(function () {
+        light(function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(6);
@@ -431,12 +444,12 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function () {
+        light.advance.testService(testType1, function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(5);
         });
-        light(function () {
+        light(function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(6);
@@ -457,12 +470,12 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function () {
+        light.advance.testService(testType1, function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(15);
         });
-        light(function () {
+        light(function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(6);
@@ -480,12 +493,12 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function () {
+        light.advance.testService(testType1, function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(16);
         });
-        light(function () {
+        light(function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(6);
@@ -503,12 +516,12 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function () {
+        light.advance.testService(testType1, function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(16);
         });
-        light(function () {
+        light(function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(6);
@@ -529,12 +542,12 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function () {
+        light.advance.testService(testType1, function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(15);
         });
-        light(function () {
+        light(function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(6);
@@ -553,12 +566,12 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function () {
+        light.advance.testService(testType1, function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(undefined);
         });
-        light(function () {
+        light(function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(6);
@@ -577,19 +590,17 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function () {
+        light.advance.testService(testType1, function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(undefined);
         });
-        light(function () {
+        light(function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(6);
         });
     });
-
-
 
     light.servicePipe("pipeRegular", function (definition) {
         return typeof definition === "function";
@@ -601,7 +612,7 @@ describe('light', function () {
         return typeof definition === "function";
     }, function (definition) {
         return function (arg) {
-           return definition(arg) + 10;
+            return definition(arg) + 10;
         };
     });
 
@@ -614,22 +625,21 @@ describe('light', function () {
     it('can use default function pipe 12', function () {
         var testType1 = {
             sample1: {
-                pipeName:"pipeRegular"
+                pipeName: "pipeRegular"
             }
         };
 
-        light.advance.testService(testType1, function () {
+        light.advance.testService(testType1, function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(6);
         });
-        light(function () {
+        light(function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(6);
         });
     });
-
 
     it('can use default function pipe 12', function () {
         var testType1 = {
@@ -638,18 +648,17 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function () {
+        light.advance.testService(testType1, function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(16);
         });
-        light(function () {
+        light(function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(6);
         });
     });
-
 
     it('can use default function pipe 12', function () {
         var testType1 = {
@@ -658,16 +667,99 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function () {
+        light.advance.testService(testType1, function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(undefined);
         });
-        light(function () {
+        light(function (chain) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(6);
         });
     });
 
+    it('should run with chain', function () {
+        light.startService("sample21", function (chain) {
+            var answer = chain().sample2().chainResult();
+            expect(answer).toBe(6);
+        });
+    });
+    it('should run with chain', function () {
+        light.startService("sample22", function (chain) {
+            var answer = chain().sample1({ x: 2, y: 3 }).chainResult();
+            expect(answer).toBe(6);
+        });
+    });
+
+    it('should run with chain', function () {
+        light.startService("sample23", function (chain) {
+            var answer = chain().sample1({ x: 2, y: 3 }).sample2().chainResult();
+            expect(answer).toBe(6);
+        });
+    });
+    it('should run with chain', function () {
+        light.startService("sample24", function (chain) {
+            var answer = chain().sample2().sample1({ x: 2, y: 3 }).chainResult();
+            expect(answer).toBe(6);
+        });
+    });
+
+    light.service("c1", function (arg, chain) {
+        return arg.x + 2;
+    });
+    light.service("c2", function (arg, chain) {
+        return this.c1({ x: 5 + arg.y });
+    });
+    light.service("c3", function (arg, chain) {
+        return chain().c2({ y: arg.z }).chainResult();
+    });
+    light.service("c4", function (arg, chain) {
+        return { z: arg.w };
+    });
+    light.service("c5", function (arg, chain) {
+        return arg;
+    });
+    light.service("c6", function (arg, chain) {
+        arg.x = arg.x + 100;
+        return arg;
+    });
+    light.service("c7", function (arg, chain) {
+        arg = arg || {};
+        arg.x = 1;
+        arg.y = 2;
+        return arg;
+    });
+
+    it('default behaviour', function () {
+        light(function (chain) {
+            var answer = chain().c1({ x: 20 }).chainResult();
+            expect(answer).toBe(22);
+        });
+    });
+    it('simple arg passing', function () {
+        light(function (chain) {
+            var answer = chain().c5({ x: 10 }).c1().chainResult();
+            expect(answer).toBe(12);
+        });
+    });
+
+    it('method can accept argument as usual', function () {
+        light(function (chain) {
+            var answer = chain().c5({ x: 10 }).c6().c1().chainResult();
+            expect(answer).toBe(112);
+        });
+    });
+    it('previous results should be passed into new method', function () {
+        light(function (chain) {
+            var answer = chain().c7().c5().c6().c1().chainResult();
+            expect(answer).toBe(103);
+        });
+    });
+    it('passing arg overrides previous result', function () {
+        light(function (chain) {
+            var answer = chain().c7().c5().c6().c1().c5({ x: 10 }).c6().c1().chainResult();
+            expect(answer).toBe(112);
+        });
+    });
 });

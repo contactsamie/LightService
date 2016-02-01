@@ -106,18 +106,17 @@ var light = (function () {
      !!!!!!!!!!!!!!!!
     */
     var getApplicableServicePipe = function (context, serviceItem, definitionOrDefinitionType, definition, name, arg) {
-        var pipeType = definitionOrDefinitionType ;
-        var actualDefinition =  definition ;
+        var pipeType = definitionOrDefinitionType;
+        var actualDefinition = definition;
 
-      var pipeName = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].pipeName;
+        var pipeName = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].pipeName;
 
-      if (pipeName) {
-          pipeType = pipeName;
-      }
+        if (pipeName) {
+            pipeType = pipeName;
+        }
         var testServicePipe = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].servicePipe;
 
         var testServicePipeCondition = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].servicePipeCondition;
-       
 
         var tmpDefinition;
         if (testServicePipe && !pipeName) {
@@ -141,7 +140,7 @@ var light = (function () {
             for (var j = 0; j < length; j++) {
                 var pipe = GLOBAL.servicePipes[j];
 
-                isAMatch = pipeType &&(pipe.name === pipeType) && (testServicePipeCondition || pipe.condition).call(GLOBAL.system, actualDefinition);
+                isAMatch = pipeType && (pipe.name === pipeType) && (testServicePipeCondition || pipe.condition).call(GLOBAL.system, actualDefinition);
 
                 if (isAMatch) {
                     GLOBAL.system.$$currentContext = {
@@ -161,11 +160,10 @@ var light = (function () {
         return tmpDefinition;
     };
     var runSuppliedServiceFunction = function (context, serviceItem, definitionOrDefinitionType, definition, name, arg) {
-
         //start testing
-        if (GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].service) {            
-            definitionOrDefinitionType = GLOBAL._TEST_OBJECTS_[name].type || definitionOrDefinitionType; 
-            definition = GLOBAL._TEST_OBJECTS_[name].service || definition;              
+        if (GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].service) {
+            definitionOrDefinitionType = GLOBAL._TEST_OBJECTS_[name].type || definitionOrDefinitionType;
+            definition = GLOBAL._TEST_OBJECTS_[name].service || definition;
         }
 
         //end testing
@@ -179,7 +177,7 @@ var light = (function () {
             throw message;
         }
 
-        return tmpDefinition.call(GLOBAL.system, arg);
+        return tmpDefinition.call(GLOBAL.system, arg, chain);
     };
 
     var createServiceDefinitionFromSuppliedFn = function (context, serviceItem, definitionOrDefinitionType, definition, name) {
@@ -208,11 +206,10 @@ var light = (function () {
     };
 
     var defineService = function (name, definitionOrDefinitionType, definition) {
-
         if (!definition) {
             definition = definitionOrDefinitionType;
             definitionOrDefinitionType = GLOBAL.DEFAULT_PIPE_NAME;
-        } 
+        }
 
         var context = {
             name: name, step: function (o) {
@@ -240,12 +237,52 @@ var light = (function () {
 
     //context are invocable other services
 
+    var chain = function () {
+        var obj = {};
+        var lastResult;
+        for (var actor in GLOBAL.actors) {
+            obj[actor] = (function (a) {
+                return function (arg) {
+                    var currentResult;
+                    lastResult = GLOBAL.actors[a](arguments.length ? arg : lastResult);
+                    return obj;
+                };
+            })(actor);
+        }
+
+        obj.chainResult = function () {
+            return lastResult;
+        };
+
+        obj.merge = function (arg) {
+            var _arg;
+
+            if (lastResult) {
+                for (var attr in lastResult) {
+                    _arg = _arg || {};
+                    _arg[attr] = lastResult[attr];
+                }
+            }
+            if (arg) {
+                for (var attr in arg) {
+                    _arg = _arg || {};
+                    _arg[attr] = arg[attr];
+                }
+            }
+            lastResult = _arg;
+
+            return obj;
+        };
+
+        return obj;
+    };
+
     var _light = function (f) {
-        typeof f === "function" && f.call(GLOBAL.actors, null);
+        typeof f === "function" && f.call(GLOBAL.actors, chain);
     };
 
     _light.startService = function (name, f) {
-        typeof f === "function" && f.call(GLOBAL.actors, getServiceByName(name));
+        typeof f === "function" && f.call(GLOBAL.actors, chain);
     };
 
     _light.version = 1;
@@ -264,11 +301,10 @@ var light = (function () {
     _light.advance = {
         testService: function (setup, f) {
             GLOBAL._TEST_OBJECTS_ = setup;
-            f.call(GLOBAL.actors, setup);
+            f.call(GLOBAL.actors, chain);
             GLOBAL._TEST_OBJECTS_ = undefined
         }
     };
-
 
     _light.servicePipe(GLOBAL.DEFAULT_PIPE_NAME, function (definition) { return typeof definition === "function"; }, function (definition) { return definition; });
 
@@ -276,7 +312,6 @@ var light = (function () {
 })();
 
 // default function servicePipe plugin
-
 
 //light.servicePipe("dom", function (definition) { return true; }, function (definition) {
 //    return function () {
