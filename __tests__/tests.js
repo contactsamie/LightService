@@ -762,4 +762,73 @@ describe('light', function () {
             expect(answer).toBe(112);
         });
     });
+
+    it('test service in a chain', function () {
+        var testType1 = {
+            c5: {
+                service: function (arg) {
+                    arg.x = arg.x + 11;
+                    return arg;
+                }
+            }
+        };
+
+        light.advance.testService(testType1, function (chain) {
+            var answer = chain().c7().c5().c6().c1().chainResult();
+            expect(answer).toBe(114);
+        });
+
+        light(function (chain) {
+            var answer = chain().c7().c5().c6().c1().chainResult();
+            expect(answer).toBe(103);
+        });
+    });
+
+    light.service("c8", function (arg, chain) {
+        return chain().c7().c5().c6().chainResult();
+    });
+
+    it('test service in a chain', function () {
+        var testType1 = {
+            c5: {
+                service: function (arg) {
+                    arg.x = arg.x + 11;
+                    return arg;
+                }
+            }
+        };
+
+        light.advance.testService(testType1, function (chain) {
+            var answer = chain().c8().c1().chainResult();
+            expect(answer).toBe(114);
+        });
+
+        light(function (chain) {
+            var answer = chain().c8().c1().chainResult();
+            expect(answer).toBe(103);
+        });
+    });
+
+    it('test service in a chain', function () {
+        var testType1 = {
+            c5: {
+                service: function (arg) {
+                    arg.x = arg.x + 11;
+                    return arg;
+                }
+            }
+        };
+
+        light.advance.testService(testType1, function (chain) {
+            var answer = this.c8();
+            answer = this.c1(answer);
+            expect(answer).toBe(114);
+        });
+
+        light(function (chain) {
+            var answer = this.c8();
+            answer = this.c1(answer);
+            expect(answer).toBe(103);
+        });
+    });
 });
