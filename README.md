@@ -28,4 +28,6 @@ and try some level of isomorphic javascripting
 
 npm install lightservice
 
+bower install lightservice
+
 Install-Package LightService
