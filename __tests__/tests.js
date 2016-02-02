@@ -833,7 +833,8 @@ describe('light', function () {
     });
 
 
-    it('speed', function () {
+    /*
+     it('speed', function () {
         var totalBuild = 1000;
         var answer = {};
 
@@ -878,4 +879,30 @@ describe('light', function () {
 
 
     });
+    */
+
+
+    it('test service in a service', function () {
+        light.service("pass1", function (arg) {
+            arg = arg || {x:1};
+            arg.x++;
+            return arg;
+        });
+        light.service("fail", function (arg) {
+            throw "failure";
+        })
+        light.service("pass2", function (arg) {
+          
+            arg.x++;
+            return arg;
+        })
+
+        light(function (service) {
+            var answer = service.pass1().fail().pass2();          
+        });
+    });
+
+
+
+
 });

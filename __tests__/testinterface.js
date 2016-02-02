@@ -17,14 +17,14 @@ var expect = expect || function (a) {
 
     return {
         toBe: function (b) {
-           // console.warn("expecting " + a + " to be " + b);
+            console.warn("expecting " + a + " to be " + b);
             if (a !== b) {
                 console.error(describe.o);
                 console.error(it.o);
                 console.error(it.f);
                 console.error("expected " + a + " to be " + b);
             } else {
-             //   console.warn("SUCCESS");
+                console.warn("SUCCESS");
             }
 
         }

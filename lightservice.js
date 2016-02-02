@@ -235,25 +235,30 @@ var light = (function () {
         }
     };
 
-    var eachAsync = function (arr, func, cb) {
-       
-        var total = 0;
-        var finalTotal = 0;
-        var hasRun = false;
-        for (var actor in arr) {
-            total++;
-                (function (a) {
-                    setTimeout(function () {                       
-                        func(a);
-                        if ((finalTotal >= total) && !hasRun) {
-                            hasRun = true;
-                             cb();
-                        } else {
-                            finalTotal++;
-                        }
-                    }, 0);
-                })(actor);            
+    var eachAsync = function (actors, func, cb) {
+        for (var actor in actors) {
+            func(actor);
         }
+        cb();
+        //var result = {};
+        //var finalTotal = 0;
+        //result. total = 0;
+        //result.finalTotal = 0;
+        //result.hasRun = false;
+        //for (var actor in arr) {
+        //    result.total++;
+        //    (function (a, result) {
+        //            setTimeout(function () {                       
+        //                func(a);
+        //                if ((result.finalTotal >= result.total) && !result.hasRun) {
+        //                    result.hasRun = true;
+        //                     cb();
+        //                } else {
+        //                    result.finalTotal++;
+        //                }
+        //            }, 0);
+        //        })(actor, result);
+        //}
        
     }
 
