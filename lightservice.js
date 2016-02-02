@@ -196,7 +196,7 @@ var light = (function () {
                 return result;
             }, function (o) {
                 return serviceItem["success"].notify(o, context, "service-success");
-            }, function (o) {
+            }, function (o) {      
                 return serviceItem["error"].notify(o, context, "service-error");
             });
 
@@ -218,9 +218,9 @@ var light = (function () {
             },
             steps: []
         };
-        var serviceItem = function (arg) {
-            arg = arg || {};
-            return serviceItem.redefinition(arg);
+        var serviceItem = function (previousOrMostCurrentResultToBePassedToTheNextActor) {
+            
+            return serviceItem.redefinition(previousOrMostCurrentResultToBePassedToTheNextActor);
         };
         serviceItem.position = GLOBAL.actorsDef.length + 1;
 

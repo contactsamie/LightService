@@ -832,7 +832,6 @@ describe('light', function () {
         });
     });
 
-
     /*
      it('speed', function () {
         var totalBuild = 1000;
@@ -849,9 +848,8 @@ describe('light', function () {
         var b = performance.now();
         console.log('It took ' + Math.floor(b - a) + ' ms to create '+totalBuild+'  services');
 
-
         var  total = 100;
-         a = performance.now();   
+         a = performance.now();
         for (var i = 0; i < total; i++) {
             light(function (service) {
                  answer = service["dynamic_" + i](answer).result;
@@ -859,7 +857,6 @@ describe('light', function () {
          }
          b = performance.now();
          console.log('It took ' + Math.floor(b - a) + ' ms to execute ' + total + ' in ' + totalBuild+' services');
-  
 
          a = performance.now();
          light(function (service) {
@@ -868,41 +865,61 @@ describe('light', function () {
          b = performance.now();
          console.log('It took ' + Math.floor(b - a) + ' ms to execute the FIRST one in ' + totalBuild + ' services');
 
-
-
          a = performance.now();
          light(function (service) {
              answer = service["dynamic_" + (totalBuild - 1)](answer).result;
          });
          b = performance.now();
          console.log('It took ' + Math.floor(b - a) + ' ms to execute the LAST one in ' + totalBuild + ' services');
-
-
     });
     */
 
-
     it('test service in a service', function () {
         light.service("pass1", function (arg) {
-            arg = arg || {x:1};
+            arg = arg || {  };
+            arg.x = arg.x || 0;
             arg.x++;
             return arg;
         });
+
         light.service("fail", function (arg) {
             throw "failure";
-        })
-        light.service("pass2", function (arg) {
-          
+        });
+
+        light.servicePipe("pass2Pipe", function (definition) {
+            return typeof definition === "function";
+        }, function (definition) {
+            return function (arg) {
+                var result;
+                var standardResult;
+
+                if (arg) {
+                    result = definition(arg);
+                    standardResult = {
+                        success: result ? true : false,
+                        result: result,
+                        exceptions: []
+                    };
+                } else {
+                    standardResult = {
+                        success: false,
+                        result: null,
+                        exceptions: ["error"]
+                    };
+                }
+
+                return standardResult;
+            };
+        });
+
+        light.service("pass2", "pass2Pipe", function (arg) {
             arg.x++;
             return arg;
-        })
+        });
 
         light(function (service) {
-            var answer = service.pass1().fail().pass2();          
+            var answer = service.pass1().fail().pass2().result;
+            expect(answer.exceptions.length).toBe(1);
         });
     });
-
-
-
-
 });
