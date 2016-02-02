@@ -177,7 +177,7 @@ var light = (function () {
             throw message;
         }
 
-        return tmpDefinition.call(GLOBAL.system, arg, chain);
+        return tmpDefinition.call(GLOBAL.system, arg, chainService());
     };
 
     var createServiceDefinitionFromSuppliedFn = function (context, serviceItem, definitionOrDefinitionType, definition, name) {
@@ -237,30 +237,26 @@ var light = (function () {
 
     //context are invocable other services
 
-    var chain = function () {
+    var chainService = function () {
         var obj = {};
-        var lastResult;
+         obj.result=undefined;
         for (var actor in GLOBAL.actors) {
             obj[actor] = (function (a) {
                 return function (arg) {
                     var currentResult;
-                    lastResult = GLOBAL.actors[a](arguments.length ? arg : lastResult);
+                    obj.result = GLOBAL.actors[a](arguments.length ? arg : obj.result);
                     return obj;
                 };
             })(actor);
-        }
-
-        obj.chainResult = function () {
-            return lastResult;
-        };
+        }       
 
         obj.merge = function (arg) {
             var _arg;
 
-            if (lastResult) {
-                for (var attr in lastResult) {
+            if (obj.result) {
+                for (var attr in obj.result) {
                     _arg = _arg || {};
-                    _arg[attr] = lastResult[attr];
+                    _arg[attr] = obj.result[attr];
                 }
             }
             if (arg) {
@@ -269,7 +265,7 @@ var light = (function () {
                     _arg[attr] = arg[attr];
                 }
             }
-            lastResult = _arg;
+            obj.result = _arg;
 
             return obj;
         };
@@ -278,11 +274,11 @@ var light = (function () {
     };
 
     var _light = function (f) {
-        typeof f === "function" && f.call(GLOBAL.actors, chain());
+        typeof f === "function" && f.call(GLOBAL.actors, chainService());
     };
 
     _light.startService = function (name, f) {
-        typeof f === "function" && f.call(GLOBAL.actors, chain());
+        typeof f === "function" && f.call(GLOBAL.actors, chainService());
     };
 
     _light.version = 1;
@@ -301,7 +297,7 @@ var light = (function () {
     _light.advance = {
         testService: function (setup, f) {
             GLOBAL._TEST_OBJECTS_ = setup;
-            f.call(GLOBAL.actors, chain());
+            f.call(GLOBAL.actors, chainService());
             GLOBAL._TEST_OBJECTS_ = undefined
         }
     };
