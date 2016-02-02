@@ -273,13 +273,15 @@ var light = (function () {
             chain[actor] = (function (a) {
                 return function (arg) {
                     var currentResult;
-                    chain.result = GLOBAL.actors[a](arguments.length ? arg : chain.result);
+                    var previousOrMostCurrentResultToBePassedToTheNextActor = arguments.length ? arg : chain.result;
+                    chain.result = GLOBAL.actors[a](previousOrMostCurrentResultToBePassedToTheNextActor);
                     return chain;
                 };
             })(actor);
         };
 
         if (cb) {
+            //todo use async to speed up things
             eachAsync(GLOBAL.actors, buildFn, function () {
                 cb(chain);
             });
