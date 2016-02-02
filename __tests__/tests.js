@@ -831,4 +831,51 @@ describe('light', function () {
             expect(answer).toBe(103);
         });
     });
+
+
+    it('speed', function () {
+        var totalBuild = 1000;
+        var answer = {};
+
+        var a = performance.now();
+        for (var i = 0; i < totalBuild; i++) {
+            light.service("dynamic_" + i, function (arg) {
+                arg.x = arg.x || 0;
+                arg.x = arg.x + 1;
+                return arg;
+            });
+        }
+        var b = performance.now();
+        console.log('It took ' + Math.floor(b - a) + ' ms to create '+totalBuild+'  services');
+
+
+        var  total = 100;
+         a = performance.now();   
+        for (var i = 0; i < total; i++) {
+            light(function (service) {
+                 answer = service["dynamic_" + i](answer).result;
+            });
+         }
+         b = performance.now();
+         console.log('It took ' + Math.floor(b - a) + ' ms to execute ' + total + ' in ' + totalBuild+' services');
+  
+
+         a = performance.now();
+         light(function (service) {
+             answer = service["dynamic_0"](answer).result;
+         });
+         b = performance.now();
+         console.log('It took ' + Math.floor(b - a) + ' ms to execute the FIRST one in ' + totalBuild + ' services');
+
+
+
+         a = performance.now();
+         light(function (service) {
+             answer = service["dynamic_" + (totalBuild - 1)](answer).result;
+         });
+         b = performance.now();
+         console.log('It took ' + Math.floor(b - a) + ' ms to execute the LAST one in ' + totalBuild + ' services');
+
+
+    });
 });

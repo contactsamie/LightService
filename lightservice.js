@@ -5,7 +5,7 @@ var light = (function () {
 
     GLOBAL.DEFAULT_PIPE_NAME = "$$default";
     GLOBAL._TEST_OBJECTS_;
-    GLOBAL.actors = function () { };
+    GLOBAL.actors =  { };
     GLOBAL.actorsDef = [];
     GLOBAL.eventSubscribers = {};
     GLOBAL.system = {};
@@ -235,28 +235,62 @@ var light = (function () {
         }
     };
 
-    //context are invocable other services
+    var eachAsync = function (arr, func, cb) {
+       
+        var total = 0;
+        var finalTotal = 0;
+        var hasRun = false;
+        for (var actor in arr) {
+            total++;
+                (function (a) {
+                    setTimeout(function () {                       
+                        func(a);
+                        if ((finalTotal >= total) && !hasRun) {
+                            hasRun = true;
+                             cb();
+                        } else {
+                            finalTotal++;
+                        }
+                    }, 0);
+                })(actor);            
+        }
+       
+    }
 
-    var chainService = function () {
-        var obj = {};
-         obj.result=undefined;
-        for (var actor in GLOBAL.actors) {
-            obj[actor] = (function (a) {
+    var chainService = function (cb) {
+        chainService.totalChain = chainService.totalChain || 0;
+        GLOBAL.actors
+
+        var chain = {};
+        chain.result = undefined;
+
+        var buildFn = function (actor) {
+            chain[actor] = (function (a) {
                 return function (arg) {
                     var currentResult;
-                    obj.result = GLOBAL.actors[a](arguments.length ? arg : obj.result);
-                    return obj;
+                    chain.result = GLOBAL.actors[a](arguments.length ? arg : chain.result);
+                    return chain;
                 };
             })(actor);
-        }       
+        };
 
-        obj.merge = function (arg) {
+        if (cb) {
+            eachAsync(GLOBAL.actors, buildFn, function () {
+                cb(chain);
+            });
+        } else {
+            for (var actor in GLOBAL.actors) {
+                buildFn(actor);
+            }
+        }
+
+        chain.merge = function (arg) {
             var _arg;
 
-            if (obj.result) {
-                for (var attr in obj.result) {
+            if (chain.result) {
+                for (var attr in chain.result) {
                     _arg = _arg || {};
-                    _arg[attr] = obj.result[attr];
+                    _arg[attr] = chain.result[attr];
                 }
             }
             if (arg) {
@@ -265,20 +299,28 @@ var light = (function () {
                     _arg[attr] = arg[attr];
                 }
             }
-            obj.result = _arg;
+            chain.result = _arg;
 
-            return obj;
+            return chain;
         };
 
-        return obj;
+        return chain;
     };
 
     var _light = function (f) {
-        typeof f === "function" && f.call(GLOBAL.actors, chainService());
+        //  typeof f === "function" && f.call(GLOBAL.actors, chainService());
+
+        chainService(function(cs){
+         typeof f === "function" && f.call(GLOBAL.actors, cs);
+        });
+       
     };
 
     _light.startService = function (name, f) {
-        typeof f === "function" && f.call(GLOBAL.actors, chainService());
+        //typeof f === "function" && f.call(GLOBAL.actors, chainService());
+        chainService(function (cs) {
+            typeof f === "function" && f.call(GLOBAL.actors, cs);
+        });
     };
 
     _light.version = 1;
