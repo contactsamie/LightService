@@ -31,7 +31,7 @@ var light = (function () {
         }
     };
 
-    GLOBAL.servicePipes = [];
+    GLOBAL.handles = [];
 
     var setUpEventSubscriberBase = function (name, id, o) {
         setUpEventSubscriberBase.ref = setUpEventSubscriberBase.ref || 0;
@@ -105,7 +105,7 @@ var light = (function () {
     /*
      !!!!!!!!!!!!!!!!
     */
-    var getApplicableServicePipe = function (context, serviceItem, definitionOrDefinitionType, definition, name, arg) {
+    var getApplicablehandle = function (context, serviceItem, definitionOrDefinitionType, definition, name, arg) {
         var pipeType = definitionOrDefinitionType;
         var actualDefinition = definition;
 
@@ -114,44 +114,44 @@ var light = (function () {
         if (pipeName) {
             pipeType = pipeName;
         }
-        var testServicePipe = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].servicePipe;
+        var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].handle;
 
-        var testServicePipeCondition = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].servicePipeCondition;
+        var testhandleCondition = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].handleCondition;
 
         var tmpDefinition;
-        if (testServicePipe && !pipeName) {
+        if (testhandle && !pipeName) {
             GLOBAL.system.$$currentContext = {
-                servicePipes: GLOBAL.servicePipes,
+                handles: GLOBAL.handles,
                 definition: actualDefinition,
                 serviceName: name,
                 pipeName: undefined,
                 arg: arg
             };
-            if (testServicePipeCondition) {
-                if (testServicePipeCondition.call(GLOBAL.system, actualDefinition)) {
-                    tmpDefinition = testServicePipe.call(GLOBAL.system, actualDefinition);
+            if (testhandleCondition) {
+                if (testhandleCondition.call(GLOBAL.system, actualDefinition)) {
+                    tmpDefinition = testhandle.call(GLOBAL.system, actualDefinition);
                 }
             } else {
-                tmpDefinition = testServicePipe.call(GLOBAL.system, actualDefinition);
+                tmpDefinition = testhandle.call(GLOBAL.system, actualDefinition);
             }
         } else {
             var isAMatch = false;
-            var length = GLOBAL.servicePipes.length;
+            var length = GLOBAL.handles.length;
             for (var j = 0; j < length; j++) {
-                var pipe = GLOBAL.servicePipes[j];
+                var pipe = GLOBAL.handles[j];
 
-                isAMatch = pipeType && (pipe.name === pipeType) && (testServicePipeCondition || pipe.condition).call(GLOBAL.system, actualDefinition);
+                isAMatch = pipeType && (pipe.name === pipeType) && (testhandleCondition || pipe.condition).call(GLOBAL.system, actualDefinition);
 
                 if (isAMatch) {
                     GLOBAL.system.$$currentContext = {
-                        servicePipes: GLOBAL.servicePipes,
+                        handles: GLOBAL.handles,
                         definition: actualDefinition,
                         serviceName: name,
                         pipeName: pipe.name,
                         arg: arg
                     };
 
-                    tmpDefinition = (testServicePipe || pipe.definition).call(GLOBAL.system, actualDefinition);
+                    tmpDefinition = (testhandle || pipe.definition).call(GLOBAL.system, actualDefinition);
 
                     break;
                 }
@@ -167,7 +167,7 @@ var light = (function () {
         }
 
         //end testing
-        var tmpDefinition = getApplicableServicePipe(context, serviceItem, definitionOrDefinitionType, definition, name, arg);
+        var tmpDefinition = getApplicablehandle(context, serviceItem, definitionOrDefinitionType, definition, name, arg);
 
         //expecting function from pipe plugin
         if (typeof tmpDefinition !== "function") {
@@ -333,8 +333,8 @@ var light = (function () {
     _light.version = 1;
     setUpSystemEvent(_light, "event", "$system");
 
-    _light.servicePipe = function (name, condition, definition) {
-        GLOBAL.servicePipes.push({
+    _light.handle = function (name, condition, definition) {
+        GLOBAL.handles.push({
             name: name,// todo check for unique name
             condition: condition,
             definition: definition
@@ -351,14 +351,14 @@ var light = (function () {
         }
     };
 
-    _light.servicePipe(GLOBAL.DEFAULT_PIPE_NAME, function (definition) { return typeof definition === "function"; }, function (definition) { return definition; });
+    _light.handle(GLOBAL.DEFAULT_PIPE_NAME, function (definition) { return typeof definition === "function"; }, function (definition) { return definition; });
 
     return _light;
 })();
 
-// default function servicePipe plugin
+// default function handle plugin
 
-//light.servicePipe("dom", function (definition) { return true; }, function (definition) {
+//light.handle("dom", function (definition) { return true; }, function (definition) {
 //    return function () {
 //     document.body.innerHTML=   definition();
 //    }

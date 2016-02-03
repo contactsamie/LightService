@@ -292,10 +292,10 @@ describe('light', function () {
     it('native tests pipes 1', function () {
         var testType1 = {
             sample1: {
-                servicePipeCondition: function (definition) {
+                handleCondition: function (definition) {
                     return typeof definition === "function";
                 },
-                servicePipe: function (definition) {
+                handle: function (definition) {
                     return definition;
                 },
                 //pipeName: "testType1",
@@ -320,10 +320,10 @@ describe('light', function () {
     it('can use default function pipe 1', function () {
         var testType1 = {
             sample1: {
-                servicePipeCondition: function (definition) {
+                handleCondition: function (definition) {
                     return typeof definition === "function";
                 },
-                servicePipe: function (definition) {
+                handle: function (definition) {
                     return definition;
                 },
                 //pipeName: "testType1", CAN USE DEFAULT PIPE
@@ -348,10 +348,10 @@ describe('light', function () {
     it('can use default function pipe 2', function () {
         var testType1 = {
             sample1: {
-                //servicePipeCondition: function (definition) {
+                //handleCondition: function (definition) {
                 //    return typeof definition === "function";
                 //},
-                servicePipe: function (definition) {
+                handle: function (definition) {
                     return definition;
                 },
                 //pipeName: "testType2",
@@ -376,10 +376,10 @@ describe('light', function () {
     it('can use default function pipe 3', function () {
         var testType1 = {
             sample1: {
-                servicePipeCondition: function (definition) {
+                handleCondition: function (definition) {
                     return typeof definition === "function";
                 },
-                //servicePipe: function (definition) {
+                //handle: function (definition) {
                 //    return definition;
                 //},
                 //pipeName: "testType3",
@@ -404,10 +404,10 @@ describe('light', function () {
     it('can use default function pipe 4', function () {
         var testType1 = {
             sample1: {
-                //servicePipeCondition: function (definition) {
+                //handleCondition: function (definition) {
                 //    return typeof definition === "function";
                 //},
-                //servicePipe: function (definition) {
+                //handle: function (definition) {
                 //    return definition;
                 //},
                 //pipeName: "testType4",
@@ -431,10 +431,10 @@ describe('light', function () {
     it('can use default function pipe 5', function () {
         var testType1 = {
             sample1: {
-                servicePipeCondition: function (definition) {
+                handleCondition: function (definition) {
                     return typeof definition === "function";
                 },
-                //servicePipe: function (definition) {
+                //handle: function (definition) {
                 //    return definition;
                 //},
                 //pipeName: "testType1",
@@ -459,7 +459,7 @@ describe('light', function () {
     it('can use default function pipe 6', function () {
         var testType1 = {
             sample1: {
-                servicePipe: function (definition) {
+                handle: function (definition) {
                     return function (arg) {
                         return definition(arg) + 10;
                     };
@@ -485,7 +485,7 @@ describe('light', function () {
     it('can use default function pipe 7', function () {
         var testType1 = {
             sample1: {
-                servicePipe: function (definition) {
+                handle: function (definition) {
                     return function (arg) {
                         return definition(arg) + 10;
                     };
@@ -508,7 +508,7 @@ describe('light', function () {
     it('can use default function pipe 8', function () {
         var testType1 = {
             sample1: {
-                servicePipe: function (definition) {
+                handle: function (definition) {
                     return function (arg) {
                         return definition(arg) + 10;
                     };
@@ -531,7 +531,7 @@ describe('light', function () {
     it('can use default function pipe 9', function () {
         var testType1 = {
             sample1: {
-                servicePipe: function (definition) {
+                handle: function (definition) {
                     return function (arg) {
                         return definition(arg) + 10;
                     };
@@ -557,7 +557,7 @@ describe('light', function () {
     it('can use default function pipe 10', function () {
         var testType1 = {
             sample1: {
-                servicePipeCondition: function (definition) {
+                handleCondition: function (definition) {
                     return typeof definition === "string";
                 },
                 service: function (arg) {
@@ -581,7 +581,7 @@ describe('light', function () {
     it('can use default function pipe 11', function () {
         var testType1 = {
             sample1: {
-                servicePipeCondition: function (definition) {
+                handleCondition: function (definition) {
                     return typeof definition === "string";
                 },
                 service: function (arg) {
@@ -602,13 +602,13 @@ describe('light', function () {
         });
     });
 
-    light.servicePipe("pipeRegular", function (definition) {
+    light.handle("pipeRegular", function (definition) {
         return typeof definition === "function";
     }, function (definition) {
         return definition
     });
 
-    light.servicePipe("pipeChange", function (definition) {
+    light.handle("pipeChange", function (definition) {
         return typeof definition === "function";
     }, function (definition) {
         return function (arg) {
@@ -616,7 +616,7 @@ describe('light', function () {
         };
     });
 
-    light.servicePipe("pipeWrong", function (definition) {
+    light.handle("pipeWrong", function (definition) {
         return typeof definition === "string";
     }, function (definition) {
         return definition() + 10;
@@ -876,7 +876,7 @@ describe('light', function () {
 
     it('test service in a service', function () {
         light.service("pass1", function (arg) {
-            arg = arg || {  };
+            arg = arg || {};
             arg.x = arg.x || 0;
             arg.x++;
             return arg;
@@ -886,7 +886,7 @@ describe('light', function () {
             throw "failure";
         });
 
-        light.servicePipe("pass2Pipe", function (definition) {
+        light.handle("pass2Pipe", function (definition) {
             return typeof definition === "function";
         }, function (definition) {
             return function (arg) {
@@ -907,7 +907,6 @@ describe('light', function () {
                         exceptions: ["error"]
                     };
                 }
-
                 return standardResult;
             };
         });
