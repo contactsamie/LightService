@@ -333,10 +333,10 @@ var light = (function () {
     _light.version = 1;
     setUpSystemEvent(_light, "event", "$system");
 
-    _light.handle = function (name, condition, definition) {
+    _light.handle = function (name,/* condition,*/ definition) {
         GLOBAL.handles.push({
             name: name,// todo check for unique name
-            condition: condition,
+            condition: function () { return true; } ,// condition,
             definition: definition
         });
     }
@@ -351,7 +351,7 @@ var light = (function () {
         }
     };
 
-    _light.handle(GLOBAL.DEFAULT_PIPE_NAME, function (definition) { return typeof definition === "function"; }, function (definition) { return definition; });
+    _light.handle(GLOBAL.DEFAULT_PIPE_NAME, /*function (definition) { return typeof definition === "function"; },*/ function (definition) { return definition; });
 
     return _light;
 })();
