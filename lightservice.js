@@ -5,7 +5,7 @@ var light = (function () {
 
     GLOBAL.DEFAULT_HANDLE_NAME = "$$default";
     GLOBAL._TEST_OBJECTS_;
-    GLOBAL.actors =  { };
+    GLOBAL.actors = {};
     GLOBAL.actorsDef = [];
     GLOBAL.eventSubscribers = {};
     GLOBAL.system = {};
@@ -111,11 +111,10 @@ var light = (function () {
         return Object.prototype.toString.call(o) === '[object Array]';
     }
 
-   
-    var getApplicablehandle_Test = function (context, serviceItem,  definition, serviceName, arg) {
+    var getApplicablehandle_Test = function (context, serviceItem, definition, serviceName, arg) {
         var testhandleName = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handleName;
-       // testhandleName = isArray(testhandleName) ? testhandleName : (testhandleName ? [testhandleName] : []);
-        
+        // testhandleName = isArray(testhandleName) ? testhandleName : (testhandleName ? [testhandleName] : []);
+
         var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handle;
 
         GLOBAL.system.$$currentContext = {
@@ -129,14 +128,12 @@ var light = (function () {
         return tmpDefinition;
     };
 
-   
     var getApplicablehandle_RealTest = function (context, serviceItem, handleName, definition, serviceName, arg, testhandle, testhandleName) {
         if (testhandleName) {
             handleName = testhandleName;
         }
-       var lastResult;
+        var lastResult;
 
-       
         var isAMatch = false;
         var length = GLOBAL.handles.length;
         for (var j = 0; j < length; j++) {
@@ -155,20 +152,19 @@ var light = (function () {
             }
         }
 
-
         return tmpDefinition;
     };
-    
+
     var getApplicablehandle = function (context, serviceItem, handleName, definition, serviceName, arg) {
-       //  handleName = isArray(handleName) ? handleName : (handleName ? [handleName] : []);
-        
-        var tmpDefinition;      
+        //  handleName = isArray(handleName) ? handleName : (handleName ? [handleName] : []);
+
+        var tmpDefinition;
         var testhandleName = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handleName;
-       // testhandleName = isArray(testhandleName) ? testhandleName : (testhandleName ? [testhandleName] : []);
-       
+        // testhandleName = isArray(testhandleName) ? testhandleName : (testhandleName ? [testhandleName] : []);
+
         var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handle;
         if (testhandle && !testhandleName) {
-            tmpDefinition = getApplicablehandle_Test(context, serviceItem, definition, serviceName, arg);           
+            tmpDefinition = getApplicablehandle_Test(context, serviceItem, definition, serviceName, arg);
         }
         else {
             tmpDefinition = getApplicablehandle_RealTest(context, serviceItem, handleName, definition, serviceName, arg, testhandle, testhandleName);
@@ -176,27 +172,35 @@ var light = (function () {
         return tmpDefinition;
     };
     var runSuppliedServiceFunction = function (context, serviceItem, handleNames, definition, serviceName, arg) {
-      
         //start testing
         if (GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].service) {
             handleNames = GLOBAL._TEST_OBJECTS_[serviceName].handleNames || handleNames;
             definition = GLOBAL._TEST_OBJECTS_[serviceName].service || definition;
         }
-        handleNames=isArray(handleNames)?handleNames:(handleNames?[handleNames]:[]);
+        handleNames = isArray(handleNames) ? handleNames : (handleNames ? [handleNames] : []);
 
-        var handleName = handleNames[0];
-        //end testing
-         var returnDefinitionFromHandle = getApplicablehandle(context, serviceItem, handleName, definition, serviceName, arg);
+        var totalHandles = handleNames.length;
 
-        //expecting function from pipe plugin
-         if (typeof returnDefinitionFromHandle !== "function") {
-            var message = "Cannot process service or handle '" + serviceName + "' "
-            message = message + (returnDefinitionFromHandle ? "'" + handleName + "' service pipe must return a function" : "no matching service pipe  exists ");
-            console.error(message);
-            throw message;
+        var lastResult;
+
+        for (var i = 0; i < totalHandles; i++) {
+            var handleName = handleNames[i];
+
+            //end testing
+            var returnDefinitionFromHandle = getApplicablehandle(context, serviceItem, handleName, definition, serviceName, arg);
+
+            //expecting function from pipe plugin
+            if (typeof returnDefinitionFromHandle !== "function") {
+                var message = "Cannot process service or handle '" + serviceName + "' "
+                message = message + (returnDefinitionFromHandle ? "'" + handleName + "' service pipe must return a function" : "no matching service pipe  exists ");
+                console.error(message);
+                throw message;
+            }
+
+            lastResult = returnDefinitionFromHandle.call(GLOBAL.system, arg, chainService());
         }
 
-         return returnDefinitionFromHandle.call(GLOBAL.system, arg, chainService());
+        return lastResult;
     };
 
     var createServiceDefinitionFromSuppliedFn = function (context, serviceItem, handleName, definition, serviceName) {
@@ -215,7 +219,7 @@ var light = (function () {
                 return result;
             }, function (o) {
                 return serviceItem["success"].notify(o, context, "service-success");
-            }, function (o) {      
+            }, function (o) {
                 return serviceItem["error"].notify(o, context, "service-error");
             });
 
@@ -223,7 +227,7 @@ var light = (function () {
             return result;
         }
     };
-    
+
     var defineService = function (serviceName, hNamesOrDefinition, definition) {
         if (!definition) {
             definition = hNamesOrDefinition;
@@ -238,7 +242,6 @@ var light = (function () {
             steps: []
         };
         var serviceItem = function (previousOrMostCurrentResultToBePassedToTheNextActor) {
-            
             return serviceItem.redefinition(previousOrMostCurrentResultToBePassedToTheNextActor);
         };
         serviceItem.position = GLOBAL.actorsDef.length + 1;
@@ -267,7 +270,7 @@ var light = (function () {
         //for (var actor in arr) {
         //    result.total++;
         //    (function (a, result) {
-        //            setTimeout(function () {                       
+        //            setTimeout(function () {
         //                func(a);
         //                if ((result.finalTotal >= result.total) && !result.hasRun) {
         //                    result.hasRun = true;
@@ -278,7 +281,6 @@ var light = (function () {
         //            }, 0);
         //        })(actor, result);
         //}
-       
     }
 
     var chainService = function (cb) {
@@ -336,13 +338,12 @@ var light = (function () {
     var _light = function (f) {
         //  typeof f === "function" && f.call(GLOBAL.actors, chainService());
 
-        chainService(function(cs){
-         typeof f === "function" && f.call(GLOBAL.actors, cs);
+        chainService(function (cs) {
+            typeof f === "function" && f.call(GLOBAL.actors, cs);
         });
-       
     };
 
-    _light.startService = function ( f) {
+    _light.startService = function (f) {
         //typeof f === "function" && f.call(GLOBAL.actors, chainService());
         chainService(function (cs) {
             typeof f === "function" && f.call(GLOBAL.actors, cs);
@@ -355,7 +356,7 @@ var light = (function () {
     _light.handle = function (serviceName,/* condition,*/ definition) {
         GLOBAL.handles.push({
             name: serviceName,// todo check for unique name
-            condition: function () { return true; } ,// condition,
+            condition: function () { return true; },// condition,
             definition: definition
         });
     }
