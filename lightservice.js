@@ -111,7 +111,6 @@ var light = (function () {
 
    
     var getApplicablehandle_Test = function (context, serviceItem, handleNames, definition, serviceName, arg, testhandle, testHandleNames) {
-        var actualDefinition = definition;
         var testHandleNames = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handleName;
         testHandleNames = isArray(testHandleNames) ? testHandleNames : (testHandleNames ? [testHandleNames] : []);
         if (testHandleNames.length) {
@@ -121,21 +120,21 @@ var light = (function () {
 
         GLOBAL.system.$$currentContext = {
             handles: GLOBAL.handles,
-            definition: actualDefinition,
+            definition: definition,
             serviceName: serviceName,
             handleName: undefined,
             arg: arg
         };
-        tmpDefinition = testhandle.call(GLOBAL.system, actualDefinition);
+        tmpDefinition = testhandle.call(GLOBAL.system, definition);
         return tmpDefinition;
     };
 
    
-    var getApplicablehandle_Real = function (context, serviceItem, handleNames, definition, serviceName, arg, testhandle, testHandleNames) {
+    var getApplicablehandle_RealTest = function (context, serviceItem, handleNames, definition, serviceName, arg, testhandle, testHandleNames) {
         if (testHandleNames.length) {
             handleNames = testHandleNames;
         }
-        var actualDefinition = definition;
+       
         var lastResult;
         var isAMatch = false;
         var length = GLOBAL.handles.length;
@@ -145,12 +144,12 @@ var light = (function () {
             if (isAMatch) {
                 GLOBAL.system.$$currentContext = {
                     handles: GLOBAL.handles,
-                    definition: actualDefinition,
+                    definition: definition,
                     serviceName: serviceName,
                     handleName: pipe.name,
                     arg: arg
                 };
-                tmpDefinition = (testhandle || pipe.definition).call(GLOBAL.system, actualDefinition);
+                tmpDefinition = (testhandle || pipe.definition).call(GLOBAL.system, definition);
                 break;
             }
         }
@@ -165,13 +164,11 @@ var light = (function () {
         testHandleNames = isArray(testHandleNames) ? testHandleNames : (testHandleNames ? [testHandleNames] : []);
        
         var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handle;
-        //if pure mock
         if (testhandle && !testHandleNames.length) {
             tmpDefinition = getApplicablehandle_Test(context, serviceItem, handleNames, definition, serviceName, arg, testhandle, testHandleNames);           
         }
-            //else if handle mock only
         else {
-            tmpDefinition = getApplicablehandle_Real(context, serviceItem, handleNames, definition, serviceName, arg, testhandle, testHandleNames);           
+            tmpDefinition = getApplicablehandle_RealTest(context, serviceItem, handleNames, definition, serviceName, arg, testhandle, testHandleNames);
         }
         return tmpDefinition;
     };
