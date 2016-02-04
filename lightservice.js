@@ -108,23 +108,22 @@ var light = (function () {
     function isArray(o) {
         return Object.prototype.toString.call(o) === '[object Array]';
     }
-    var getApplicablehandle = function (context, serviceItem, definitionOrDefinitionType, definition, name, arg) {
-        var pipeType = pipeName = isArray(definitionOrDefinitionType) ? definitionOrDefinitionType : (definitionOrDefinitionType?[definitionOrDefinitionType] : []);
+    var getApplicablehandle = function (context, serviceItem, handleNames, definition, name, arg) {
+        var handleNames = isArray(handleNames) ? handleNames : (handleNames ? [handleNames] : []);
         var actualDefinition = definition;
 
-        var pipeName = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].pipeName;
+        var testHandleNames = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].pipeName;
 
-        pipeName = isArray(pipeName) ? pipeName : (pipeName?[pipeName] : []);
+        testHandleNames = isArray(testHandleNames) ? testHandleNames : (testHandleNames ? [testHandleNames] : []);
 
-        if (pipeName.length) {
-            pipeType = pipeName;
+        if (testHandleNames.length) {
+            handleNames = testHandleNames;
         }
         var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].handle;
 
-       // var testhandleCondition = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].handleCondition;
-
         var tmpDefinition;
-        if (testhandle && !pipeName.length) {
+        //if pure mock
+        if (testhandle && !testHandleNames.length) {
             GLOBAL.system.$$currentContext = {
                 handles: GLOBAL.handles,
                 definition: actualDefinition,
@@ -133,26 +132,18 @@ var light = (function () {
                 arg: arg
             };
             tmpDefinition = testhandle.call(GLOBAL.system, actualDefinition);
-            //if (testhandleCondition) {
-            //    if (testhandleCondition.call(GLOBAL.system, actualDefinition)) {
-            //        tmpDefinition = testhandle.call(GLOBAL.system, actualDefinition);
-            //    }
-            //} else {
-            //    tmpDefinition = testhandle.call(GLOBAL.system, actualDefinition);
-            //}
-        } else {
+        }
+            //else if handle mock only
+        else {
 
             var lastResult;
-
-           // var handleLength=
-
 
             var isAMatch = false;
             var length = GLOBAL.handles.length;
             for (var j = 0; j < length; j++) {
                 var pipe = GLOBAL.handles[j];
 
-                isAMatch = pipeType.length && (pipe.name === pipeType[0]);// && (testhandleCondition || pipe.condition).call(GLOBAL.system, actualDefinition);
+                isAMatch = handleNames.length && (pipe.name === handleNames[0]);
 
                 if (isAMatch) {
                     GLOBAL.system.$$currentContext = {
@@ -168,29 +159,24 @@ var light = (function () {
                     break;
                 }
             }
-
-
-
-
-
-
         }
         return tmpDefinition;
     };
     var runSuppliedServiceFunction = function (context, serviceItem, definitionOrDefinitionType, definition, name, arg) {
+        var handleNames = definitionOrDefinitionType;
         //start testing
         if (GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].service) {
-            definitionOrDefinitionType = GLOBAL._TEST_OBJECTS_[name].type || definitionOrDefinitionType;
+            handleNames = GLOBAL._TEST_OBJECTS_[name].type || handleNames;
             definition = GLOBAL._TEST_OBJECTS_[name].service || definition;
         }
 
         //end testing
-        var tmpDefinition = getApplicablehandle(context, serviceItem, definitionOrDefinitionType, definition, name, arg);
+        var tmpDefinition = getApplicablehandle(context, serviceItem, handleNames, definition, name, arg);
 
         //expecting function from pipe plugin
         if (typeof tmpDefinition !== "function") {
             var message = "Cannot process service '" + name + "' "
-            message = message + (tmpDefinition ? "'" + definitionOrDefinitionType + "' service pipe must return a function" : "no matching service pipe  exists ");
+            message = message + (tmpDefinition ? "'" + handleNames + "' service pipe must return a function" : "no matching service pipe  exists ");
             console.error(message);
             throw message;
         }
