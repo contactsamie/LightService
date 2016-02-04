@@ -296,7 +296,7 @@ describe('light', function () {
                 handle: function (definition) {
                     return definition;
                 },
-                //pipeName: "testType1",
+                //handleName: "testType1",
                 service: function (arg) {
                     return arg.x + arg.y;
                 }
@@ -322,7 +322,7 @@ describe('light', function () {
                 handle: function (definition) {
                     return definition;
                 },
-                //pipeName: "testType1", CAN USE DEFAULT PIPE
+                //handleName: "testType1", CAN USE DEFAULT PIPE
                 service: function (arg) {
                     return arg.x + arg.y;
                 }
@@ -348,7 +348,7 @@ describe('light', function () {
                 handle: function (definition) {
                     return definition;
                 },
-                //pipeName: "testType2",
+                //handleName: "testType2",
                 service: function (arg) {
                     return arg.x + arg.y;
                 }
@@ -589,7 +589,7 @@ describe('light', function () {
     it('can use default function pipe 12', function () {
         var testType1 = {
             sample1: {
-                pipeName: "pipeRegular"
+                handleName: "pipeRegular"
             }
         };
 
@@ -608,7 +608,7 @@ describe('light', function () {
     it('can use default function pipe 12', function () {
         var testType1 = {
             sample1: {
-                pipeName: "pipeChange"
+                handleName: "pipeChange"
             }
         };
 
@@ -627,7 +627,7 @@ describe('light', function () {
     it('can use default function pipe 12', function () {
         var testType1 = {
             sample1: {
-                pipeName: "pipeWrong"
+                handleName: "pipeWrong"
             }
         };
 

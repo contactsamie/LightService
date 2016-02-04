@@ -112,7 +112,7 @@ var light = (function () {
         var handleNames = isArray(handleNames) ? handleNames : (handleNames ? [handleNames] : []);
         var actualDefinition = definition;
 
-        var testHandleNames = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].pipeName;
+        var testHandleNames = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].handleName;
 
         testHandleNames = isArray(testHandleNames) ? testHandleNames : (testHandleNames ? [testHandleNames] : []);
 
@@ -128,7 +128,7 @@ var light = (function () {
                 handles: GLOBAL.handles,
                 definition: actualDefinition,
                 serviceName: name,
-                pipeName: undefined,
+                handleName: undefined,
                 arg: arg
             };
             tmpDefinition = testhandle.call(GLOBAL.system, actualDefinition);
@@ -150,7 +150,7 @@ var light = (function () {
                         handles: GLOBAL.handles,
                         definition: actualDefinition,
                         serviceName: name,
-                        pipeName: pipe.name,
+                        handleName: pipe.name,
                         arg: arg
                     };
 
