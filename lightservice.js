@@ -3,7 +3,7 @@
 var light = (function () {
     var GLOBAL = {};
 
-    GLOBAL.DEFAULT_PIPE_NAME = "$$default";
+    GLOBAL.DEFAULT_HANDLE_NAME = "$$default";
     GLOBAL._TEST_OBJECTS_;
     GLOBAL.actors =  { };
     GLOBAL.actorsDef = [];
@@ -108,26 +108,24 @@ var light = (function () {
     function isArray(o) {
         return Object.prototype.toString.call(o) === '[object Array]';
     }
-    var getApplicablehandle = function (context, serviceItem, handleNames, definition, name, arg) {
+    var getApplicablehandle = function (context, serviceItem, handleNames, definition, serviceName, arg) {
         var handleNames = isArray(handleNames) ? handleNames : (handleNames ? [handleNames] : []);
         var actualDefinition = definition;
+        var tmpDefinition;
 
-        var testHandleNames = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].handleName;
-
+     
+        var testHandleNames = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handleName;
         testHandleNames = isArray(testHandleNames) ? testHandleNames : (testHandleNames ? [testHandleNames] : []);
-
         if (testHandleNames.length) {
             handleNames = testHandleNames;
         }
-        var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].handle;
-
-        var tmpDefinition;
+        var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handle;
         //if pure mock
         if (testhandle && !testHandleNames.length) {
             GLOBAL.system.$$currentContext = {
                 handles: GLOBAL.handles,
                 definition: actualDefinition,
-                serviceName: name,
+                serviceName: serviceName,
                 handleName: undefined,
                 arg: arg
             };
@@ -135,47 +133,41 @@ var light = (function () {
         }
             //else if handle mock only
         else {
-
             var lastResult;
-
             var isAMatch = false;
             var length = GLOBAL.handles.length;
             for (var j = 0; j < length; j++) {
                 var pipe = GLOBAL.handles[j];
-
                 isAMatch = handleNames.length && (pipe.name === handleNames[0]);
-
                 if (isAMatch) {
                     GLOBAL.system.$$currentContext = {
                         handles: GLOBAL.handles,
                         definition: actualDefinition,
-                        serviceName: name,
+                        serviceName: serviceName,
                         handleName: pipe.name,
                         arg: arg
                     };
-
                     tmpDefinition = (testhandle || pipe.definition).call(GLOBAL.system, actualDefinition);
-
                     break;
                 }
             }
         }
         return tmpDefinition;
     };
-    var runSuppliedServiceFunction = function (context, serviceItem, definitionOrDefinitionType, definition, name, arg) {
+    var runSuppliedServiceFunction = function (context, serviceItem, definitionOrDefinitionType, definition, serviceName, arg) {
         var handleNames = definitionOrDefinitionType;
         //start testing
-        if (GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[name] && GLOBAL._TEST_OBJECTS_[name].service) {
-            handleNames = GLOBAL._TEST_OBJECTS_[name].type || handleNames;
-            definition = GLOBAL._TEST_OBJECTS_[name].service || definition;
+        if (GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].service) {
+            handleNames = GLOBAL._TEST_OBJECTS_[serviceName].type || handleNames;
+            definition = GLOBAL._TEST_OBJECTS_[serviceName].service || definition;
         }
 
         //end testing
-        var tmpDefinition = getApplicablehandle(context, serviceItem, handleNames, definition, name, arg);
+        var tmpDefinition = getApplicablehandle(context, serviceItem, handleNames, definition, serviceName, arg);
 
         //expecting function from pipe plugin
         if (typeof tmpDefinition !== "function") {
-            var message = "Cannot process service '" + name + "' "
+            var message = "Cannot process service '" + serviceName + "' "
             message = message + (tmpDefinition ? "'" + handleNames + "' service pipe must return a function" : "no matching service pipe  exists ");
             console.error(message);
             throw message;
@@ -184,11 +176,11 @@ var light = (function () {
         return tmpDefinition.call(GLOBAL.system, arg, chainService());
     };
 
-    var createServiceDefinitionFromSuppliedFn = function (context, serviceItem, definitionOrDefinitionType, definition, name) {
-        setUpServiceEvent(serviceItem, "before", name);
-        setUpServiceEvent(serviceItem, "after", name);
-        setUpServiceEvent(serviceItem, "error", name);
-        setUpServiceEvent(serviceItem, "success", name);
+    var createServiceDefinitionFromSuppliedFn = function (context, serviceItem, definitionOrDefinitionType, definition, serviceName) {
+        setUpServiceEvent(serviceItem, "before", serviceName);
+        setUpServiceEvent(serviceItem, "after", serviceName);
+        setUpServiceEvent(serviceItem, "error", serviceName);
+        setUpServiceEvent(serviceItem, "success", serviceName);
 
         return function (arg, callerContext) {
             var result;
@@ -196,7 +188,7 @@ var light = (function () {
             GLOBAL.utility.tryCatch(context, function () { return serviceItem["before"].notify(); }, function () { }, function () { });
 
             GLOBAL.utility.tryCatch(context, function () {
-                result = runSuppliedServiceFunction(context, serviceItem, definitionOrDefinitionType, definition, name, arg);
+                result = runSuppliedServiceFunction(context, serviceItem, definitionOrDefinitionType, definition, serviceName, arg);
                 return result;
             }, function (o) {
                 return serviceItem["success"].notify(o, context, "service-success");
@@ -209,15 +201,15 @@ var light = (function () {
         }
     };
 
-    var defineService = function (name, definitionOrDefinitionType, definition) {
+    var defineService = function (serviceName, definitionOrDefinitionType, definition) {
         if (!definition) {
             definition = definitionOrDefinitionType;
-            definitionOrDefinitionType = [GLOBAL.DEFAULT_PIPE_NAME];
+            definitionOrDefinitionType = [GLOBAL.DEFAULT_HANDLE_NAME];
         }
 
         var context = {
-            name: name, step: function (o) {
-                _light["event"].notify(name, context, "service-call");
+            name: serviceName, step: function (o) {
+                _light["event"].notify(serviceName, context, "service-call");
                 this.steps.push(o);
             },
             steps: []
@@ -228,13 +220,13 @@ var light = (function () {
         };
         serviceItem.position = GLOBAL.actorsDef.length + 1;
 
-        serviceItem.redefinition = createServiceDefinitionFromSuppliedFn(context, serviceItem, definitionOrDefinitionType, definition, name);
+        serviceItem.redefinition = createServiceDefinitionFromSuppliedFn(context, serviceItem, definitionOrDefinitionType, definition, serviceName);
 
-        serviceItem.me = name;
-        GLOBAL.actors[name] = serviceItem;
-        GLOBAL.actorsDef.push(GLOBAL.actors[name]);
-        GLOBAL.system[name] = function (arg) {
-            context.step(name);
+        serviceItem.me = serviceName;
+        GLOBAL.actors[serviceName] = serviceItem;
+        GLOBAL.actorsDef.push(GLOBAL.actors[serviceName]);
+        GLOBAL.system[serviceName] = function (arg) {
+            context.step(serviceName);
             return serviceItem.redefinition(arg, context);
         }
     };
@@ -355,7 +347,7 @@ var light = (function () {
         }
     };
 
-    _light.handle(GLOBAL.DEFAULT_PIPE_NAME, /*function (definition) { return typeof definition === "function"; },*/ function (definition) { return definition; });
+    _light.handle(GLOBAL.DEFAULT_HANDLE_NAME, /*function (definition) { return typeof definition === "function"; },*/ function (definition) { return definition; });
 
     return _light;
 })();
