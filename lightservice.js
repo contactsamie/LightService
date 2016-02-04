@@ -156,11 +156,11 @@ var light = (function () {
     };
 
     var getApplicablehandle = function (context, serviceItem, handleName, definition, serviceName, arg) {
-        //  handleName = isArray(handleName) ? handleName : (handleName ? [handleName] : []);
+        
 
         var tmpDefinition;
         var testhandleName = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handleName;
-        // testhandleName = isArray(testhandleName) ? testhandleName : (testhandleName ? [testhandleName] : []);
+       
 
         var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handle;
         if (testhandle && !testhandleName) {
@@ -231,11 +231,12 @@ var light = (function () {
         }
     };
 
-    var defineService = function (serviceName, hNamesOrDefinition, definition) {
+    var defineService = function (serviceName, handleNamesOrDefinition, definition) {
         if (!definition) {
-            definition = hNamesOrDefinition;
-            hNamesOrDefinition = GLOBAL.DEFAULT_HANDLE_NAME;
+            definition = handleNamesOrDefinition;
+            handleNamesOrDefinition = GLOBAL.DEFAULT_HANDLE_NAME;
         }
+             
 
         var context = {
             name: serviceName, step: function (o) {
@@ -249,7 +250,7 @@ var light = (function () {
         };
         serviceItem.position = GLOBAL.actorsDef.length + 1;
 
-        serviceItem.redefinition = createServiceDefinitionFromSuppliedFn(context, serviceItem, hNamesOrDefinition, definition, serviceName);
+        serviceItem.redefinition = createServiceDefinitionFromSuppliedFn(context, serviceItem, handleNamesOrDefinition, definition, serviceName);
 
         serviceItem.me = serviceName;
         GLOBAL.actors[serviceName] = serviceItem;
