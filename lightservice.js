@@ -231,18 +231,26 @@ var light = (function () {
         }
     };
 
-    var defineService = function (serviceName, handleNamesOrDefinition, definition) {
+    var defineService = function (serviceName, handleNamesOrDefinition, fn) {
 
         //var definition = function (arg) {
         //  return  fn(arg);
         //};
 
+  
 
-        if (!definition) {
-            definition = handleNamesOrDefinition;
+        if (!fn) {
+            fn = handleNamesOrDefinition;
             handleNamesOrDefinition = GLOBAL.DEFAULT_HANDLE_NAME;
         }            
-
+      //!!!!
+        //experiment ----start
+        var definition = function () {
+            var result;
+            result = fn.apply(this, arguments);
+            return result;
+        };
+        //experiment ----end
         var context = {
             name: serviceName, step: function (o) {
                 _light["event"].notify(serviceName, context, "service-call");
