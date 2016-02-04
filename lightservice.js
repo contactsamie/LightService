@@ -111,8 +111,8 @@ var light = (function () {
 
    
     var getApplicablehandle_Test = function (context, serviceItem,  definition, serviceName, arg) {
-        var testHandleNames = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handleName;
-       // testHandleNames = isArray(testHandleNames) ? testHandleNames : (testHandleNames ? [testHandleNames] : []);
+        var testhandleName = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handleName;
+       // testhandleName = isArray(testhandleName) ? testhandleName : (testhandleName ? [testhandleName] : []);
         
         var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handle;
 
@@ -128,9 +128,9 @@ var light = (function () {
     };
 
    
-    var getApplicablehandle_RealTest = function (context, serviceItem, handleNames, definition, serviceName, arg, testhandle, testHandleNames) {
-        if (testHandleNames) {
-            handleNames = testHandleNames;
+    var getApplicablehandle_RealTest = function (context, serviceItem, handleName, definition, serviceName, arg, testhandle, testhandleName) {
+        if (testhandleName) {
+            handleName = testhandleName;
         }
        var lastResult;
 
@@ -139,7 +139,7 @@ var light = (function () {
         var length = GLOBAL.handles.length;
         for (var j = 0; j < length; j++) {
             var pipe = GLOBAL.handles[j];
-            isAMatch = handleNames && (pipe.name === handleNames);
+            isAMatch = handleName && (pipe.name === handleName);
             if (isAMatch) {
                 GLOBAL.system.$$currentContext = {
                     handles: GLOBAL.handles,
@@ -157,37 +157,37 @@ var light = (function () {
         return tmpDefinition;
     };
     
-    var getApplicablehandle = function (context, serviceItem, handleNames, definition, serviceName, arg) {
-       //  handleNames = isArray(handleNames) ? handleNames : (handleNames ? [handleNames] : []);
+    var getApplicablehandle = function (context, serviceItem, handleName, definition, serviceName, arg) {
+       //  handleName = isArray(handleName) ? handleName : (handleName ? [handleName] : []);
         
         var tmpDefinition;      
-        var testHandleNames = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handleName;
-       // testHandleNames = isArray(testHandleNames) ? testHandleNames : (testHandleNames ? [testHandleNames] : []);
+        var testhandleName = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handleName;
+       // testhandleName = isArray(testhandleName) ? testhandleName : (testhandleName ? [testhandleName] : []);
        
         var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handle;
-        if (testhandle && !testHandleNames) {
+        if (testhandle && !testhandleName) {
             tmpDefinition = getApplicablehandle_Test(context, serviceItem, definition, serviceName, arg);           
         }
         else {
-            tmpDefinition = getApplicablehandle_RealTest(context, serviceItem, handleNames, definition, serviceName, arg, testhandle, testHandleNames);
+            tmpDefinition = getApplicablehandle_RealTest(context, serviceItem, handleName, definition, serviceName, arg, testhandle, testhandleName);
         }
         return tmpDefinition;
     };
-    var runSuppliedServiceFunction = function (context, serviceItem, handleNames, definition, serviceName, arg) {
+    var runSuppliedServiceFunction = function (context, serviceItem, handleName, definition, serviceName, arg) {
       
         //start testing
         if (GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].service) {
-            handleNames = GLOBAL._TEST_OBJECTS_[serviceName].type || handleNames;
+            handleName = GLOBAL._TEST_OBJECTS_[serviceName].type || handleName;
             definition = GLOBAL._TEST_OBJECTS_[serviceName].service || definition;
         }
 
         //end testing
-         var returnDefinitionFromHandle = getApplicablehandle(context, serviceItem, handleNames, definition, serviceName, arg);
+         var returnDefinitionFromHandle = getApplicablehandle(context, serviceItem, handleName, definition, serviceName, arg);
 
         //expecting function from pipe plugin
          if (typeof returnDefinitionFromHandle !== "function") {
             var message = "Cannot process service or handle '" + serviceName + "' "
-            message = message + (returnDefinitionFromHandle ? "'" + handleNames + "' service pipe must return a function" : "no matching service pipe  exists ");
+            message = message + (returnDefinitionFromHandle ? "'" + handleName + "' service pipe must return a function" : "no matching service pipe  exists ");
             console.error(message);
             throw message;
         }
@@ -195,7 +195,7 @@ var light = (function () {
          return returnDefinitionFromHandle.call(GLOBAL.system, arg, chainService());
     };
 
-    var createServiceDefinitionFromSuppliedFn = function (context, serviceItem, handleNames, definition, serviceName) {
+    var createServiceDefinitionFromSuppliedFn = function (context, serviceItem, handleName, definition, serviceName) {
         setUpServiceEvent(serviceItem, "before", serviceName);
         setUpServiceEvent(serviceItem, "after", serviceName);
         setUpServiceEvent(serviceItem, "error", serviceName);
@@ -207,7 +207,7 @@ var light = (function () {
             GLOBAL.utility.tryCatch(context, function () { return serviceItem["before"].notify(); }, function () { }, function () { });
 
             GLOBAL.utility.tryCatch(context, function () {
-                result = runSuppliedServiceFunction(context, serviceItem, handleNames, definition, serviceName, arg);
+                result = runSuppliedServiceFunction(context, serviceItem, handleName, definition, serviceName, arg);
                 return result;
             }, function (o) {
                 return serviceItem["success"].notify(o, context, "service-success");
