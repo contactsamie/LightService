@@ -173,8 +173,8 @@ var light = (function () {
         }
         return tmpDefinition;
     };
-    var runSuppliedServiceFunction = function (context, serviceItem, definitionOrDefinitionType, definition, serviceName, arg) {
-        var handleNames = definitionOrDefinitionType;
+    var runSuppliedServiceFunction = function (context, serviceItem, handleNames, definition, serviceName, arg) {
+      
         //start testing
         if (GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].service) {
             handleNames = GLOBAL._TEST_OBJECTS_[serviceName].type || handleNames;
@@ -195,7 +195,7 @@ var light = (function () {
          return returnDefinitionFromHandle.call(GLOBAL.system, arg, chainService());
     };
 
-    var createServiceDefinitionFromSuppliedFn = function (context, serviceItem, definitionOrDefinitionType, definition, serviceName) {
+    var createServiceDefinitionFromSuppliedFn = function (context, serviceItem, handleNames, definition, serviceName) {
         setUpServiceEvent(serviceItem, "before", serviceName);
         setUpServiceEvent(serviceItem, "after", serviceName);
         setUpServiceEvent(serviceItem, "error", serviceName);
@@ -207,7 +207,7 @@ var light = (function () {
             GLOBAL.utility.tryCatch(context, function () { return serviceItem["before"].notify(); }, function () { }, function () { });
 
             GLOBAL.utility.tryCatch(context, function () {
-                result = runSuppliedServiceFunction(context, serviceItem, definitionOrDefinitionType, definition, serviceName, arg);
+                result = runSuppliedServiceFunction(context, serviceItem, handleNames, definition, serviceName, arg);
                 return result;
             }, function (o) {
                 return serviceItem["success"].notify(o, context, "service-success");
@@ -219,11 +219,11 @@ var light = (function () {
             return result;
         }
     };
-
-    var defineService = function (serviceName, definitionOrDefinitionType, definition) {
+    
+    var defineService = function (serviceName, hNamesOrDefinition, definition) {
         if (!definition) {
-            definition = definitionOrDefinitionType;
-            definitionOrDefinitionType = [GLOBAL.DEFAULT_HANDLE_NAME];
+            definition = hNamesOrDefinition;
+            hNamesOrDefinition = [GLOBAL.DEFAULT_HANDLE_NAME];
         }
 
         var context = {
@@ -239,7 +239,7 @@ var light = (function () {
         };
         serviceItem.position = GLOBAL.actorsDef.length + 1;
 
-        serviceItem.redefinition = createServiceDefinitionFromSuppliedFn(context, serviceItem, definitionOrDefinitionType, definition, serviceName);
+        serviceItem.redefinition = createServiceDefinitionFromSuppliedFn(context, serviceItem, hNamesOrDefinition, definition, serviceName);
 
         serviceItem.me = serviceName;
         GLOBAL.actors[serviceName] = serviceItem;
