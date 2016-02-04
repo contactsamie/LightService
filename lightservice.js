@@ -95,8 +95,8 @@ var light = (function () {
         that[event].notify = GLOBAL.eventSubscribers[id].notify;
     };
 
-    var getServiceByName = function (name) {
-        var item = GLOBAL.actors[name];
+    var getServiceByName = function (serviceName) {
+        var item = GLOBAL.actors[serviceName];
         return item;
     };
     function parseJSON(data) {
@@ -266,11 +266,11 @@ var light = (function () {
         chain.result = undefined;
 
         var buildFn = function (actor) {
-            chain[actor] = (function (a) {
+            chain[actor] = (function (serviceName) {
                 return function (arg) {
                     var currentResult;
                     var previousOrMostCurrentResultToBePassedToTheNextActor = arguments.length ? arg : chain.result;
-                    chain.result = GLOBAL.actors[a](previousOrMostCurrentResultToBePassedToTheNextActor);
+                    chain.result = GLOBAL.actors[serviceName](previousOrMostCurrentResultToBePassedToTheNextActor);
                     return chain;
                 };
             })(actor);
