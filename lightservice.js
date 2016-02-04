@@ -191,7 +191,7 @@ var light = (function () {
 
             //expecting function from pipe plugin
             if (typeof returnDefinitionFromHandle !== "function") {
-                var message = "Cannot process service or handle '" + serviceName + "' "
+                var message = "Cannot process service or handle '" + serviceName + "' ";
                 message = message + (returnDefinitionFromHandle ? "'" + handleName + "' service pipe must return a function" : "no matching service pipe  exists ");
                 console.error(message);
                 throw message;
