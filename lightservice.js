@@ -132,8 +132,9 @@ var light = (function () {
         if (testHandleNames.length) {
             handleNames = testHandleNames;
         }
+       var lastResult;
+
        
-        var lastResult;
         var isAMatch = false;
         var length = GLOBAL.handles.length;
         for (var j = 0; j < length; j++) {
@@ -151,6 +152,8 @@ var light = (function () {
                 break;
             }
         }
+
+
         return tmpDefinition;
     };
     
@@ -179,17 +182,17 @@ var light = (function () {
         }
 
         //end testing
-        var tmpDefinition = getApplicablehandle(context, serviceItem, handleNames, definition, serviceName, arg);
+         var returnDefinitionFromHandle = getApplicablehandle(context, serviceItem, handleNames, definition, serviceName, arg);
 
         //expecting function from pipe plugin
-        if (typeof tmpDefinition !== "function") {
-            var message = "Cannot process service '" + serviceName + "' "
-            message = message + (tmpDefinition ? "'" + handleNames + "' service pipe must return a function" : "no matching service pipe  exists ");
+         if (typeof returnDefinitionFromHandle !== "function") {
+            var message = "Cannot process service or handle '" + serviceName + "' "
+            message = message + (returnDefinitionFromHandle ? "'" + handleNames + "' service pipe must return a function" : "no matching service pipe  exists ");
             console.error(message);
             throw message;
         }
 
-        return tmpDefinition.call(GLOBAL.system, arg, chainService());
+         return returnDefinitionFromHandle.call(GLOBAL.system, arg, chainService());
     };
 
     var createServiceDefinitionFromSuppliedFn = function (context, serviceItem, definitionOrDefinitionType, definition, serviceName) {
