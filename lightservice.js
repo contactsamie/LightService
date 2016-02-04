@@ -319,7 +319,7 @@ var light = (function () {
        
     };
 
-    _light.startService = function (name, f) {
+    _light.startService = function ( f) {
         //typeof f === "function" && f.call(GLOBAL.actors, chainService());
         chainService(function (cs) {
             typeof f === "function" && f.call(GLOBAL.actors, cs);
@@ -329,9 +329,9 @@ var light = (function () {
     _light.version = 1;
     setUpSystemEvent(_light, "event", "$system");
 
-    _light.handle = function (name,/* condition,*/ definition) {
+    _light.handle = function (serviceName,/* condition,*/ definition) {
         GLOBAL.handles.push({
-            name: name,// todo check for unique name
+            name: serviceName,// todo check for unique name
             condition: function () { return true; } ,// condition,
             definition: definition
         });
