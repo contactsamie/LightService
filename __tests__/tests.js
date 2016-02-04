@@ -248,7 +248,7 @@ describe('light', function () {
     };
     it('native tests', function () {
         light(function (service) {
-            light.advance.testService(testObj, function (service) {
+            light.advance.serviceTest(testObj, function (service) {
                 var test = this.sample2;
                 var path = [];
                 test.before(function () { path.push("before"); });
@@ -265,7 +265,7 @@ describe('light', function () {
 
     it('native tests 2', function () {
         light(function (service) {
-            light.advance.testService(testObj, function (service) {
+            light.advance.serviceTest(testObj, function (service) {
                 var test = this.sample2;
                 var answer = test();
                 expect(answer).toBe(5);
@@ -277,7 +277,7 @@ describe('light', function () {
     });
 
     it('native tests 2', function () {
-        light.advance.testService(testObj, function (service) {
+        light.advance.serviceTest(testObj, function (service) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(5);
@@ -302,7 +302,7 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function (service) {
+        light.advance.serviceTest(testType1, function (service) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(5);
@@ -327,7 +327,7 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function () {
+        light.advance.serviceTest(testType1, function () {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(5);
@@ -352,7 +352,7 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function (service) {
+        light.advance.serviceTest(testType1, function (service) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(5);
@@ -373,7 +373,7 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function () {
+        light.advance.serviceTest(testType1, function () {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(5);
@@ -394,7 +394,7 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function (service) {
+        light.advance.serviceTest(testType1, function (service) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(5);
@@ -414,7 +414,7 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function (service) {
+        light.advance.serviceTest(testType1, function (service) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(5);
@@ -440,7 +440,7 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function (service) {
+        light.advance.serviceTest(testType1, function (service) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(15);
@@ -463,7 +463,7 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function (service) {
+        light.advance.serviceTest(testType1, function (service) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(16);
@@ -486,7 +486,7 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function (service) {
+        light.advance.serviceTest(testType1, function (service) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(16);
@@ -512,7 +512,7 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function (service) {
+        light.advance.serviceTest(testType1, function (service) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(15);
@@ -533,7 +533,7 @@ describe('light', function () {
             }
         };
 
-        /* light.advance.testService(testType1, function (service) {
+        /* light.advance.serviceTest(testType1, function (service) {
              var test = this.sample2;
              var answer = test();
              expect(answer).toBe(undefined);
@@ -554,7 +554,7 @@ describe('light', function () {
             }
         };
 
-        /* light.advance.testService(testType1, function (service) {
+        /* light.advance.serviceTest(testType1, function (service) {
              var test = this.sample2;
              var answer = test();
              expect(answer).toBe(undefined);
@@ -587,7 +587,7 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function (service) {
+        light.advance.serviceTest(testType1, function (service) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(6);
@@ -606,7 +606,7 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function (service) {
+        light.advance.serviceTest(testType1, function (service) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(16);
@@ -625,7 +625,7 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function (service) {
+        light.advance.serviceTest(testType1, function (service) {
             var test = this.sample2;
             var answer = test();
             expect(answer).toBe(undefined);
@@ -731,7 +731,7 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function (service) {
+        light.advance.serviceTest(testType1, function (service) {
             var answer = service.c7().c5().c6().c1().result();
             expect(answer).toBe(114);
         });
@@ -756,7 +756,7 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function (service) {
+        light.advance.serviceTest(testType1, function (service) {
             var answer = service.c8().c1().result();
             expect(answer).toBe(114);
         });
@@ -777,7 +777,7 @@ describe('light', function () {
             }
         };
 
-        light.advance.testService(testType1, function (service) {
+        light.advance.serviceTest(testType1, function (service) {
             var answer = this.c8();
             answer = this.c1(answer);
             expect(answer).toBe(114);

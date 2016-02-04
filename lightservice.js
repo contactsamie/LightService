@@ -232,11 +232,16 @@ var light = (function () {
     };
 
     var defineService = function (serviceName, handleNamesOrDefinition, definition) {
+
+        //var definition = function (arg) {
+        //  return  fn(arg);
+        //};
+
+
         if (!definition) {
             definition = handleNamesOrDefinition;
             handleNamesOrDefinition = GLOBAL.DEFAULT_HANDLE_NAME;
-        }
-             
+        }            
 
         var context = {
             name: serviceName, step: function (o) {
@@ -372,7 +377,7 @@ var light = (function () {
     _light.service = defineService;
 
     _light.advance = {
-        testService: function (setup, f) {
+        serviceTest: function (setup, f) {
             GLOBAL._TEST_OBJECTS_ = setup;
             f.call(GLOBAL.actors, chainService());
             GLOBAL._TEST_OBJECTS_ = undefined
