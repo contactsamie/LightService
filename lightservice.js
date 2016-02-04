@@ -110,12 +110,10 @@ var light = (function () {
     }
 
    
-    var getApplicablehandle_Test = function (context, serviceItem, handleNames, definition, serviceName, arg, testhandle, testHandleNames) {
+    var getApplicablehandle_Test = function (context, serviceItem,  definition, serviceName, arg) {
         var testHandleNames = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handleName;
         testHandleNames = isArray(testHandleNames) ? testHandleNames : (testHandleNames ? [testHandleNames] : []);
-        if (testHandleNames.length) {
-            handleNames = testHandleNames;
-        }
+        
         var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handle;
 
         GLOBAL.system.$$currentContext = {
@@ -157,7 +155,7 @@ var light = (function () {
     };
     
     var getApplicablehandle = function (context, serviceItem, handleNames, definition, serviceName, arg) {
-        var handleNames = isArray(handleNames) ? handleNames : (handleNames ? [handleNames] : []);
+         handleNames = isArray(handleNames) ? handleNames : (handleNames ? [handleNames] : []);
         
         var tmpDefinition;      
         var testHandleNames = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handleName;
@@ -165,7 +163,7 @@ var light = (function () {
        
         var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handle;
         if (testhandle && !testHandleNames.length) {
-            tmpDefinition = getApplicablehandle_Test(context, serviceItem, handleNames, definition, serviceName, arg, testhandle, testHandleNames);           
+            tmpDefinition = getApplicablehandle_Test(context, serviceItem, definition, serviceName, arg);           
         }
         else {
             tmpDefinition = getApplicablehandle_RealTest(context, serviceItem, handleNames, definition, serviceName, arg, testhandle, testHandleNames);
