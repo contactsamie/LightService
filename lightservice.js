@@ -112,7 +112,7 @@ var light = (function () {
    
     var getApplicablehandle_Test = function (context, serviceItem,  definition, serviceName, arg) {
         var testHandleNames = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handleName;
-        testHandleNames = isArray(testHandleNames) ? testHandleNames : (testHandleNames ? [testHandleNames] : []);
+       // testHandleNames = isArray(testHandleNames) ? testHandleNames : (testHandleNames ? [testHandleNames] : []);
         
         var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handle;
 
@@ -129,7 +129,7 @@ var light = (function () {
 
    
     var getApplicablehandle_RealTest = function (context, serviceItem, handleNames, definition, serviceName, arg, testhandle, testHandleNames) {
-        if (testHandleNames.length) {
+        if (testHandleNames) {
             handleNames = testHandleNames;
         }
        var lastResult;
@@ -139,7 +139,7 @@ var light = (function () {
         var length = GLOBAL.handles.length;
         for (var j = 0; j < length; j++) {
             var pipe = GLOBAL.handles[j];
-            isAMatch = handleNames.length && (pipe.name === handleNames[0]);
+            isAMatch = handleNames && (pipe.name === handleNames);
             if (isAMatch) {
                 GLOBAL.system.$$currentContext = {
                     handles: GLOBAL.handles,
@@ -158,14 +158,14 @@ var light = (function () {
     };
     
     var getApplicablehandle = function (context, serviceItem, handleNames, definition, serviceName, arg) {
-         handleNames = isArray(handleNames) ? handleNames : (handleNames ? [handleNames] : []);
+       //  handleNames = isArray(handleNames) ? handleNames : (handleNames ? [handleNames] : []);
         
         var tmpDefinition;      
         var testHandleNames = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handleName;
-        testHandleNames = isArray(testHandleNames) ? testHandleNames : (testHandleNames ? [testHandleNames] : []);
+       // testHandleNames = isArray(testHandleNames) ? testHandleNames : (testHandleNames ? [testHandleNames] : []);
        
         var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handle;
-        if (testhandle && !testHandleNames.length) {
+        if (testhandle && !testHandleNames) {
             tmpDefinition = getApplicablehandle_Test(context, serviceItem, definition, serviceName, arg);           
         }
         else {
@@ -223,7 +223,7 @@ var light = (function () {
     var defineService = function (serviceName, hNamesOrDefinition, definition) {
         if (!definition) {
             definition = hNamesOrDefinition;
-            hNamesOrDefinition = [GLOBAL.DEFAULT_HANDLE_NAME];
+            hNamesOrDefinition = GLOBAL.DEFAULT_HANDLE_NAME;
         }
 
         var context = {
