@@ -108,49 +108,70 @@ var light = (function () {
     function isArray(o) {
         return Object.prototype.toString.call(o) === '[object Array]';
     }
-    var getApplicablehandle = function (context, serviceItem, handleNames, definition, serviceName, arg) {
-        var handleNames = isArray(handleNames) ? handleNames : (handleNames ? [handleNames] : []);
-        var actualDefinition = definition;
-        var tmpDefinition;
 
-     
+   
+    var getApplicablehandle_Test = function (context, serviceItem, handleNames, definition, serviceName, arg, testhandle, testHandleNames) {
+        var actualDefinition = definition;
         var testHandleNames = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handleName;
         testHandleNames = isArray(testHandleNames) ? testHandleNames : (testHandleNames ? [testHandleNames] : []);
         if (testHandleNames.length) {
             handleNames = testHandleNames;
         }
         var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handle;
+
+        GLOBAL.system.$$currentContext = {
+            handles: GLOBAL.handles,
+            definition: actualDefinition,
+            serviceName: serviceName,
+            handleName: undefined,
+            arg: arg
+        };
+        tmpDefinition = testhandle.call(GLOBAL.system, actualDefinition);
+        return tmpDefinition;
+    };
+
+   
+    var getApplicablehandle_Real = function (context, serviceItem, handleNames, definition, serviceName, arg, testhandle, testHandleNames) {
+        if (testHandleNames.length) {
+            handleNames = testHandleNames;
+        }
+        var actualDefinition = definition;
+        var lastResult;
+        var isAMatch = false;
+        var length = GLOBAL.handles.length;
+        for (var j = 0; j < length; j++) {
+            var pipe = GLOBAL.handles[j];
+            isAMatch = handleNames.length && (pipe.name === handleNames[0]);
+            if (isAMatch) {
+                GLOBAL.system.$$currentContext = {
+                    handles: GLOBAL.handles,
+                    definition: actualDefinition,
+                    serviceName: serviceName,
+                    handleName: pipe.name,
+                    arg: arg
+                };
+                tmpDefinition = (testhandle || pipe.definition).call(GLOBAL.system, actualDefinition);
+                break;
+            }
+        }
+        return tmpDefinition;
+    };
+    
+    var getApplicablehandle = function (context, serviceItem, handleNames, definition, serviceName, arg) {
+        var handleNames = isArray(handleNames) ? handleNames : (handleNames ? [handleNames] : []);
+        
+        var tmpDefinition;      
+        var testHandleNames = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handleName;
+        testHandleNames = isArray(testHandleNames) ? testHandleNames : (testHandleNames ? [testHandleNames] : []);
+       
+        var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handle;
         //if pure mock
         if (testhandle && !testHandleNames.length) {
-            GLOBAL.system.$$currentContext = {
-                handles: GLOBAL.handles,
-                definition: actualDefinition,
-                serviceName: serviceName,
-                handleName: undefined,
-                arg: arg
-            };
-            tmpDefinition = testhandle.call(GLOBAL.system, actualDefinition);
+            tmpDefinition = getApplicablehandle_Test(context, serviceItem, handleNames, definition, serviceName, arg, testhandle, testHandleNames);           
         }
             //else if handle mock only
         else {
-            var lastResult;
-            var isAMatch = false;
-            var length = GLOBAL.handles.length;
-            for (var j = 0; j < length; j++) {
-                var pipe = GLOBAL.handles[j];
-                isAMatch = handleNames.length && (pipe.name === handleNames[0]);
-                if (isAMatch) {
-                    GLOBAL.system.$$currentContext = {
-                        handles: GLOBAL.handles,
-                        definition: actualDefinition,
-                        serviceName: serviceName,
-                        handleName: pipe.name,
-                        arg: arg
-                    };
-                    tmpDefinition = (testhandle || pipe.definition).call(GLOBAL.system, actualDefinition);
-                    break;
-                }
-            }
+            tmpDefinition = getApplicablehandle_Real(context, serviceItem, handleNames, definition, serviceName, arg, testhandle, testHandleNames);           
         }
         return tmpDefinition;
     };
