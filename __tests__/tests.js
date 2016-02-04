@@ -240,7 +240,7 @@ describe('light', function () {
 
     var testObj = {
         sample1: {
-            type: undefined,
+            handleName: undefined,
             service: function (arg) {
                 return arg.x + arg.y;
             }

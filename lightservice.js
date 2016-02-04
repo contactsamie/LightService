@@ -177,7 +177,7 @@ var light = (function () {
       
         //start testing
         if (GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].service) {
-            handleName = GLOBAL._TEST_OBJECTS_[serviceName].type || handleName;
+            handleName = GLOBAL._TEST_OBJECTS_[serviceName].handleName || handleName;
             definition = GLOBAL._TEST_OBJECTS_[serviceName].service || definition;
         }
 
