@@ -71,7 +71,9 @@ var light = (function () {
         };
         createEventEmitter(name, id, function (item, o, context, notificationInfo) {
             if (typeof item === "function") {
-                try { item(o, context, notificationInfo) } catch (e) { }
+                try {
+                    item(o, context, notificationInfo)
+                } catch (e) { }
             }
         });
     };
@@ -173,14 +175,16 @@ var light = (function () {
         }
         return tmpDefinition;
     };
-    var runSuppliedServiceFunction = function (context, serviceItem, handleName, definition, serviceName, arg) {
+    var runSuppliedServiceFunction = function (context, serviceItem, handleNames, definition, serviceName, arg) {
       
         //start testing
         if (GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].service) {
-            handleName = GLOBAL._TEST_OBJECTS_[serviceName].handleName || handleName;
+            handleNames = GLOBAL._TEST_OBJECTS_[serviceName].handleNames || handleNames;
             definition = GLOBAL._TEST_OBJECTS_[serviceName].service || definition;
         }
+        handleNames=isArray(handleNames)?handleNames:(handleNames?[handleNames]:[]);
 
+        var handleName = handleNames[0];
         //end testing
          var returnDefinitionFromHandle = getApplicablehandle(context, serviceItem, handleName, definition, serviceName, arg);
 
