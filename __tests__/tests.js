@@ -292,7 +292,6 @@ describe('light', function () {
     it('native tests pipes 1', function () {
         var testType1 = {
             sample1: {
-               
                 handle: function (definition) {
                     return definition;
                 },
@@ -318,7 +317,6 @@ describe('light', function () {
     it('can use default function pipe 1', function () {
         var testType1 = {
             sample1: {
-              
                 handle: function (definition) {
                     return definition;
                 },
@@ -344,7 +342,6 @@ describe('light', function () {
     it('can use default function pipe 2', function () {
         var testType1 = {
             sample1: {
-                
                 handle: function (definition) {
                     return definition;
                 },
@@ -391,7 +388,6 @@ describe('light', function () {
     it('can use default function pipe 4', function () {
         var testType1 = {
             sample1: {
-
                 service: function (arg) {
                     return arg.x + arg.y;
                 }
@@ -531,7 +527,6 @@ describe('light', function () {
     it('can use default function pipe 10', function () {
         var testType1 = {
             sample1: {
-
                 service: function (arg) {
                     return arg.x + arg.y;
                 }
@@ -553,7 +548,6 @@ describe('light', function () {
     it('can use default function pipe 11', function () {
         var testType1 = {
             sample1: {
-               
                 service: function (arg) {
                     return arg.x + arg.y;
                 }
@@ -582,7 +576,7 @@ describe('light', function () {
         };
     });
 
-    light.handle("pipeWrong",  function (definition) {
+    light.handle("pipeWrong", function (definition) {
         return definition() + 10;
     });
 
@@ -884,7 +878,6 @@ describe('light', function () {
         });
     });
     it('test service in a service', function () {
-
         light.handle("handle10", function (definition) {
             return function (arg) {
                 arg = arg || {};
@@ -906,15 +899,21 @@ describe('light', function () {
             };
         });
 
-        light.service("pass100", ["handle10"], function (arg) {
-            arg.x = arg.x+1;
+        light.service("pass100",
+            ["handle10"],
+            function (arg) {
+            arg.x = arg.x + 1;
             return arg;
-        });   
-        light.service("pass200", ["handle10", "handle10"], function (arg) {
+        });
+        light.service("pass200",
+            ["handle10", "handle10"],
+            function (arg) {
             arg.x = arg.x + 2;
             return arg;
         });
-        light.service("pass300", ["handle10", "handle20"], function (arg) {
+        light.service("pass300",
+            ["handle10", "handle20"],
+            function (arg) {
             arg.x = arg.x + 3;
             return arg;
         });
@@ -929,6 +928,9 @@ describe('light', function () {
             answer = service.pass300().result();
             expect(answer.x).toBe(12);
 
+
+            answer = service.pass300().pass200().pass100().result();
+            expect(answer.x).toBe(23);
         });
     });
 });

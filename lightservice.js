@@ -172,7 +172,6 @@ var light = (function () {
         return tmpDefinition;
     };
     var runSuppliedServiceFunction = function (context, serviceItem, handleNames, definition, serviceName, arg) {
-
         //start testing
         if (GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].service) {
             handleNames = GLOBAL._TEST_OBJECTS_[serviceName].handleNames || handleNames;
@@ -183,9 +182,9 @@ var light = (function () {
         var totalHandles = handleNames.length;
 
         var lastResult;
-         lastResult = arg;
+        lastResult = arg;
         for (var i = 0; i < totalHandles; i++) {
-            var handleName = handleNames[i];      
+            var handleName = handleNames[i];
 
             //end testing
             var returnDefinitionFromHandle = getApplicablehandle(context, serviceItem, handleName, definition, serviceName, lastResult);
