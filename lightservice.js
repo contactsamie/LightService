@@ -172,6 +172,7 @@ var light = (function () {
         return tmpDefinition;
     };
     var runSuppliedServiceFunction = function (context, serviceItem, handleNames, definition, serviceName, arg) {
+
         //start testing
         if (GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].service) {
             handleNames = GLOBAL._TEST_OBJECTS_[serviceName].handleNames || handleNames;
@@ -182,12 +183,12 @@ var light = (function () {
         var totalHandles = handleNames.length;
 
         var lastResult;
-
+         lastResult = arg;
         for (var i = 0; i < totalHandles; i++) {
-            var handleName = handleNames[i];
+            var handleName = handleNames[i];      
 
             //end testing
-            var returnDefinitionFromHandle = getApplicablehandle(context, serviceItem, handleName, definition, serviceName, arg);
+            var returnDefinitionFromHandle = getApplicablehandle(context, serviceItem, handleName, definition, serviceName, lastResult);
 
             //expecting function from pipe plugin
             if (typeof returnDefinitionFromHandle !== "function") {
@@ -197,7 +198,7 @@ var light = (function () {
                 throw message;
             }
 
-            lastResult = returnDefinitionFromHandle.call(GLOBAL.system, arg, chainService());
+            lastResult = returnDefinitionFromHandle.call(GLOBAL.system, lastResult, chainService());
         }
 
         return lastResult;
@@ -210,12 +211,15 @@ var light = (function () {
         setUpServiceEvent(serviceItem, "success", serviceName);
 
         return function (arg, callerContext) {
+            var tArg = {};
+            tArg.arg = arg;
+
             var result;
             context.callerContext = callerContext;
             GLOBAL.utility.tryCatch(context, function () { return serviceItem["before"].notify(); }, function () { }, function () { });
 
             GLOBAL.utility.tryCatch(context, function () {
-                result = runSuppliedServiceFunction(context, serviceItem, handleName, definition, serviceName, arg);
+                result = runSuppliedServiceFunction(context, serviceItem, handleName, definition, serviceName, tArg.arg);
                 return result;
             }, function (o) {
                 return serviceItem["success"].notify(o, context, "service-success");
@@ -288,14 +292,18 @@ var light = (function () {
         GLOBAL.actors
 
         var chain = {};
-        chain.result = undefined;
-
+        var result = undefined;
+        chain.result = function () {
+            var res = result;
+            result = undefined;
+            return res;
+        };
         var buildFn = function (actor) {
             chain[actor] = (function (serviceName) {
                 return function (arg) {
                     var currentResult;
-                    var previousOrMostCurrentResultToBePassedToTheNextActor = arguments.length ? arg : chain.result;
-                    chain.result = GLOBAL.actors[serviceName](previousOrMostCurrentResultToBePassedToTheNextActor);
+                    var previousOrMostCurrentResultToBePassedToTheNextActor = arguments.length ? arg : result;
+                    result = GLOBAL.actors[serviceName](previousOrMostCurrentResultToBePassedToTheNextActor);
                     return chain;
                 };
             })(actor);
@@ -315,10 +323,10 @@ var light = (function () {
         chain.merge = function (arg) {
             var _arg;
 
-            if (chain.result) {
-                for (var attr in chain.result) {
+            if (result) {
+                for (var attr in result) {
                     _arg = _arg || {};
-                    _arg[attr] = chain.result[attr];
+                    _arg[attr] = result[attr];
                 }
             }
             if (arg) {
@@ -327,7 +335,7 @@ var light = (function () {
                     _arg[attr] = arg[attr];
                 }
             }
-            chain.result = _arg;
+            result = _arg;
 
             return chain;
         };
