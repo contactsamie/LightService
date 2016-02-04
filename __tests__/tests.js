@@ -932,5 +932,19 @@ describe('light', function () {
             answer = service.pass300().pass200().pass100().result();
             expect(answer.x).toBe(23);
         });
+
+        light(function (service) {
+            var answer = this.pass100();
+            expect(answer.x).toBe(3);
+
+            answer = this.pass200();
+            expect(answer.x).toBe(8);
+
+            answer = this.pass300();
+            expect(answer.x).toBe(12);
+
+            answer = this.pass100(this.pass200(this.pass300()));
+            expect(answer.x).toBe(23);
+        });
     });
 });
