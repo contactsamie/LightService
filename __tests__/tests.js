@@ -291,7 +291,7 @@ describe('light', function () {
 
     it('native tests pipes 1', function () {
         var testType1 = {
-            sample1: {
+            sample1: { 
                 handle: function (definition) {
                     return definition;
                 },
@@ -946,5 +946,95 @@ describe('light', function () {
             answer = this.pass100(this.pass200(this.pass300()));
             expect(answer.x).toBe(23);
         });
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    it('access to other services inside a handle 1', function () {
+        light.handle("haccess11", function (definition) {
+            return function (arg) {
+                arg=this.haccess2(arg);
+                result = definition(arg);
+                result = this.haccess2(result);
+                return result;
+            };
+        });
+       
+        light.service("haccess2",
+            function (arg) {
+                arg.x = arg.x + 1;
+                return arg;
+            });
+
+        light.service("haccess1",
+            ["haccess11"],
+            function (arg) {
+                arg.x = arg.x + 10;
+                return arg;
+            });
+      
+
+        light(function (service) {
+            var answer = service.haccess1({x:0}).result();
+            expect(answer.x).toBe(12);
+        });
+
+    });
+
+
+
+    it('access to other services inside a handle 2', function () {
+        light.handle("haccess_11", function (definition) {
+            return function (arg) {
+                arg = this.haccess_2(arg);
+                result = definition(arg);
+                result = this.haccess_2(result);
+                return result;
+            };
+        });
+        light.handle("haccess_22", function (definition) {
+            return function (arg) {
+                arg.x = arg.x+100
+                result = definition(arg);
+                arg.x = arg.x + 100
+                return result;
+            };
+        });
+
+        light.service("haccess_2",
+               ["haccess_22"],
+            function (arg) {
+                arg.x = arg.x + 1;
+                return arg;
+            });
+
+        light.service("haccess_1",
+            ["haccess_11"],
+            function (arg) {
+                arg.x = arg.x + 10;
+                return arg;
+            });
+
+
+        light(function (service) {
+            var answer = service.haccess_1({ x: 0 }).result();
+            expect(answer.x).toBe(412);
+        });
+
     });
 });

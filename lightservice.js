@@ -5,8 +5,30 @@ var light = (function () {
 
     GLOBAL.DEFAULT_HANDLE_NAME = "$$default";
     GLOBAL._TEST_OBJECTS_;
-    GLOBAL.actors = {};
-    GLOBAL.actorsDef = [];
+    GLOBAL.systemServices = {};
+    GLOBAL.registry = {
+        service: {},
+        handle: {}
+    };
+
+    GLOBAL.isRegistered = function (str) {
+        if (GLOBAL.registry.service[str] || GLOBAL.registry.handle[str]) {
+            return true;
+        }
+        return false;
+    };
+
+    GLOBAL.generateUniqueSystemName = function (prefix) {
+
+        prefix = prefix || "";
+        var str = (prefix + 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx')["replace"](/[xy]/g, function (c) { var r = Math.random() * 16 | 0, v = c == 'x' ? r : r & 0x3 | 0x8; return v.toString(16); });
+
+        if (GLOBAL.isRegistered(str)) {
+            return GLOBAL.generateUniqueSystemName(prefix);
+        }
+        GLOBAL.generateUniqueSystemName.names[str] = true;
+        return str;
+    }
     GLOBAL.eventSubscribers = {};
     GLOBAL.system = {};
     GLOBAL.utility = {};
@@ -98,7 +120,7 @@ var light = (function () {
     };
 
     var getServiceByName = function (serviceName) {
-        var item = GLOBAL.actors[serviceName];
+        var item = GLOBAL.systemServices[serviceName];
         return item;
     };
     function parseJSON(data) {
@@ -137,17 +159,17 @@ var light = (function () {
         var isAMatch = false;
         var length = GLOBAL.handles.length;
         for (var j = 0; j < length; j++) {
-            var pipe = GLOBAL.handles[j];
-            isAMatch = handleName && (pipe.name === handleName);
+            var handle = GLOBAL.handles[j];
+            isAMatch = handleName && (handle.name === handleName);
             if (isAMatch) {
                 GLOBAL.system.$$currentContext = {
                     handles: GLOBAL.handles,
                     definition: definition,
                     serviceName: serviceName,
-                    handleName: pipe.name,
+                    handleName: handle.name,
                     arg: arg
                 };
-                tmpDefinition = (testhandle || pipe.definition).call(GLOBAL.system, definition);
+                tmpDefinition = (testhandle || handle.definition).call(GLOBAL.system, definition);
                 break;
             }
         }
@@ -189,10 +211,10 @@ var light = (function () {
             //end testing
             var returnDefinitionFromHandle = getApplicablehandle(context, serviceItem, handleName, definition, serviceName, lastResult);
 
-            //expecting function from pipe plugin
+            //expecting function from handle plugin
             if (typeof returnDefinitionFromHandle !== "function") {
                 var message = "Cannot process service or handle '" + serviceName + "' ";
-                message = message + (returnDefinitionFromHandle ? "'" + handleName + "' service pipe must return a function" : "no matching service pipe  exists ");
+                message = message + (returnDefinitionFromHandle ? "'" + handleName + "' service handle must return a function" : "no matching service handle  exists ");
                 console.error(message);
                 throw message;
             }
@@ -230,14 +252,15 @@ var light = (function () {
             return result;
         }
     };
-
+   
     var defineService = function (serviceName, handleNamesOrDefinition, fn) {
 
-        //var definition = function (arg) {
-        //  return  fn(arg);
-        //};
+        // todo check for unique name
+        if (GLOBAL.isRegistered(serviceName)) {
+            throw "Unable to create service with name '" + serviceName + "'.Name already exists in registry";
+            return;
+        }
 
-  
 
         if (!fn) {
             fn = handleNamesOrDefinition;
@@ -261,17 +284,20 @@ var light = (function () {
         var serviceItem = function (previousOrMostCurrentResultToBePassedToTheNextActor) {
             return serviceItem.redefinition(previousOrMostCurrentResultToBePassedToTheNextActor);
         };
-        serviceItem.position = GLOBAL.actorsDef.length + 1;
+       
 
         serviceItem.redefinition = createServiceDefinitionFromSuppliedFn(context, serviceItem, handleNamesOrDefinition, definition, serviceName);
 
         serviceItem.me = serviceName;
-        GLOBAL.actors[serviceName] = serviceItem;
-        GLOBAL.actorsDef.push(GLOBAL.actors[serviceName]);
+        GLOBAL.systemServices[serviceName] = serviceItem;
+        //!! reg
+        GLOBAL.registry.service[serviceName] = {};
         GLOBAL.system[serviceName] = function (arg) {
             context.step(serviceName);
             return serviceItem.redefinition(arg, context);
         }
+
+        return serviceName;
     };
 
     var eachAsync = function (actors, func, cb) {
@@ -302,7 +328,7 @@ var light = (function () {
 
     var chainService = function (cb) {
         chainService.totalChain = chainService.totalChain || 0;
-        GLOBAL.actors
+      //  GLOBAL.systemServices
 
         var chain = {};
         var result = undefined;
@@ -316,7 +342,7 @@ var light = (function () {
                 return function (arg) {
                     var currentResult;
                     var previousOrMostCurrentResultToBePassedToTheNextActor = arguments.length ? arg : result;
-                    result = GLOBAL.actors[serviceName](previousOrMostCurrentResultToBePassedToTheNextActor);
+                    result = GLOBAL.systemServices[serviceName](previousOrMostCurrentResultToBePassedToTheNextActor);
                     return chain;
                 };
             })(actor);
@@ -324,11 +350,11 @@ var light = (function () {
 
         if (cb) {
             //todo use async to speed up things
-            eachAsync(GLOBAL.actors, buildFn, function () {
+            eachAsync(GLOBAL.systemServices, buildFn, function () {
                 cb(chain);
             });
         } else {
-            for (var actor in GLOBAL.actors) {
+            for (var actor in GLOBAL.systemServices) {
                 buildFn(actor);
             }
         }
@@ -357,29 +383,48 @@ var light = (function () {
     };
 
     var _light = function (f) {
-        //  typeof f === "function" && f.call(GLOBAL.actors, chainService());
+        //  typeof f === "function" && f.call(GLOBAL.systemServices, chainService());
 
         chainService(function (cs) {
-            typeof f === "function" && f.call(GLOBAL.actors, cs);
+            typeof f === "function" && f.call(GLOBAL.systemServices, cs);
         });
     };
 
     _light.startService = function (f) {
-        //typeof f === "function" && f.call(GLOBAL.actors, chainService());
+        //typeof f === "function" && f.call(GLOBAL.systemServices, chainService());
         chainService(function (cs) {
-            typeof f === "function" && f.call(GLOBAL.actors, cs);
+            typeof f === "function" && f.call(GLOBAL.systemServices, cs);
         });
     };
 
     _light.version = 1;
     setUpSystemEvent(_light, "event", "$system");
 
-    _light.handle = function (serviceName,/* condition,*/ definition) {
+    _light.handle = function (handleName, definition) {
+
+        if ((arguments.length == 0) || (arguments.length>2)) {
+            throw "Cannot create handle : problem with handle definition"
+            return;
+        }
+
+        if (arguments.length == 1) {
+            definition = handleName;
+            handleName = GLOBAL.generateUniqueSystemName();
+        }
+
+        if (GLOBAL.isRegistered(handleName)) {
+            throw "Unable to create handle with name '" + handleName + "'.Name already exists in registry";
+            return;
+        }
+
+        GLOBAL.registry.handle[handleName] = {};
+
         GLOBAL.handles.push({
-            name: serviceName,// todo check for unique name
-            condition: function () { return true; },// condition,
+            name: handleName,
             definition: definition
         });
+
+        return handleName;
     }
 
     _light.service = defineService;
@@ -387,25 +432,17 @@ var light = (function () {
     _light.advance = {
         serviceTest: function (setup, f) {
             GLOBAL._TEST_OBJECTS_ = setup;
-            f.call(GLOBAL.actors, chainService());
+            f.call(GLOBAL.systemServices, chainService());
             GLOBAL._TEST_OBJECTS_ = undefined
         }
     };
 
-    _light.handle(GLOBAL.DEFAULT_HANDLE_NAME, /*function (definition) { return typeof definition === "function"; },*/ function (definition) { return definition; });
+    _light.handle(GLOBAL.DEFAULT_HANDLE_NAME,  function (definition) { return definition; });
 
     return _light;
 })();
 
-// default function handle plugin
 
-//light.handle("dom", function (definition) { return true; }, function (definition) {
-//    return function () {
-//     document.body.innerHTML=   definition();
-//    }
-//});
-
-//light.service("setThings", "dom", function () { return "<bold>wooooooooooooo</bold>";  });
 
 if (typeof module !== "undefined" && ('exports' in module)) {
     module.exports = light;
