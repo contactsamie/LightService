@@ -51,6 +51,12 @@ var light = (function () {
         return str;
     }
     GLOBAL.loadScript = function (src, onload) {
+
+        // todo wrap require js
+        //if (src) {          
+        //    return require(src);
+        //}
+
         onload ? GLOBAL.loadScriptAsync(src, onload) : GLOBAL.loadScriptSync(src);
     };
 
@@ -72,17 +78,6 @@ var light = (function () {
             return;
         }
 
-        //var inLocalhost =  document.location.hostname === "localhost";
-        //var loaded;
-        //if (inLocalhost) {
-        //    GLOBAL.loadScriptAsync(src, function () {
-        //        loaded = true;
-        //    });
-        //    while (!loaded) {
-        //        GLOBAL.burnThread(1)
-        //    }
-        //    return;
-        //}
 
         var xhrObj = createXMLHTTPObject();
         xhrObj.open('GET', src, false);
@@ -91,6 +86,8 @@ var light = (function () {
         se.type = "text/javascript";
         se.text = xhrObj.responseText;
         document.getElementsByTagName('body')[0].appendChild(se);
+
+       
     };
     GLOBAL.eventSubscribers = {};
     GLOBAL.system = {};
