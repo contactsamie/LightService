@@ -4,6 +4,7 @@ LightService
 
 [![Join the chat at https://gitter.im/contactsamie/LightService](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/contactsamie/LightService)
 
+
 LightService is an Service Framework 
 
 GOALS: 
@@ -25,6 +26,9 @@ FURTHER GOALS:
 Easy Drop-in .NET intergration including SignalR 
 and try some level of isomorphic javascripting
 
+
+
+<script src="http://lightservicelib.github.io/2.0.1/lightservice.min.js"></script>
 
 npm install lightservice
 
