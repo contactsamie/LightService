@@ -1037,4 +1037,44 @@ describe('light', function () {
         });
 
     });
+
+    it('auto generate handle names', function () {
+        var haccess_2;
+        var haccess_1;
+        var haccess_11= light.handle( function (definition) {
+            return function (arg) {
+                arg = this[haccess_2](arg);
+                result = definition(arg);
+                result = this[haccess_2](result);
+                return result;
+            };
+        });
+        var haccess_22=   light.handle( function (definition) {
+            return function (arg) {
+                arg.x = arg.x + 100
+                result = definition(arg);
+                arg.x = arg.x + 100
+                return result;
+            };
+        });
+
+         haccess_2=  light.service("haccess_2a",[haccess_22],
+            function (arg) {
+                arg.x = arg.x + 1;
+                return arg;
+            });
+
+         haccess_1=  light.service("haccess_1a",[haccess_11],
+            function (arg) {
+                arg.x = arg.x + 10;
+                return arg;
+            });
+
+
+        light(function (service) {
+            var answer = service.haccess_1({ x: 0 }).result();
+            expect(answer.x).toBe(412);
+        });
+
+    });
 });
