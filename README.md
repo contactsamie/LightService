@@ -27,7 +27,7 @@ Easy Drop-in .NET intergration including SignalR
 and try some level of isomorphic javascripting
 
 
-
+http://lightservicelib.github.io/2.0.1/lightservice.min.js
 <script src="http://lightservicelib.github.io/2.0.1/lightservice.min.js"></script>
 
 npm install lightservice
