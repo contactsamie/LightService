@@ -24,7 +24,7 @@ var light = (function () {
 
         if (GLOBAL.isRegistered(str)) {
             return GLOBAL.generateUniqueSystemName(prefix);
-        }        
+        }
         return str;
     }
     GLOBAL.eventSubscribers = {};
@@ -133,7 +133,7 @@ var light = (function () {
 
     var getApplicablehandle_Test = function (context, serviceItem, definition, serviceName, arg) {
         var testhandleName = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handleName;
-       
+
         var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handle;
 
         GLOBAL.system.$$currentContext = {
@@ -175,11 +175,8 @@ var light = (function () {
     };
 
     var getApplicablehandle = function (context, serviceItem, handleName, definition, serviceName, arg) {
-        
-
         var tmpDefinition;
         var testhandleName = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handleName;
-       
 
         var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handle;
         if (testhandle && !testhandleName) {
@@ -249,17 +246,14 @@ var light = (function () {
             return result;
         }
     };
-   
+
     var defineService = function (serviceName, handleNamesOrDefinition, fn) {
-
-
         if ((arguments.length == 0) || (arguments.length > 3)) {
             throw "Cannot create service : problem with service definition"
             return;
         }
 
         if (arguments.length == 1) {
-
             if (typeof serviceName !== "function") {
                 throw "service definition has to be a function";
                 return;
@@ -268,7 +262,6 @@ var light = (function () {
             serviceName = GLOBAL.generateUniqueSystemName();
         }
         if (arguments.length == 2) {
-
             if (typeof handleNamesOrDefinition !== "function") {
                 throw "service definition has to be a function";
                 return;
@@ -282,19 +275,15 @@ var light = (function () {
                 //service name is provided
                 handleNamesOrDefinition = GLOBAL.DEFAULT_HANDLE_NAME;
             }
-
-          
         }
-
-
 
         // todo check for unique name
         if (GLOBAL.isRegistered(serviceName)) {
             throw "Unable to create service with name '" + serviceName + "'.Name already exists in registry";
             return;
         }
-          
-      //!!!!
+
+        //!!!!
         //experiment ----start
         var definition = function () {
             var result;
@@ -312,7 +301,6 @@ var light = (function () {
         var serviceItem = function (previousOrMostCurrentResultToBePassedToTheNextActor) {
             return serviceItem.redefinition(previousOrMostCurrentResultToBePassedToTheNextActor);
         };
-       
 
         serviceItem.redefinition = createServiceDefinitionFromSuppliedFn(context, serviceItem, handleNamesOrDefinition, definition, serviceName);
 
@@ -356,7 +344,7 @@ var light = (function () {
 
     var chainService = function (cb) {
         chainService.totalChain = chainService.totalChain || 0;
-      //  GLOBAL.systemServices
+        //  GLOBAL.systemServices
 
         var chain = {};
         var result = undefined;
@@ -429,8 +417,7 @@ var light = (function () {
     setUpSystemEvent(_light, "event", "$system");
 
     _light.handle = function (handleName, definition) {
-
-        if ((arguments.length == 0) || (arguments.length>2)) {
+        if ((arguments.length == 0) || (arguments.length > 2)) {
             throw "Cannot create handle : problem with handle definition"
             return;
         }
@@ -469,12 +456,10 @@ var light = (function () {
         }
     };
 
-    _light.handle(GLOBAL.DEFAULT_HANDLE_NAME,  function (definition) { return definition; });
+    _light.handle(GLOBAL.DEFAULT_HANDLE_NAME, function (definition) { return definition; });
 
     return _light;
 })();
-
-
 
 if (typeof module !== "undefined" && ('exports' in module)) {
     module.exports = light;
