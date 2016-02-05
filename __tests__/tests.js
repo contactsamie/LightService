@@ -867,7 +867,7 @@ describe('light', function () {
             };
         });
 
-        light.service("pass2", "pass2Pipe", function (arg) {
+        light.service("pass2", ["pass2Pipe"], function (arg) {
             arg.x++;
             return arg;
         });

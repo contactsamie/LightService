@@ -133,8 +133,7 @@ var light = (function () {
 
     var getApplicablehandle_Test = function (context, serviceItem, definition, serviceName, arg) {
         var testhandleName = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handleName;
-        // testhandleName = isArray(testhandleName) ? testhandleName : (testhandleName ? [testhandleName] : []);
-
+       
         var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handle;
 
         GLOBAL.system.$$currentContext = {
