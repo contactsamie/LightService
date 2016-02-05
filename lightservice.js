@@ -8,16 +8,39 @@ var light = (function () {
     GLOBAL.systemServices = {};
     GLOBAL.registry = {
         service: {},
-        handle: {}
+        handle: {},
+        scripts: {}
     };
-
+    GLOBAL.burnThread = function (seconds) {
+        var e = new Date().getTime() + (seconds * 1000);
+        while (new Date().getTime() <= e) { }
+    };
     GLOBAL.isRegistered = function (str) {
         if (GLOBAL.registry.service[str] || GLOBAL.registry.handle[str]) {
             return true;
         }
         return false;
     };
+    var XMLHttpFactories = [
+	function () { return new XMLHttpRequest() },
+	function () { return new ActiveXObject("Msxml2.XMLHTTP") },
+	function () { return new ActiveXObject("Msxml3.XMLHTTP") },
+	function () { return new ActiveXObject("Microsoft.XMLHTTP") }
+    ];
 
+    function createXMLHTTPObject() {
+        var xmlhttp = false;
+        for (var i = 0; i < XMLHttpFactories.length; i++) {
+            try {
+                xmlhttp = XMLHttpFactories[i]();
+            }
+            catch (e) {
+                continue;
+            }
+            break;
+        }
+        return xmlhttp;
+    }
     GLOBAL.generateUniqueSystemName = function (prefix) {
         prefix = prefix || "";
         var str = (prefix + 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx')["replace"](/[xy]/g, function (c) { var r = Math.random() * 16 | 0, v = c == 'x' ? r : r & 0x3 | 0x8; return v.toString(16); });
@@ -27,6 +50,48 @@ var light = (function () {
         }
         return str;
     }
+    GLOBAL.loadScript = function (src, onload) {
+        onload ? GLOBAL.loadScriptAsync(src, onload) : GLOBAL.loadScriptSync(src);
+    };
+
+    GLOBAL.loadScriptAsync = function (src, onload) {
+        if (!document) {
+            throw "Cannot load script : no document";
+            return;
+        }
+
+        var script = document.createElement('script');
+        script.src = src;
+        script.onload = typeof onload === "function" ? onload : function () { };
+        document.body.appendChild(script);
+    };
+
+    GLOBAL.loadScriptSync = function (src) {
+        if (!document) {
+            throw "Cannot load script : no document";
+            return;
+        }
+
+        //var inLocalhost =  document.location.hostname === "localhost";
+        //var loaded;
+        //if (inLocalhost) {
+        //    GLOBAL.loadScriptAsync(src, function () {
+        //        loaded = true;
+        //    });
+        //    while (!loaded) {
+        //        GLOBAL.burnThread(1)
+        //    }
+        //    return;
+        //}
+
+        var xhrObj = createXMLHTTPObject();
+        xhrObj.open('GET', src, false);
+        xhrObj.send('');
+        var se = document.createElement('script');
+        se.type = "text/javascript";
+        se.text = xhrObj.responseText;
+        document.getElementsByTagName('body')[0].appendChild(se);
+    };
     GLOBAL.eventSubscribers = {};
     GLOBAL.system = {};
     GLOBAL.utility = {};
@@ -246,6 +311,13 @@ var light = (function () {
             return result;
         }
     };
+    var _light = function (f) {
+        //  typeof f === "function" && f.call(GLOBAL.systemServices, chainService());
+
+        chainService(function (cs) {
+            typeof f === "function" && f.call(GLOBAL.systemServices, cs);
+        });
+    };
 
     var defineService = function (serviceName, handleNamesOrDefinition, fn) {
         if ((arguments.length == 0) || (arguments.length > 3)) {
@@ -254,12 +326,27 @@ var light = (function () {
         }
 
         if (arguments.length == 1) {
-            if (typeof serviceName !== "function") {
-                throw "service definition has to be a function";
-                return;
+            if (typeof serviceName === "function") {
+                fn = serviceName;
+                serviceName = GLOBAL.generateUniqueSystemName();
+            } else {
+                if (!GLOBAL.registry.scripts[serviceName]) {
+                    GLOBAL.registry.scripts[serviceName] = true;
+
+                    return {
+                        load: function (onload) {
+                            GLOBAL.loadScript(serviceName, onload && function () { _light(onload); });
+                        }
+                    };
+                } else {
+                    return {
+                        load: function (onload) {
+                            onload && _light(onload);
+                        }
+                    }
+                  
+                }
             }
-            fn = serviceName;
-            serviceName = GLOBAL.generateUniqueSystemName();
         }
         if (arguments.length == 2) {
             if (typeof handleNamesOrDefinition !== "function") {
@@ -396,14 +483,6 @@ var light = (function () {
         };
 
         return chain;
-    };
-
-    var _light = function (f) {
-        //  typeof f === "function" && f.call(GLOBAL.systemServices, chainService());
-
-        chainService(function (cs) {
-            typeof f === "function" && f.call(GLOBAL.systemServices, cs);
-        });
     };
 
     _light.startService = function (f) {
