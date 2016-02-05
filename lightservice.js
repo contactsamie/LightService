@@ -252,17 +252,48 @@ var light = (function () {
    
     var defineService = function (serviceName, handleNamesOrDefinition, fn) {
 
+
+        if ((arguments.length == 0) || (arguments.length > 3)) {
+            throw "Cannot create service : problem with service definition"
+            return;
+        }
+
+        if (arguments.length == 1) {
+
+            if (typeof serviceName !== "function") {
+                throw "service definition has to be a function";
+                return;
+            }
+            fn = serviceName;
+            serviceName = GLOBAL.generateUniqueSystemName();
+        }
+        if (arguments.length == 2) {
+
+            if (typeof handleNamesOrDefinition !== "function") {
+                throw "service definition has to be a function";
+                return;
+            }
+            fn = handleNamesOrDefinition;
+
+            if (isArray(serviceName)) {
+                handleNamesOrDefinition = serviceName;
+                serviceName = GLOBAL.generateUniqueSystemName();
+            } else {
+                //service name is provided
+                handleNamesOrDefinition = GLOBAL.DEFAULT_HANDLE_NAME;
+            }
+
+          
+        }
+
+
+
         // todo check for unique name
         if (GLOBAL.isRegistered(serviceName)) {
             throw "Unable to create service with name '" + serviceName + "'.Name already exists in registry";
             return;
         }
-
-
-        if (!fn) {
-            fn = handleNamesOrDefinition;
-            handleNamesOrDefinition = GLOBAL.DEFAULT_HANDLE_NAME;
-        }            
+          
       //!!!!
         //experiment ----start
         var definition = function () {
@@ -405,6 +436,10 @@ var light = (function () {
         }
 
         if (arguments.length == 1) {
+            if (typeof handleName !== "function") {
+                throw "handle definition has to be a function";
+                return;
+            }
             definition = handleName;
             handleName = GLOBAL.generateUniqueSystemName();
         }
