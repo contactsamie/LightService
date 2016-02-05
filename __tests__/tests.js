@@ -1070,7 +1070,9 @@ describe('light', function () {
                 return arg;
             });
 
-
+         expect(haccess_1).toBe("haccess_1a");
+         expect(haccess_2).toBe("haccess_2a");
+        
         light(function (service) {
             var answer = service.haccess_1({ x: 0 }).result();
             expect(answer.x).toBe(412);
