@@ -43,7 +43,7 @@ var light = (function () {
     }
     GLOBAL.generateUniqueSystemName = function (prefix) {
         prefix = prefix || "";
-        var str = (prefix + 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx')["replace"](/[xy]/g, function (c) { var r = Math.random() * 16 | 0, v = c == 'x' ? r : r & 0x3 | 0x8; return v.toString(16); });
+        var str = (prefix + '_xxxxxxxx_xxxx_4xxx_yxxx_xxxxxxxxxxxx')["replace"](/[xy]/g, function (c) { var r = Math.random() * 16 | 0, v = c == 'x' ? r : r & 0x3 | 0x8; return v.toString(16); });
 
         if (GLOBAL.isRegistered(str)) {
             return GLOBAL.generateUniqueSystemName(prefix);
@@ -51,9 +51,8 @@ var light = (function () {
         return str;
     }
     GLOBAL.loadScript = function (src, onload) {
-
         // todo wrap require js
-        //if (src) {          
+        //if (src) {
         //    return require(src);
         //}
 
@@ -78,7 +77,6 @@ var light = (function () {
             return;
         }
 
-
         var xhrObj = createXMLHTTPObject();
         xhrObj.open('GET', src, false);
         xhrObj.send('');
@@ -86,8 +84,6 @@ var light = (function () {
         se.type = "text/javascript";
         se.text = xhrObj.responseText;
         document.getElementsByTagName('body')[0].appendChild(se);
-
-       
     };
     GLOBAL.eventSubscribers = {};
     GLOBAL.system = {};
@@ -317,6 +313,7 @@ var light = (function () {
     };
 
     var defineService = function (serviceName, handleNamesOrDefinition, fn) {
+        var servicePrefix = "service_"
         if ((arguments.length == 0) || (arguments.length > 3)) {
             throw "Cannot create service : problem with service definition"
             return;
@@ -325,14 +322,16 @@ var light = (function () {
         if (arguments.length == 1) {
             if (typeof serviceName === "function") {
                 fn = serviceName;
-                serviceName = GLOBAL.generateUniqueSystemName();
+                serviceName = GLOBAL.generateUniqueSystemName(servicePrefix);
+                handleNamesOrDefinition = GLOBAL.DEFAULT_HANDLE_NAME;
             } else {
                 if (!GLOBAL.registry.scripts[serviceName]) {
                     GLOBAL.registry.scripts[serviceName] = true;
-
                     return {
                         load: function (onload) {
-                            GLOBAL.loadScript(serviceName, onload && function () { _light(onload); });
+                            GLOBAL.loadScript(serviceName, onload && function () {
+                                _light(onload);
+                            });
                         }
                     };
                 } else {
@@ -341,7 +340,6 @@ var light = (function () {
                             onload && _light(onload);
                         }
                     }
-                  
                 }
             }
         }
@@ -354,7 +352,7 @@ var light = (function () {
 
             if (isArray(serviceName)) {
                 handleNamesOrDefinition = serviceName;
-                serviceName = GLOBAL.generateUniqueSystemName();
+                serviceName = GLOBAL.generateUniqueSystemName(servicePrefix);
             } else {
                 //service name is provided
                 handleNamesOrDefinition = GLOBAL.DEFAULT_HANDLE_NAME;
@@ -405,25 +403,6 @@ var light = (function () {
             func(actor);
         }
         cb();
-        //var result = {};
-        //var finalTotal = 0;
-        //result. total = 0;
-        //result.finalTotal = 0;
-        //result.hasRun = false;
-        //for (var actor in arr) {
-        //    result.total++;
-        //    (function (a, result) {
-        //            setTimeout(function () {
-        //                func(a);
-        //                if ((result.finalTotal >= result.total) && !result.hasRun) {
-        //                    result.hasRun = true;
-        //                     cb();
-        //                } else {
-        //                    result.finalTotal++;
-        //                }
-        //            }, 0);
-        //        })(actor, result);
-        //}
     }
 
     var chainService = function (cb) {
@@ -493,6 +472,7 @@ var light = (function () {
     setUpSystemEvent(_light, "event", "$system");
 
     _light.handle = function (handleName, definition) {
+        var handleePrefix = "handle_";
         if ((arguments.length == 0) || (arguments.length > 2)) {
             throw "Cannot create handle : problem with handle definition"
             return;
@@ -504,7 +484,7 @@ var light = (function () {
                 return;
             }
             definition = handleName;
-            handleName = GLOBAL.generateUniqueSystemName();
+            handleName = GLOBAL.generateUniqueSystemName(handleePrefix);
         }
 
         if (GLOBAL.isRegistered(handleName)) {

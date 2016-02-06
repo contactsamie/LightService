@@ -1092,6 +1092,22 @@ describe('light', function () {
     });
 
 
+    it('auto generate service names when only definition is provided', function () {
+     
+        var haccess_1;    
+        
+        haccess_1 = light.service( function (arg) {
+            arg.x = arg.x + 10;
+            return arg;
+        });
+
+        light(function (service) {
+            var answer = service[haccess_1]({ x: 0 }).result();
+            expect(answer.x).toBe(10);
+        });
+    });
+
+
     if (document) {
         it('load file sync', function () {
             light.service("load.js").load();
