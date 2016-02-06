@@ -135,6 +135,14 @@ var light = (function () {
         },
         getAllRecords: function (i) {
             return JSON.parse(JSON.stringify(GLOBAL.track.records));
+        }, startRecord: function () {
+            GLOBAL.recordServices = true;
+        },
+        stopRecord: function () {
+            GLOBAL.recordServices = false;
+        },
+        clearRecord: function () {
+            GLOBAL.track.clearAllRecords();
         }
     };
 
@@ -591,15 +599,6 @@ var light = (function () {
 
     _light.version = 1;
 
-    _light.startRecord = function () {
-        GLOBAL.recordServices = true;
-    };
-    _light.stopRecord = function () {
-        GLOBAL.recordServices = false;
-    };
-    _light.clearRecord = function () {
-        GLOBAL.track.clearAllRecords();
-    };
     setUpSystemEvent(_light, "event", "$system");
 
     _light.handle(GLOBAL.DEFAULT_HANDLE_NAME, function (definition) { return definition; });
