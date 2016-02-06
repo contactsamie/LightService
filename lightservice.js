@@ -245,6 +245,7 @@ var light = (function () {
         }
         return tmpDefinition;
     };
+
     var runSuppliedServiceFunction = function (context, serviceItem, handleNames, definition, serviceName, arg) {
         //start testing
         if (GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].service) {
@@ -304,16 +305,9 @@ var light = (function () {
             return result;
         }
     };
-    var _light = function (f) {
-        //  typeof f === "function" && f.call(GLOBAL.systemServices, chainService());
-
-        chainService(function (cs) {
-            typeof f === "function" && f.call(GLOBAL.systemServices, cs);
-        });
-    };
 
     var defineService = function (serviceName, handleNamesOrDefinition, fn) {
-        var servicePrefix = "service_"
+        var servicePrefix = "service_";
         if ((arguments.length == 0) || (arguments.length > 3)) {
             throw "Cannot create service : problem with service definition"
             return;
@@ -461,15 +455,19 @@ var light = (function () {
         return chain;
     };
 
-    _light.startService = function (f) {
-        //typeof f === "function" && f.call(GLOBAL.systemServices, chainService());
-        chainService(function (cs) {
-            typeof f === "function" && f.call(GLOBAL.systemServices, cs);
-        });
+    var _light = function (f) {
+        (function (f) {
+            setTimeout(function () {
+                chainService(function (cs) {
+                    typeof f === "function" && f.call(GLOBAL.systemServices, cs);
+                });
+            },0);
+        })(f);
     };
 
-    _light.version = 1;
-    setUpSystemEvent(_light, "event", "$system");
+    _light.startService = function (f) {
+        _light(f);
+    };
 
     _light.handle = function (handleName, definition) {
         var handleePrefix = "handle_";
@@ -511,6 +509,10 @@ var light = (function () {
             GLOBAL._TEST_OBJECTS_ = undefined
         }
     };
+
+    _light.version = 1;
+
+    setUpSystemEvent(_light, "event", "$system");
 
     _light.handle(GLOBAL.DEFAULT_HANDLE_NAME, function (definition) { return definition; });
 
