@@ -4,6 +4,12 @@ var light = (function () {
     var GLOBAL = {};
 
     GLOBAL.DEFAULT_HANDLE_NAME = "$$default";
+    GLOBAL.entranceTag = "entrance";
+    GLOBAL.exitTag = "exit";
+    GLOBAL.serviceTag = "service";
+    GLOBAL.handleTag = "handle";
+
+
     GLOBAL._TEST_OBJECTS_;
     GLOBAL.systemServices = {};
     GLOBAL.registry = {
@@ -87,6 +93,35 @@ var light = (function () {
     };
     GLOBAL.eventSubscribers = {};
     GLOBAL.system = {};
+
+    //   GLOBAL.track.record(entranceOrExit, serviceOrHandleMethodName, methodName, argumentOrReturnData, isFirstCallInServiceRun, isLastCallInServiceRun);
+    GLOBAL.track = {
+        // GLOBAL.track.record(GLOBAL.entranceTag, GLOBAL.handleTag, testhandleName, serviceName, arg,true);
+        record: function (entranceOrExit, serviceOrHandleMethodName, methodName, argumentOrReturnData,miscData,isTest, isFirstCallInServiceRun, isLastCallInServiceRun) {
+            GLOBAL.system.records = GLOBAL.system.records || [];
+            GLOBAL.system.records.push({
+                motion: entranceOrExit,
+                methodType: serviceOrHandleMethodName,
+                methodName: methodName,
+                time: Date.now ? Date.now() : new Date().getTime(),
+                position: GLOBAL.system.records.length,
+                isFirst: isFirstCallInServiceRun,
+                isLast: isLastCallInServiceRun,
+                data: argumentOrReturnData,
+                miscData:  miscData,
+                isTest: isTest
+            });
+        },
+        getRecord: function (i) {
+            GLOBAL.system.records = GLOBAL.system.records || [];
+            return  GLOBAL.system.records[i]||[];
+        },
+        getLastRecord: function () {
+            GLOBAL.system.records = GLOBAL.system.records || [];
+            return GLOBAL.system.records.length? GLOBAL.system.records[GLOBAL.system.records.length-1]:[];
+        }
+    }
+
     GLOBAL.utility = {};
     GLOBAL.utility.execSurpressError = function (o, e, context, notificationInfo) {
         _light["event"].notify(e, context, notificationInfo);
@@ -205,9 +240,10 @@ var light = (function () {
         tmpDefinition = testhandle.call(GLOBAL.system, definition);
 
         */
-        
-       
-        tmpDefinition = testhandle.call(GLOBAL.systemServices, definition);
+
+        GLOBAL.track.record(GLOBAL.entranceTag, GLOBAL.handleTag, testhandleName, serviceName, arg,true);
+        tmpDefinition = testhandle.call(GLOBAL.systemServices, definition, arg, GLOBAL.system);
+        GLOBAL.track.record(GLOBAL.exitTag, GLOBAL.handleTag, testhandleName, serviceName, null, true);
         return tmpDefinition;
     };
 
@@ -231,10 +267,12 @@ var light = (function () {
                     handleName: handle.name,
                     arg: arg
                 };
-               
+
  tmpDefinition = (testhandle || handle.definition).call(GLOBAL.system, definition);
                 */
-                tmpDefinition = (testhandle || handle.definition).call(GLOBAL.systemServices, definition);
+                GLOBAL.track.record(GLOBAL.entranceTag, GLOBAL.handleTag, handleName, serviceName, arg);
+                tmpDefinition = (testhandle || handle.definition).call(GLOBAL.systemServices, definition, arg, GLOBAL.system);
+                GLOBAL.track.record(GLOBAL.exitTag, GLOBAL.handleTag, handleName, serviceName);
                 break;
             }
         }
@@ -281,13 +319,12 @@ var light = (function () {
                 console.error(message);
                 throw message;
             }
-            
 
             /*
               lastResult = returnDefinitionFromHandle.call(GLOBAL.system, lastResult, chainService());
             */
 
-            lastResult = returnDefinitionFromHandle.call(GLOBAL.systemServices, lastResult, chainService());
+            lastResult = returnDefinitionFromHandle.call(GLOBAL.systemServices, lastResult, chainService(), GLOBAL.system);
         }
 
         return lastResult;
@@ -305,14 +342,27 @@ var light = (function () {
 
             var result;
             context.callerContext = callerContext;
-            GLOBAL.utility.tryCatch(context, function () { return serviceItem["before"].notify(); }, function () { }, function () { });
+            GLOBAL.utility.tryCatch(context, function () {
+               
+                return serviceItem["before"].notify();
+            }, function (o) {
+           
+            }, function (o) {
+               
+            });
 
             GLOBAL.utility.tryCatch(context, function () {
+
+                GLOBAL.track.record(GLOBAL.entranceTag, GLOBAL.serviceTag, handleName, tArg);
                 result = runSuppliedServiceFunction(context, serviceItem, handleName, definition, serviceName, tArg.arg);
+                GLOBAL.track.record(GLOBAL.exitTag, GLOBAL.serviceTag, handleName, result);
+
                 return result;
             }, function (o) {
+                GLOBAL.track.record(GLOBAL.exitTag, GLOBAL.serviceTag, handleName, "event:success");
                 return serviceItem["success"].notify(o, context, "service-success");
             }, function (o) {
+                GLOBAL.track.record(GLOBAL.exitTag, GLOBAL.serviceTag, handleName, "event:error",o);
                 return serviceItem["error"].notify(o, context, "service-error");
             });
 
@@ -419,7 +469,7 @@ var light = (function () {
 
     var chainService = function (cb) {
         chainService.totalChain = chainService.totalChain || 0;
-      
+
         var chain = {};
         var result = undefined;
         chain.result = function () {
@@ -473,13 +523,13 @@ var light = (function () {
     };
 
     var _light = function (f) {
-       // (function (f) {
-         //   setTimeout(function () {
-                chainService(function (cs) {
-                    typeof f === "function" && f.call(GLOBAL.systemServices, cs);
-                });
+        // (function (f) {
+        //   setTimeout(function () {
+        chainService(function (cs) {
+            typeof f === "function" && f.call(GLOBAL.systemServices, cs, GLOBAL.system);
+        });
         //    },0);
-       // })(f);
+        // })(f);
     };
 
     _light.startService = function (f) {
@@ -522,7 +572,7 @@ var light = (function () {
     _light.advance = {
         serviceTest: function (setup, f) {
             GLOBAL._TEST_OBJECTS_ = setup;
-            f.call(GLOBAL.systemServices, chainService());
+            f.call(GLOBAL.systemServices, chainService(), GLOBAL.system);
             GLOBAL._TEST_OBJECTS_ = undefined
         }
     };
