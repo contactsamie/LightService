@@ -28,10 +28,12 @@ and try some level of isomorphic javascripting
 
 
 http://lightservicelib.github.io/latest/lightservice.min.js
-<script src="http://lightservicelib.github.io/latest/lightservice.min.js"></script>
 
 npm install lightservice
 
 bower install lightservice
 
 Install-Package LightService
+
+http://codepen.io/contactsamie/pen/jWezvz
+
