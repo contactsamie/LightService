@@ -119,6 +119,7 @@ var light = (function () {
             };
             //todo use an immutable library
             recordObject = JSON.parse(JSON.stringify(recordObject));
+           // recordObject.link = arg.link;
             GLOBAL.track.records.push(recordObject);
             // console.log();
         },
@@ -278,7 +279,8 @@ var light = (function () {
             miscDataType: GLOBAL.serviceArgTag,
             isTest: true,
             isFirstCallInServiceRun: GLOBAL.unknownTag,
-            isLastCallInServiceRun: GLOBAL.unknownTag
+            isLastCallInServiceRun: GLOBAL.unknownTag,
+            link: testhandle
         });
 
         tmpDefinition = testhandle.call(GLOBAL.systemServices, definition, arg, GLOBAL.system);
@@ -292,7 +294,8 @@ var light = (function () {
             miscDataType: GLOBAL.unknownTag,
             isTest: true,
             isFirstCallInServiceRun: GLOBAL.unknownTag,
-            isLastCallInServiceRun: GLOBAL.unknownTag
+            isLastCallInServiceRun: GLOBAL.unknownTag,
+            link: testhandle
         });
         return tmpDefinition;
     };
@@ -330,7 +333,8 @@ var light = (function () {
                     miscDataType: GLOBAL.serviceArgTag,
                     isTest: false,
                     isFirstCallInServiceRun: GLOBAL.unknownTag,
-                    isLastCallInServiceRun: GLOBAL.unknownTag
+                    isLastCallInServiceRun: GLOBAL.unknownTag,
+                    link: (testhandle || handle.definition)
                 });
 
                 tmpDefinition = (testhandle || handle.definition).call(GLOBAL.systemServices, definition, arg, GLOBAL.system);
@@ -344,7 +348,8 @@ var light = (function () {
                     miscDataType: GLOBAL.unknownTag,
                     isTest: false,
                     isFirstCallInServiceRun: GLOBAL.unknownTag,
-                    isLastCallInServiceRun: GLOBAL.unknownTag
+                    isLastCallInServiceRun: GLOBAL.unknownTag,
+                    link: (testhandle || handle.definition)
                 });
 
                 break;
@@ -432,7 +437,8 @@ var light = (function () {
                     miscDataType: GLOBAL.handleTag,
                     isTest: false,
                     isFirstCallInServiceRun: GLOBAL.unknownTag,
-                    isLastCallInServiceRun: GLOBAL.unknownTag
+                    isLastCallInServiceRun: GLOBAL.unknownTag,
+                    link:definition
                 });
 
                 result = runSuppliedServiceFunction(context, serviceItem, handleName, definition, serviceName, tArg.arg);
@@ -446,7 +452,8 @@ var light = (function () {
                     miscDataType: GLOBAL.handleTag,
                     isTest: false,
                     isFirstCallInServiceRun: GLOBAL.unknownTag,
-                    isLastCallInServiceRun: GLOBAL.unknownTag
+                    isLastCallInServiceRun: GLOBAL.unknownTag,
+                    link: definition
                 });
 
                 return result;
@@ -462,7 +469,8 @@ var light = (function () {
                     miscDataType: GLOBAL.eventTag,
                     isTest: false,
                     isFirstCallInServiceRun: GLOBAL.unknownTag,
-                    isLastCallInServiceRun: GLOBAL.unknownTag
+                    isLastCallInServiceRun: GLOBAL.unknownTag,
+                    link: definition
                 });
 
                 return serviceItem["error"].notify(o, context, "service-error");
