@@ -24,7 +24,6 @@ describe('light', function () {
         var haccess_1;
 
         haccess_1 = light.service(function (arg, service, system) {
-           
             arg.x = arg.x + 10;
             return arg;
         });
