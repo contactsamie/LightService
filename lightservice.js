@@ -135,13 +135,14 @@ var light = (function () {
         },
         getAllRecords: function (i) {
             return JSON.parse(JSON.stringify(GLOBAL.track.records));
-        }, startRecord: function () {
+        },
+        recordStart: function () {
             GLOBAL.recordServices = true;
         },
-        stopRecord: function () {
+        recordStop: function () {
             GLOBAL.recordServices = false;
         },
-        clearRecord: function () {
+        recordClear: function () {
             GLOBAL.track.clearAllRecords();
         }
     };

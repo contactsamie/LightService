@@ -30,9 +30,9 @@ describe('light', function () {
         });
 
         light(function (service, system) {
-            system.startRecord();
+            system.recordStart();
             var answer = service[haccess_1]({ x: 0 }).result();
-            system.stopRecord();
+            system.recordStop();
             console.log(system.getAllRecords());
             expect(answer.x).toBe(10);
         });
