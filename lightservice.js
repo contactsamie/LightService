@@ -194,7 +194,8 @@ var light = (function () {
 
         var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handle;
 
-        GLOBAL.system.$$currentContext = {
+        /*
+         GLOBAL.system.$$currentContext = {
             handles: GLOBAL.handles,
             definition: definition,
             serviceName: serviceName,
@@ -202,6 +203,11 @@ var light = (function () {
             arg: arg
         };
         tmpDefinition = testhandle.call(GLOBAL.system, definition);
+
+        */
+        
+       
+        tmpDefinition = testhandle.call(GLOBAL.systemServices, definition);
         return tmpDefinition;
     };
 
@@ -217,14 +223,18 @@ var light = (function () {
             var handle = GLOBAL.handles[j];
             isAMatch = handleName && (handle.name === handleName);
             if (isAMatch) {
-                GLOBAL.system.$$currentContext = {
+                /*
+                 GLOBAL.system.$$currentContext = {
                     handles: GLOBAL.handles,
                     definition: definition,
                     serviceName: serviceName,
                     handleName: handle.name,
                     arg: arg
                 };
-                tmpDefinition = (testhandle || handle.definition).call(GLOBAL.system, definition);
+               
+ tmpDefinition = (testhandle || handle.definition).call(GLOBAL.system, definition);
+                */
+                tmpDefinition = (testhandle || handle.definition).call(GLOBAL.systemServices, definition);
                 break;
             }
         }
@@ -271,8 +281,13 @@ var light = (function () {
                 console.error(message);
                 throw message;
             }
+            
 
-            lastResult = returnDefinitionFromHandle.call(GLOBAL.system, lastResult, chainService());
+            /*
+              lastResult = returnDefinitionFromHandle.call(GLOBAL.system, lastResult, chainService());
+            */
+
+            lastResult = returnDefinitionFromHandle.call(GLOBAL.systemServices, lastResult, chainService());
         }
 
         return lastResult;
@@ -384,10 +399,13 @@ var light = (function () {
         GLOBAL.systemServices[serviceName] = serviceItem;
         //!! reg
         GLOBAL.registry.service[serviceName] = {};
-        GLOBAL.system[serviceName] = function (arg) {
+
+        /*
+         GLOBAL.system[serviceName] = function (arg) {
             context.step(serviceName);
             return serviceItem.redefinition(arg, context);
         }
+        */
 
         return serviceName;
     };
@@ -401,8 +419,7 @@ var light = (function () {
 
     var chainService = function (cb) {
         chainService.totalChain = chainService.totalChain || 0;
-        //  GLOBAL.systemServices
-
+      
         var chain = {};
         var result = undefined;
         chain.result = function () {
@@ -456,13 +473,13 @@ var light = (function () {
     };
 
     var _light = function (f) {
-        (function (f) {
-            setTimeout(function () {
+       // (function (f) {
+         //   setTimeout(function () {
                 chainService(function (cs) {
                     typeof f === "function" && f.call(GLOBAL.systemServices, cs);
                 });
-            },0);
-        })(f);
+        //    },0);
+       // })(f);
     };
 
     _light.startService = function (f) {

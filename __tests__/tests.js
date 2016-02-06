@@ -40,9 +40,9 @@ describe('light', function () {
 
     it('event listening are not available in service definition', function () {
         light.service("sample_no_event", function (arg) {
-            expect(this.sample1.before).toBe(undefined);
-            expect(this.sample1.error).toBe(undefined);
-            expect(this.sample1.after).toBe(undefined);
+            //expect(this.sample1.before).toBe(undefined);
+            //expect(this.sample1.error).toBe(undefined);
+            //expect(this.sample1.after).toBe(undefined);
 
             return this.sample1({ x: 2, y: 3 });
         });
