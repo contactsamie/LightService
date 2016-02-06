@@ -141,6 +141,8 @@ var light = (function () {
         },
         play: function (i, j) {
             var that = this;
+            i = i || 0;
+            j = j || (GLOBAL.track.records.length - 1);
 
             _light(function (service) {
                 var inter = service;
