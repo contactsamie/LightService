@@ -34,6 +34,9 @@ npm install lightservice
 bower install lightservice
 
 Install-Package LightService
+todo
 
 http://codepen.io/contactsamie/pen/jWezvz
+
+http://www.jointjs.com/demos/devs
 
