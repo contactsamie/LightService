@@ -7,6 +7,7 @@ light.event(function (e, context,notificationInfo) {
    console.log(notificationInfo);
    console.log(e);
 });*/
+
 light.event(function (e, context, notificationInfo) { });
 
 light.service("test", function (arg, service) { });
@@ -19,6 +20,24 @@ light.service("sample2", function (arg, service) {
 });
 
 describe('light', function () {
+    it('recording history', function () {
+        var haccess_1;
+
+        haccess_1 = light.service(function (arg, service, system) {
+           
+            arg.x = arg.x + 10;
+            return arg;
+        });
+
+        light(function (service, system) {
+            light.startRecord();
+            var answer = service[haccess_1]({ x: 0 }).result();
+            light.stopRecord();
+            console.log(system.getAllRecords());
+            expect(answer.x).toBe(10);
+        });
+    });
+
     it('exists', function () {
         expect(light.version).toBe(1);
     });
@@ -1091,23 +1110,7 @@ describe('light', function () {
         });
     });
 
-
     it('auto generate service names when only definition is provided', function () {
-     
-        var haccess_1;    
-        
-        haccess_1 = light.service( function (arg) {
-            arg.x = arg.x + 10;
-            return arg;
-        });
-
-        light(function (service) {
-            var answer = service[haccess_1]({ x: 0 }).result();
-            expect(answer.x).toBe(10);
-        });
-    });
-    it('recording history', function () {
-
         var haccess_1;
 
         haccess_1 = light.service(function (arg) {
@@ -1120,6 +1123,4 @@ describe('light', function () {
             expect(answer.x).toBe(10);
         });
     });
-
-   
 });

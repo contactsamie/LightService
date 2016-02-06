@@ -92,36 +92,52 @@ var light = (function () {
         document.getElementsByTagName('body')[0].appendChild(se);
     };
     GLOBAL.eventSubscribers = {};
-    GLOBAL.system = {};
 
     //   GLOBAL.track.record(entranceOrExit, serviceOrHandleMethodName, methodName, argumentOrReturnData, isFirstCallInServiceRun, isLastCallInServiceRun);
-    GLOBAL.track = {
+        GLOBAL.track = {
         // GLOBAL.track.record(GLOBAL.entranceTag, GLOBAL.handleTag, testhandleName, serviceName, arg,true);
-        record: function (entranceOrExit, serviceOrHandleMethodName, methodName, argumentOrReturnData,miscData,isTest, isFirstCallInServiceRun, isLastCallInServiceRun) {
-            GLOBAL.system.records = GLOBAL.system.records || [];
-            GLOBAL.system.records.push({
+            record: function (entranceOrExit, serviceOrHandleMethodName, methodName, argumentOrReturnData, miscData, isTest, isFirstCallInServiceRun, isLastCallInServiceRun) {
+
+                if (!GLOBAL.recordServices) {
+                    return;
+                }
+
+            GLOBAL.track.records = GLOBAL.track.records || [];
+            var recordObject = {
                 motion: entranceOrExit,
                 methodType: serviceOrHandleMethodName,
                 methodName: methodName,
                 time: Date.now ? Date.now() : new Date().getTime(),
-                position: GLOBAL.system.records.length,
+                position: GLOBAL.track.records.length,
                 isFirst: isFirstCallInServiceRun,
                 isLast: isLastCallInServiceRun,
                 data: argumentOrReturnData,
-                miscData:  miscData,
+                miscData: miscData,
                 isTest: isTest
-            });
+            };
+            GLOBAL.track.records.push(recordObject);
+           // console.log();
         },
-        getRecord: function (i) {
-            GLOBAL.system.records = GLOBAL.system.records || [];
-            return  GLOBAL.system.records[i]||[];
-        },
-        getLastRecord: function () {
-            GLOBAL.system.records = GLOBAL.system.records || [];
-            return GLOBAL.system.records.length? GLOBAL.system.records[GLOBAL.system.records.length-1]:[];
+        clearAllRecords: function () {
+            GLOBAL.track.records = [];
         }
     }
 
+    GLOBAL.system = {
+        getRecord: function (i) {
+            GLOBAL.track.records = GLOBAL.track.records || [];
+            return GLOBAL.track.records[i] || [];
+        },
+        getLastRecord: function () {
+            GLOBAL.track.records = GLOBAL.track.records || [];
+            return GLOBAL.track.records.length ? GLOBAL.track.records[GLOBAL.track.records.length - 1] : [];
+        },
+        getAllRecords: function (i) {            
+            return JSON.parse(JSON.stringify(GLOBAL.track.records));
+        }
+    };
+
+   
     GLOBAL.utility = {};
     GLOBAL.utility.execSurpressError = function (o, e, context, notificationInfo) {
         _light["event"].notify(e, context, notificationInfo);
@@ -359,7 +375,7 @@ var light = (function () {
 
                 return result;
             }, function (o) {
-                GLOBAL.track.record(GLOBAL.exitTag, GLOBAL.serviceTag, handleName, "event:success");
+              //  GLOBAL.track.record(GLOBAL.exitTag, GLOBAL.serviceTag, handleName, "event:success");
                 return serviceItem["success"].notify(o, context, "service-success");
             }, function (o) {
                 GLOBAL.track.record(GLOBAL.exitTag, GLOBAL.serviceTag, handleName, "event:error",o);
@@ -579,6 +595,15 @@ var light = (function () {
 
     _light.version = 1;
 
+    _light.startRecord = function () {
+        GLOBAL.recordServices = true;
+    };
+    _light.stopRecord = function () {
+        GLOBAL.recordServices = false;
+    };
+    _light.clearRecord = function () {
+        GLOBAL.track.clearAllRecords();
+    };
     setUpSystemEvent(_light, "event", "$system");
 
     _light.handle(GLOBAL.DEFAULT_HANDLE_NAME, function (definition) { return definition; });
