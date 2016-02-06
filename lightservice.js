@@ -94,30 +94,28 @@ var light = (function () {
     };
     GLOBAL.eventSubscribers = {};
 
-    //   GLOBAL.track.record(entranceOrExit, serviceOrHandleMethodName, methodName, argumentOrReturnData, isFirstCallInServiceRun, isLastCallInServiceRun);
     GLOBAL.track = {
-        // GLOBAL.track.record(GLOBAL.entranceTag, GLOBAL.handleTag, testhandleName, serviceName, arg,true);
-        record: function (entranceOrExit, serviceOrHandleMethodName, methodName, argumentOrReturnData, miscData, miscDataType, isTest, isFirstCallInServiceRun, isLastCallInServiceRun) {
+        record: function (arg) {
             GLOBAL.track.records = GLOBAL.track.records || [];
             if (!GLOBAL.recordServices) {
                 return;
             }
-            if (methodName === GLOBAL.DEFAULT_HANDLE_NAME) {
+            if (arg.methodName === GLOBAL.DEFAULT_HANDLE_NAME) {
                 return;
             }
 
             var recordObject = {
-                dataType: entranceOrExit,
-                methodType: serviceOrHandleMethodName,
-                methodName: methodName,
+                dataType: arg.entranceOrExit,
+                methodType: arg.serviceOrHandleMethodName,
+                methodName: arg.methodName,
                 time: Date.now ? Date.now() : new Date().getTime(),
                 position: GLOBAL.track.records.length,
-                isFirst: isFirstCallInServiceRun,
-                isLast: isLastCallInServiceRun,
-                data: argumentOrReturnData,
-                isTest: isTest || false,
-                info: miscData,
-                infoType: miscDataType
+                isFirst: arg.isFirstCallInServiceRun,
+                isLast: arg.isLastCallInServiceRun,
+                data: arg.argumentOrReturnData,
+                isTest: arg.isTest || false,
+                info: arg.miscData,
+                infoType: arg.miscDataType
             };
             //todo use an immutable library
             recordObject = JSON.parse(JSON.stringify(recordObject));
@@ -271,10 +269,31 @@ var light = (function () {
         tmpDefinition = testhandle.call(GLOBAL.system, definition);
 
         */
-        //(entranceOrExit, serviceOrHandleMethodName, methodName, argumentOrReturnData, miscData,miscDataType, isTest, isFirstCallInServiceRun, isLastCallInServiceRun)
-        GLOBAL.track.record(GLOBAL.entranceTag, GLOBAL.handleTag, testhandleName, serviceName, arg, GLOBAL.serviceArgTag, true);
+        GLOBAL.track.record({
+            entranceOrExit: GLOBAL.entranceTag,
+            serviceOrHandleMethodName: GLOBAL.handleTag,
+            methodName: testhandleName,
+            argumentOrReturnData: serviceName,
+            miscData: arg,
+            miscDataType: GLOBAL.serviceArgTag,
+            isTest: true,
+            isFirstCallInServiceRun: GLOBAL.unknownTag,
+            isLastCallInServiceRun: GLOBAL.unknownTag
+        });
+
         tmpDefinition = testhandle.call(GLOBAL.systemServices, definition, arg, GLOBAL.system);
-        GLOBAL.track.record(GLOBAL.exitTag, GLOBAL.handleTag, testhandleName, serviceName, GLOBAL.unknownTag, GLOBAL.unknownTag, true);
+
+        GLOBAL.track.record({
+            entranceOrExit: GLOBAL.exitTag,
+            serviceOrHandleMethodName: GLOBAL.handleTag,
+            methodName: testhandleName,
+            argumentOrReturnData: serviceName,
+            miscData: GLOBAL.unknownTag,
+            miscDataType: GLOBAL.unknownTag,
+            isTest: true,
+            isFirstCallInServiceRun: GLOBAL.unknownTag,
+            isLastCallInServiceRun: GLOBAL.unknownTag
+        });
         return tmpDefinition;
     };
 
@@ -302,10 +321,32 @@ var light = (function () {
               tmpDefinition = (testhandle || handle.definition).call(GLOBAL.system, definition);
                 */
 
-                // (entranceOrExit, serviceOrHandleMethodName, methodName, argumentOrReturnData, miscData,miscDataType, isTest, isFirstCallInServiceRun, isLastCallInServiceRun)
-                GLOBAL.track.record(GLOBAL.entranceTag, GLOBAL.handleTag, handleName, serviceName, arg, GLOBAL.serviceArgTag);
+                GLOBAL.track.record({
+                    entranceOrExit: GLOBAL.entranceTag,
+                    serviceOrHandleMethodName: GLOBAL.handleTag,
+                    methodName: handleName,
+                    argumentOrReturnData: serviceName,
+                    miscData: arg,
+                    miscDataType: GLOBAL.serviceArgTag,
+                    isTest: false,
+                    isFirstCallInServiceRun: GLOBAL.unknownTag,
+                    isLastCallInServiceRun: GLOBAL.unknownTag
+                });
+
                 tmpDefinition = (testhandle || handle.definition).call(GLOBAL.systemServices, definition, arg, GLOBAL.system);
-                GLOBAL.track.record(GLOBAL.exitTag, GLOBAL.handleTag, handleName, serviceName, GLOBAL.unknownTag, GLOBAL.unknownTag);
+
+                GLOBAL.track.record({
+                    entranceOrExit: GLOBAL.exitTag,
+                    serviceOrHandleMethodName: GLOBAL.handleTag,
+                    methodName: handleName,
+                    argumentOrReturnData: serviceName,
+                    miscData: GLOBAL.unknownTag,
+                    miscDataType: GLOBAL.unknownTag,
+                    isTest: false,
+                    isFirstCallInServiceRun: GLOBAL.unknownTag,
+                    isLastCallInServiceRun: GLOBAL.unknownTag
+                });
+
                 break;
             }
         }
@@ -382,17 +423,48 @@ var light = (function () {
             });
 
             GLOBAL.utility.tryCatch(context, function () {
-                //(entranceOrExit, serviceOrHandleMethodName, methodName, argumentOrReturnData, miscData,miscDataType, isTest, isFirstCallInServiceRun, isLastCallInServiceRun)
-                GLOBAL.track.record(GLOBAL.entranceTag, GLOBAL.serviceTag, serviceName, tArg.arg, handleName, GLOBAL.handleTag);
+                GLOBAL.track.record({
+                    entranceOrExit: GLOBAL.entranceTag,
+                    serviceOrHandleMethodName: GLOBAL.serviceTag,
+                    methodName: serviceName,
+                    argumentOrReturnData: tArg.arg,
+                    miscData: handleName,
+                    miscDataType: GLOBAL.handleTag,
+                    isTest: false,
+                    isFirstCallInServiceRun: GLOBAL.unknownTag,
+                    isLastCallInServiceRun: GLOBAL.unknownTag
+                });
+
                 result = runSuppliedServiceFunction(context, serviceItem, handleName, definition, serviceName, tArg.arg);
-                GLOBAL.track.record(GLOBAL.exitTag, GLOBAL.serviceTag, serviceName, result, handleName, GLOBAL.handleTag);
+
+                GLOBAL.track.record({
+                    entranceOrExit: GLOBAL.exitTag,
+                    serviceOrHandleMethodName: GLOBAL.serviceTag,
+                    methodName: serviceName,
+                    argumentOrReturnData: result,
+                    miscData: handleName,
+                    miscDataType: GLOBAL.handleTag,
+                    isTest: false,
+                    isFirstCallInServiceRun: GLOBAL.unknownTag,
+                    isLastCallInServiceRun: GLOBAL.unknownTag
+                });
 
                 return result;
             }, function (o) {
                 return serviceItem["success"].notify(o, context, "service-success");
             }, function (o) {
-                //(entranceOrExit, serviceOrHandleMethodName, methodName, argumentOrReturnData, miscData,miscDataType, isTest, isFirstCallInServiceRun, isLastCallInServiceRun)
-                GLOBAL.track.record(GLOBAL.exitTag, GLOBAL.serviceTag, handleName, o, "event:error", GLOBAL.eventTag, o);
+                GLOBAL.track.record({
+                    entranceOrExit: GLOBAL.exitTag,
+                    serviceOrHandleMethodName: GLOBAL.serviceTag,
+                    methodName: serviceName,
+                    argumentOrReturnData: o,
+                    miscData: "event:error",
+                    miscDataType: GLOBAL.eventTag,
+                    isTest: false,
+                    isFirstCallInServiceRun: GLOBAL.unknownTag,
+                    isLastCallInServiceRun: GLOBAL.unknownTag
+                });
+
                 return serviceItem["error"].notify(o, context, "service-error");
             });
 
