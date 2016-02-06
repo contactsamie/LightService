@@ -31,6 +31,8 @@ describe('light', function () {
         light(function (service, system) {
             system.recordStart();
             var answer = service[haccess_1]({ x: 0 }).result();
+            console.log(system.getAllRecords());
+            system.play(0,1);
             system.recordStop();
             console.log(system.getAllRecords());
             expect(answer.x).toBe(10);

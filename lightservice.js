@@ -118,9 +118,11 @@ var light = (function () {
                 infoType: arg.miscDataType
             };
             //todo use an immutable library
-            recordObject = JSON.parse(JSON.stringify(recordObject));
-           // recordObject.link = arg.link;
+
+            //recordObject.link = arg.link;
             GLOBAL.track.records.push(recordObject);
+            GLOBAL.track.records = JSON.parse(JSON.stringify(GLOBAL.track.records));
+
             // console.log();
         },
         clearAllRecords: function () {
@@ -137,9 +139,27 @@ var light = (function () {
             GLOBAL.track.records = GLOBAL.track.records || [];
             return GLOBAL.track.records.length ? GLOBAL.track.records[GLOBAL.track.records.length - 1] : [];
         },
+        play: function (i, j) {
+            var that = this;
+
+            _light(function (service) {
+                var inter = service;
+                for (var m = i; m <= j; m++) {
+                    var playGround = that.getRecord(m);
+                    if (!playGround) {
+                        throw "unable to find service to play service";
+                    }
+                    if ((playGround.methodType === GLOBAL.serviceTag) && (playGround.dataType === GLOBAL.entranceTag)) {
+                        inter = (m === i) ? inter[playGround.methodName](playGround.data) : inter[playGround.methodName]();
+                    }
+                }
+                var result = inter.result();
+            });
+        },
         getAllRecords: function (i) {
             //todo use an immutable library
             return JSON.parse(JSON.stringify(GLOBAL.track.records));
+            // return GLOBAL.track.records.map(function (o) { return o; });
         },
         recordStart: function () {
             GLOBAL.recordServices = true;
@@ -438,7 +458,7 @@ var light = (function () {
                     isTest: false,
                     isFirstCallInServiceRun: GLOBAL.unknownTag,
                     isLastCallInServiceRun: GLOBAL.unknownTag,
-                    link:definition
+                    link: definition
                 });
 
                 result = runSuppliedServiceFunction(context, serviceItem, handleName, definition, serviceName, tArg.arg);
