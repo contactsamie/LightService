@@ -116,6 +116,8 @@ var light = (function () {
                 miscData: miscData,
                 isTest: isTest
             };
+            //todo use an immutable library
+            recordObject = JSON.parse(JSON.stringify(recordObject));
             GLOBAL.track.records.push(recordObject);
             // console.log();
         },
@@ -134,6 +136,7 @@ var light = (function () {
             return GLOBAL.track.records.length ? GLOBAL.track.records[GLOBAL.track.records.length - 1] : [];
         },
         getAllRecords: function (i) {
+            //todo use an immutable library
             return JSON.parse(JSON.stringify(GLOBAL.track.records));
         },
         recordStart: function () {
