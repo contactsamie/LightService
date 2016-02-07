@@ -32,15 +32,13 @@ describe('light', function () {
             system.recordStart();
             var answer = service[haccess_1]({ x: 0 }).result();
             console.log(system.getAllRecords());
-            system.play(0,1);
-          //  system.recordStop();
+            system.play(0, 1);
             console.log(system.getAllRecords());
             expect(answer.x).toBe(10);
         });
     });
 
     it('exists', function () {
-       // system.recordStop();
         expect(light.version).toBe(1);
     });
 
@@ -119,7 +117,7 @@ describe('light', function () {
         });
     });
     it('should allow event subscription 2', function () {
-        light.startService("test", function (service,system) {
+        light.startService("test", function (service, system) {
             var test = this.test;
             var path = [];
             test.after(function () {
@@ -128,7 +126,6 @@ describe('light', function () {
             test();
             expect(path[0]).toBe("after1");
             expect(path.length).toBe(1);
-           
         });
     });
 
@@ -737,11 +734,9 @@ describe('light', function () {
         });
     });
     it('passing arg overrides previous result', function () {
-        light(function (service,system) {
-          
+        light(function (service, system) {
             var answer = service.c7().c5().c6().c1().c5({ x: 10 }).c6().c1().result();
             expect(answer).toBe(112);
-           
         });
     });
 
@@ -943,7 +938,6 @@ describe('light', function () {
             });
 
         light(function (service, system) {
-           
             var answer = service.pass100().result();
             expect(answer.x).toBe(3);
 
@@ -955,7 +949,6 @@ describe('light', function () {
 
             answer = service.pass300().pass200().pass100().result();
             expect(answer.x).toBe(23);
-          
         });
 
         light(function (service) {
