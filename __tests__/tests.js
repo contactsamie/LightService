@@ -1130,28 +1130,27 @@ describe('light', function () {
         haccess_2 = light.service(function (arg, service, system, storage) {
             arg = arg || {};
             arg.x = arg.x || 0;
-            if (storage.answer) {
-                return { x: 555 * storage.answer.x };
+            if (storage.get("answer")) {
+                return { x: 555 * storage.get("answer").x };
             }
 
             arg.x = arg.x + 100;
-            storage.answer = arg;
-            return storage.answer;
+            storage.set("answer", arg);
+            return storage.get("answer");
         });
         haccess_1 = light.service(function (arg, service, system, storage) {
             arg = arg || {};
             arg.x = arg.x || 0;
-            if (storage.answer) {
-                return { x: 555 * storage.answer.x };
+            if (storage.get("answer")) {
+                return { x: 555 * storage.get("answer").x };
             }
 
             arg.x = arg.x + 10;
-            storage.answer = arg;
-            return storage.answer;
+            storage.set("answer", arg);
+            return storage.get("answer");
         });
 
         light(function (service) {
-           
             expect(this[haccess_1]().x).toBe(10);
             expect(this[haccess_1]().x).toBe(5550);
             expect(this[haccess_1]().x).toBe(5550);

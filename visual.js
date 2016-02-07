@@ -43,6 +43,9 @@ graphArg.style = [
     }
 ];
 var nodes = {};
+
+
+
 light.service("addNode", function (arg) {
     graphArg.elements = graphArg.elements || {};
     graphArg.elements.nodes = graphArg.elements.nodes || [];
@@ -95,9 +98,9 @@ light.service("visualizeCalls", function (arg, service, system) {
     for (var i = 0; i < records.length; i++) {
         var currentRecord = records[i];
         var nextRecord = records[i + 1] || { methodType: "end", methodName: "" };
-        service.connect({
-            fromLink:currentRecord.link,
-            fromError: currentRecord.info === "event:error"?10:0,
+        var connectObj = {
+            fromLink: currentRecord.link,
+            fromError: currentRecord.info === "event:error" ? 10 : 0,
             fromSuccess: ((currentRecord.dataType === "argument") || (currentRecord.info !== "event:error")) ? 10 : 0,
             fromUnknown: 0,
             toLink: nextRecord.link,
@@ -106,7 +109,8 @@ light.service("visualizeCalls", function (arg, service, system) {
             toUnknown: 0,
             from: (currentRecord.dataType === "argument" ? "in:" : "out:") + currentRecord.methodType + ":" + currentRecord.methodName,// + "# " + currentRecord.position,
             to: (nextRecord.dataType === "argument" ? "in:" : "out:") + nextRecord.methodType + ":" + nextRecord.methodName,//+"# "+ nextRecord.position,
-        });
+        };
+        service.connect(connectObj);
     }
     service.draw("cy");
 });

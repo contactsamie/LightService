@@ -2,9 +2,27 @@
 
 var light = (function () {
     var GLOBAL = {};
-    GLOBAL.SERVICE_STOR = {
-    }
-    GLOBAL._GLOBAL_SCOPE_NAME = "_GLOBAL_SCOPE_";
+    GLOBAL._STORE_ = {};
+    GLOBAL.storeFactory = function (systemName) {
+        GLOBAL._STORE_[systemName] = {
+            store: {},
+            method: function () {
+                return {
+                    get: function (name) {
+                        var data = GLOBAL._STORE_[systemName]["store"][name];
+                        if (!data) {
+                            return data;
+                        };
+                        return JSON.parse(data).data;
+                    },
+                    set: function (name, obj) {
+                        GLOBAL._STORE_[systemName]["store"][name] = JSON.stringify({ data: obj });
+                    }
+                };
+            }
+        }
+    };
+   
     GLOBAL.DEFAULT_HANDLE_NAME = "$$default";
     GLOBAL.entranceTag = "argument";
     GLOBAL.exitTag = "result";
@@ -59,6 +77,11 @@ var light = (function () {
         }
         return str;
     }
+
+    GLOBAL._GLOBAL_SCOPE_NAME = GLOBAL.generateUniqueSystemName("_GLOBAL_SCOPE_");
+    GLOBAL.storeFactory(GLOBAL._GLOBAL_SCOPE_NAME);
+
+
     GLOBAL.loadScript = function (src, onload) {
         // todo wrap require js
         //if (src) {
@@ -120,7 +143,7 @@ var light = (function () {
                 isTest: arg.isTest || false,
                 info: arg.info,
                 infoType: arg.infoType,
-                link:arg.link
+                link: arg.link
             };
             //todo use an immutable library
 
@@ -315,7 +338,7 @@ var light = (function () {
             link: testhandle
         });
 
-        tmpDefinition = testhandle.call(GLOBAL.systemServices, definition, arg, GLOBAL.system, GLOBAL.SERVICE_STOR[serviceName]);
+        tmpDefinition = testhandle.call(GLOBAL.systemServices, definition, arg, GLOBAL.system, GLOBAL._STORE_[serviceName].method());
 
         GLOBAL.track.record({
             entranceOrExit: GLOBAL.exitTag,
@@ -369,7 +392,7 @@ var light = (function () {
                     link: (testhandle || handle.definition)
                 });
 
-                tmpDefinition = (testhandle || handle.definition).call(GLOBAL.systemServices, definition, arg, GLOBAL.system, GLOBAL.SERVICE_STOR[handleName]);
+                tmpDefinition = (testhandle || handle.definition).call(GLOBAL.systemServices, definition, arg, GLOBAL.system, GLOBAL._STORE_[handleName].method());
 
                 GLOBAL.track.record({
                     entranceOrExit: GLOBAL.exitTag,
@@ -435,7 +458,7 @@ var light = (function () {
               lastResult = returnDefinitionFromHandle.call(GLOBAL.system, lastResult, chainService());
             */
 
-            lastResult = returnDefinitionFromHandle.call(GLOBAL.systemServices, lastResult, chainService(), GLOBAL.system, GLOBAL.SERVICE_STOR[serviceName]);
+            lastResult = returnDefinitionFromHandle.call(GLOBAL.systemServices, lastResult, chainService(), GLOBAL.system, GLOBAL._STORE_[serviceName].method());
         }
 
         return lastResult;
@@ -596,7 +619,8 @@ var light = (function () {
         GLOBAL.systemServices[serviceName] = serviceItem;
         //!! reg
         GLOBAL.registry.service[serviceName] = {};
-        GLOBAL.SERVICE_STOR[serviceName] = {};
+
+        GLOBAL.storeFactory(serviceName);
 
         /*
          GLOBAL.system[serviceName] = function (arg) {
@@ -629,8 +653,12 @@ var light = (function () {
             chain[actor] = (function (serviceName) {
                 return function (arg) {
                     var currentResult;
-                    var previousOrMostCurrentResultToBePassedToTheNextActor = arguments.length ? arg : result;
-                    result = GLOBAL.systemServices[serviceName](previousOrMostCurrentResultToBePassedToTheNextActor);
+                    var res = {};
+                    //TODO use immutable lib
+                    res.previousOrMostCurrentResultToBePassedToTheNextActor = arguments.length ? arg : result;
+                    var previousOrMostCurrentResultToBePassedToTheNextActor = JSON.parse(JSON.stringify(res)).previousOrMostCurrentResultToBePassedToTheNextActor;
+
+                    result = GLOBAL.systemServices[serviceName](res.previousOrMostCurrentResultToBePassedToTheNextActor);
                     return chain;
                 };
             })(actor);
@@ -674,7 +702,7 @@ var light = (function () {
         // (function (f) {
         //   setTimeout(function () {
         chainService(function (cs) {
-            typeof f === "function" && f.call(GLOBAL.systemServices, cs, GLOBAL.system, GLOBAL.SERVICE_STOR[GLOBAL._GLOBAL_SCOPE_NAME]);
+            typeof f === "function" && f.call(GLOBAL.systemServices, cs, GLOBAL.system, GLOBAL._STORE_[GLOBAL._GLOBAL_SCOPE_NAME].method());
         });
         //    },0);
         // })(f);
@@ -711,7 +739,7 @@ var light = (function () {
             name: handleName,
             definition: definition
         });
-        GLOBAL.SERVICE_STOR[handleName] = {};
+        GLOBAL.storeFactory(handleName);
         return handleName;
     }
 
@@ -720,7 +748,7 @@ var light = (function () {
     _light.advance = {
         serviceTest: function (setup, f) {
             GLOBAL._TEST_OBJECTS_ = setup;
-            f.call(GLOBAL.systemServices, chainService(), GLOBAL.system, GLOBAL.SERVICE_STOR[GLOBAL._GLOBAL_SCOPE_NAME]);
+            f.call(GLOBAL.systemServices, chainService(), GLOBAL.system, GLOBAL._STORE_[GLOBAL._GLOBAL_SCOPE_NAME]);
             GLOBAL._TEST_OBJECTS_ = undefined
         }
     };
