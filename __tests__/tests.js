@@ -1150,14 +1150,43 @@ describe('light', function () {
             return storage.get("answer");
         });
 
+        haccess_2r = light.service(function (arg, service, system, storage) {
+            arg = arg || {};
+            arg.x = arg.x || 0;
+            if (storage.getRef("answer")) {
+                return { x: 555 * storage.getRef("answer").x };
+            }
+
+            arg.x = arg.x + 100;
+            storage.setRef("answer", arg);
+            return storage.getRef("answer");
+        });
+        haccess_1r = light.service(function (arg, service, system, storage) {
+            arg = arg || {};
+            arg.x = arg.x || 0;
+            if (storage.getRef("answer")) {
+                return { x: 555 * storage.getRef("answer").x };
+            }
+
+            arg.x = arg.x + 10;
+            storage.setRef("answer", arg);
+            return storage.getRef("answer");
+        });
+
         light(function (service) {
             expect(this[haccess_1]().x).toBe(10);
             expect(this[haccess_1]().x).toBe(5550);
             expect(this[haccess_1]().x).toBe(5550);
 
+            var answer = this[haccess_1]();
+            answer.x = 1;
+
             expect(this[haccess_2]().x).toBe(100);
             expect(this[haccess_2]().x).toBe(55500);
             expect(this[haccess_2]().x).toBe(55500);
+
+            var answer1 = this[haccess_2]();
+            answer1.x = 1;
 
             expect(this[haccess_1]().x).toBe(5550);
             expect(this[haccess_2]().x).toBe(55500);

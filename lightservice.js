@@ -1,11 +1,10 @@
-//var q = require("q");
-
 var light = (function () {
     var GLOBAL = {};
     GLOBAL._STORE_ = {};
     GLOBAL.storeFactory = function (systemName) {
         GLOBAL._STORE_[systemName] = {
             store: {},
+            ref: {},
             method: function () {
                 return {
                     get: function (name) {
@@ -17,12 +16,18 @@ var light = (function () {
                     },
                     set: function (name, obj) {
                         GLOBAL._STORE_[systemName]["store"][name] = JSON.stringify({ data: obj });
+                    },
+                    setRef: function (name, obj) {
+                        GLOBAL._STORE_[systemName]["ref"][name] = obj;
+                    },
+                    getRef: function (name) {
+                        return GLOBAL._STORE_[systemName]["ref"][name];
                     }
                 };
             }
         }
     };
-   
+
     GLOBAL.DEFAULT_HANDLE_NAME = "$$default";
     GLOBAL.entranceTag = "argument";
     GLOBAL.exitTag = "result";
@@ -80,7 +85,6 @@ var light = (function () {
 
     GLOBAL._GLOBAL_SCOPE_NAME = GLOBAL.generateUniqueSystemName("_GLOBAL_SCOPE_");
     GLOBAL.storeFactory(GLOBAL._GLOBAL_SCOPE_NAME);
-
 
     GLOBAL.loadScript = function (src, onload) {
         // todo wrap require js
@@ -149,7 +153,7 @@ var light = (function () {
 
             //recordObject.link = arg.link;
             GLOBAL.track.records.push(JSON.parse(JSON.stringify(recordObject)));
-           // GLOBAL.track.records[GLOBAL.track.records.length - 1].link = arg.link;
+            // GLOBAL.track.records[GLOBAL.track.records.length - 1].link = arg.link;
             //  GLOBAL.track.records = JSON.parse(JSON.stringify(GLOBAL.track.records));
 
             // console.log();
