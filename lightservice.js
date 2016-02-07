@@ -143,13 +143,13 @@ var light = (function () {
                 isTest: arg.isTest || false,
                 info: arg.info,
                 infoType: arg.infoType,
-                link: arg.link
+                link: typeof arg.link === "function" ? arg.link.toString() : arg.link
             };
             //todo use an immutable library
 
             //recordObject.link = arg.link;
             GLOBAL.track.records.push(JSON.parse(JSON.stringify(recordObject)));
-            GLOBAL.track.records[GLOBAL.track.records.length - 1].link = arg.link;
+           // GLOBAL.track.records[GLOBAL.track.records.length - 1].link = arg.link;
             //  GLOBAL.track.records = JSON.parse(JSON.stringify(GLOBAL.track.records));
 
             // console.log();
@@ -658,7 +658,7 @@ var light = (function () {
                     res.previousOrMostCurrentResultToBePassedToTheNextActor = arguments.length ? arg : result;
                     var previousOrMostCurrentResultToBePassedToTheNextActor = JSON.parse(JSON.stringify(res)).previousOrMostCurrentResultToBePassedToTheNextActor;
 
-                    result = GLOBAL.systemServices[serviceName](res.previousOrMostCurrentResultToBePassedToTheNextActor);
+                    result = GLOBAL.systemServices[serviceName](previousOrMostCurrentResultToBePassedToTheNextActor);
                     return chain;
                 };
             })(actor);
