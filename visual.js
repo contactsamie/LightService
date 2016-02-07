@@ -3,7 +3,7 @@
         boxSelectionEnabled: false,
         autounselectify: true,
         layout: {
-            name: 'dagre'
+            name: 'concentric'// 'grid'// 'dagre'
         }
     };
     graphArg.style = [
@@ -67,17 +67,21 @@
         });
     });
     light(function (service, system) {
+       
         var records = system.getAllRecords();
         for (var i = 0; i < records.length; i++) {
             var currentRecord = records[i];
             var nextRecord = records[i + 1] || {methodType:"end",methodName:""};
 
             service.connect({
-                from: (currentRecord.dataType==="argument"?"in:":"out:") + currentRecord.methodType + ":" + currentRecord.methodName,
-                to: (nextRecord.dataType === "argument" ? "in:" : "out:") + nextRecord.methodType + ":" + nextRecord.methodName,
-            }).draw("cy");
+                from: (currentRecord.dataType === "argument" ? "in:" : "out:") + currentRecord.methodType + ":" + currentRecord.methodName,//+ currentRecord.position,
+                to: (nextRecord.dataType === "argument" ? "in:" : "out:") + nextRecord.methodType + ":" + nextRecord.methodName,//+ nextRecord.position,
+            });
       
         }
+
+        service.draw("cy");
+     
        
     });
 });
