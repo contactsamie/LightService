@@ -91,7 +91,7 @@ light.service("draw", function (arg) {
     });
 });
 light.service("visualizeCalls", function (arg, service, system) {
-    var records = system.getAllRecords(150,220);
+    var records = system.getAllRecords();
     for (var i = 0; i < records.length; i++) {
         var currentRecord = records[i];
         var nextRecord = records[i + 1] || { methodType: "end", methodName: "" };
@@ -104,8 +104,8 @@ light.service("visualizeCalls", function (arg, service, system) {
             toError: nextRecord.info === "event:error" ? 10 : 0,
             toSuccess: ((nextRecord.dataType === "argument") || (nextRecord.info !== "event:error")) ? 10 : 0,
             toUnknown: 0,
-            from: (currentRecord.dataType === "argument" ? "in:" : "out:") + currentRecord.methodType + ":" + currentRecord.methodName + "# " + currentRecord.position,
-            to: (nextRecord.dataType === "argument" ? "in:" : "out:") + nextRecord.methodType + ":" + nextRecord.methodName+"# "+ nextRecord.position,
+            from: (currentRecord.dataType === "argument" ? "in:" : "out:") + currentRecord.methodType + ":" + currentRecord.methodName,// + "# " + currentRecord.position,
+            to: (nextRecord.dataType === "argument" ? "in:" : "out:") + nextRecord.methodType + ":" + nextRecord.methodName,//+"# "+ nextRecord.position,
         });
     }
     service.draw("cy");
