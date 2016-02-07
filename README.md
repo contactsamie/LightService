@@ -7,6 +7,10 @@ LightService
 
 LightService is an Service Framework 
 
+#demo
+http://codepen.io/contactsamie/pen/jWezvz
+
+
 GOALS: 
 
 This provides a Simple, convinient and consistent interface for service consumption
@@ -34,9 +38,8 @@ npm install lightservice
 bower install lightservice
 
 Install-Package LightService
-todo
 
-http://codepen.io/contactsamie/pen/jWezvz
+#todo
 
 http://www.jointjs.com/demos/devs
 
