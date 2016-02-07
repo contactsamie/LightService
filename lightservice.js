@@ -2,7 +2,9 @@
 
 var light = (function () {
     var GLOBAL = {};
-
+    GLOBAL.SERVICE_STOR = {
+    }
+    GLOBAL._GLOBAL_SCOPE_NAME = "_GLOBAL_SCOPE_";
     GLOBAL.DEFAULT_HANDLE_NAME = "$$default";
     GLOBAL.entranceTag = "argument";
     GLOBAL.exitTag = "result";
@@ -95,6 +97,8 @@ var light = (function () {
     GLOBAL.eventSubscribers = {};
 
     GLOBAL.track = {
+        // record not yet able to track arguments because it gets mutated
+        // TODO resolve above problem
         record: function (arg) {
             GLOBAL.track.records = GLOBAL.track.records || [];
             if (!GLOBAL.recordServices) {
@@ -115,15 +119,15 @@ var light = (function () {
                 data: arg.argumentOrReturnData,
                 isTest: arg.isTest || false,
                 info: arg.info,
-                infoType: arg.infoType
+                infoType: arg.infoType,
+                link:arg.link
             };
             //todo use an immutable library
 
             //recordObject.link = arg.link;
             GLOBAL.track.records.push(JSON.parse(JSON.stringify(recordObject)));
             GLOBAL.track.records[GLOBAL.track.records.length - 1].link = arg.link;
-          //  GLOBAL.track.records = JSON.parse(JSON.stringify(GLOBAL.track.records));
-
+            //  GLOBAL.track.records = JSON.parse(JSON.stringify(GLOBAL.track.records));
 
             // console.log();
         },
@@ -132,7 +136,7 @@ var light = (function () {
         }
     }
 
-    GLOBAL.system = {       
+    GLOBAL.system = {
         getRecord: function (i) {
             GLOBAL.track.records = GLOBAL.track.records || [];
             return GLOBAL.track.records[i] || [];
@@ -162,9 +166,9 @@ var light = (function () {
         },
         getAllRecords: function (i, j) {
             i = i || 0;
-            
+
             //todo use an immutable library
-            var result =GLOBAL.track.records.slice(i, j);
+            var result = GLOBAL.track.records.slice(i, j);
 
             return result;
             // return GLOBAL.track.records.map(function (o) { return o; });
@@ -311,7 +315,7 @@ var light = (function () {
             link: testhandle
         });
 
-        tmpDefinition = testhandle.call(GLOBAL.systemServices, definition, arg, GLOBAL.system);
+        tmpDefinition = testhandle.call(GLOBAL.systemServices, definition, arg, GLOBAL.system, GLOBAL.SERVICE_STOR[serviceName]);
 
         GLOBAL.track.record({
             entranceOrExit: GLOBAL.exitTag,
@@ -365,7 +369,7 @@ var light = (function () {
                     link: (testhandle || handle.definition)
                 });
 
-                tmpDefinition = (testhandle || handle.definition).call(GLOBAL.systemServices, definition, arg, GLOBAL.system);
+                tmpDefinition = (testhandle || handle.definition).call(GLOBAL.systemServices, definition, arg, GLOBAL.system, GLOBAL.SERVICE_STOR[handleName]);
 
                 GLOBAL.track.record({
                     entranceOrExit: GLOBAL.exitTag,
@@ -431,7 +435,7 @@ var light = (function () {
               lastResult = returnDefinitionFromHandle.call(GLOBAL.system, lastResult, chainService());
             */
 
-            lastResult = returnDefinitionFromHandle.call(GLOBAL.systemServices, lastResult, chainService(), GLOBAL.system);
+            lastResult = returnDefinitionFromHandle.call(GLOBAL.systemServices, lastResult, chainService(), GLOBAL.system, GLOBAL.SERVICE_STOR[serviceName]);
         }
 
         return lastResult;
@@ -575,7 +579,6 @@ var light = (function () {
 
         var definition = fn;
 
-
         var context = {
             name: serviceName, step: function (o) {
                 _light["event"].notify(serviceName, context, "service-call");
@@ -593,6 +596,7 @@ var light = (function () {
         GLOBAL.systemServices[serviceName] = serviceItem;
         //!! reg
         GLOBAL.registry.service[serviceName] = {};
+        GLOBAL.SERVICE_STOR[serviceName] = {};
 
         /*
          GLOBAL.system[serviceName] = function (arg) {
@@ -670,7 +674,7 @@ var light = (function () {
         // (function (f) {
         //   setTimeout(function () {
         chainService(function (cs) {
-            typeof f === "function" && f.call(GLOBAL.systemServices, cs, GLOBAL.system);
+            typeof f === "function" && f.call(GLOBAL.systemServices, cs, GLOBAL.system, GLOBAL.SERVICE_STOR[GLOBAL._GLOBAL_SCOPE_NAME]);
         });
         //    },0);
         // })(f);
@@ -707,7 +711,7 @@ var light = (function () {
             name: handleName,
             definition: definition
         });
-
+        GLOBAL.SERVICE_STOR[handleName] = {};
         return handleName;
     }
 
@@ -716,7 +720,7 @@ var light = (function () {
     _light.advance = {
         serviceTest: function (setup, f) {
             GLOBAL._TEST_OBJECTS_ = setup;
-            f.call(GLOBAL.systemServices, chainService(), GLOBAL.system);
+            f.call(GLOBAL.systemServices, chainService(), GLOBAL.system, GLOBAL.SERVICE_STOR[GLOBAL._GLOBAL_SCOPE_NAME]);
             GLOBAL._TEST_OBJECTS_ = undefined
         }
     };

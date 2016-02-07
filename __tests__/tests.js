@@ -1123,4 +1123,45 @@ describe('light', function () {
             expect(answer.x).toBe(10);
         });
     });
+
+    it('providing local temporary storage', function () {
+        var haccess_1;
+
+        haccess_2 = light.service(function (arg, service, system, storage) {
+            arg = arg || {};
+            arg.x = arg.x || 0;
+            if (storage.answer) {
+                return { x: 555 * storage.answer.x };
+            }
+
+            arg.x = arg.x + 100;
+            storage.answer = arg;
+            return storage.answer;
+        });
+        haccess_1 = light.service(function (arg, service, system, storage) {
+            arg = arg || {};
+            arg.x = arg.x || 0;
+            if (storage.answer) {
+                return { x: 555 * storage.answer.x };
+            }
+
+            arg.x = arg.x + 10;
+            storage.answer = arg;
+            return storage.answer;
+        });
+
+        light(function (service) {
+           
+            expect(this[haccess_1]().x).toBe(10);
+            expect(this[haccess_1]().x).toBe(5550);
+            expect(this[haccess_1]().x).toBe(5550);
+
+            expect(this[haccess_2]().x).toBe(100);
+            expect(this[haccess_2]().x).toBe(55500);
+            expect(this[haccess_2]().x).toBe(55500);
+
+            expect(this[haccess_1]().x).toBe(5550);
+            expect(this[haccess_2]().x).toBe(55500);
+        });
+    });
 });
