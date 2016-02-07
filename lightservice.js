@@ -120,8 +120,10 @@ var light = (function () {
             //todo use an immutable library
 
             //recordObject.link = arg.link;
-            GLOBAL.track.records.push(recordObject);
-            GLOBAL.track.records = JSON.parse(JSON.stringify(GLOBAL.track.records));
+            GLOBAL.track.records.push(JSON.parse(JSON.stringify(recordObject)));
+            GLOBAL.track.records[GLOBAL.track.records.length - 1].link = arg.link;
+          //  GLOBAL.track.records = JSON.parse(JSON.stringify(GLOBAL.track.records));
+
 
             // console.log();
         },
@@ -162,7 +164,9 @@ var light = (function () {
             i = i || 0;
             
             //todo use an immutable library
-            return JSON.parse(JSON.stringify(GLOBAL.track.records.slice(i,j)));
+            var result =GLOBAL.track.records.slice(i, j);
+
+            return result;
             // return GLOBAL.track.records.map(function (o) { return o; });
         },
         recordStart: function () {
@@ -560,12 +564,18 @@ var light = (function () {
 
         //!!!!
         //experiment ----start
-        var definition = function () {
+        /*
+         var definition = function () {
             var result;
             result = fn.apply(this, arguments);
             return result;
         };
+        */
         //experiment ----end
+
+        var definition = fn;
+
+
         var context = {
             name: serviceName, step: function (o) {
                 _light["event"].notify(serviceName, context, "service-call");

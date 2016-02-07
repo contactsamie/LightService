@@ -51,18 +51,18 @@ light.service("addNode", function (arg) {
             id: arg.id,
             error: arg.error,
             unknown: arg.unknown,
-            success: arg.success
+            success: arg.success           
         }
     });
 
-    nodes[arg] = true;
+    nodes[arg.id] = arg.link;
 });
 light.service("connect", function (arg) {
     if (!nodes[arg.from]) {
-        this.addNode({ id: arg.from ,error:arg.fromError,success:arg.fromSuccess,unknown:arg.fromUnknown});
+        this.addNode({ id: arg.from ,error:arg.fromError,success:arg.fromSuccess,unknown:arg.fromUnknown , link:arg.fromLink});
     }
     if (!nodes[arg.to]) {
-        this.addNode({ id: arg.to, error: arg.toError, success: arg.toSuccess, unknown: arg.toUnknown });
+        this.addNode({ id: arg.to, error: arg.toError, success: arg.toSuccess, unknown: arg.toUnknown,link:arg.toLink });
     }
 
     graphArg.elements = graphArg.elements || {};
@@ -84,6 +84,10 @@ light.service("draw", function (arg) {
     $(function () {
         graphArg.container = document.getElementById(arg);
         var cy = window.cy = cytoscape(graphArg);
+        cy.on('tap', function (evt) {
+            console.info(nodes[evt.cyTarget.id()]);
+            $('#definition').html((nodes[evt.cyTarget.id()]).toString());
+        });
     });
 });
 light.service("visualizeCalls", function (arg, service, system) {
@@ -92,9 +96,11 @@ light.service("visualizeCalls", function (arg, service, system) {
         var currentRecord = records[i];
         var nextRecord = records[i + 1] || { methodType: "end", methodName: "" };
         service.connect({
+            fromLink:currentRecord.link,
             fromError: currentRecord.info === "event:error"?10:0,
             fromSuccess: ((currentRecord.dataType === "argument") || (currentRecord.info !== "event:error")) ? 10 : 0,
             fromUnknown: 0,
+            toLink: nextRecord.link,
             toError: nextRecord.info === "event:error" ? 10 : 0,
             toSuccess: ((nextRecord.dataType === "argument") || (nextRecord.info !== "event:error")) ? 10 : 0,
             toUnknown: 0,
