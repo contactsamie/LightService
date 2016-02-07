@@ -23,7 +23,6 @@ var light = (function () {
     }
     GLOBAL.ImmutableStore = {};
 
-  
     GLOBAL._STATE_ = {};
     GLOBAL.stateFactory = function (systemName) {
         GLOBAL._STATE_[systemName] = {
@@ -776,9 +775,9 @@ var light = (function () {
                     set: function (n, o) {
                         var out = JSON.parse(GLOBAL.ImmutableStore[name]);
                         out.data[n] = o;
-                     var newData=  JSON.parse(JSON.stringify(out)).data ;
+                        var newData = JSON.parse(JSON.stringify(out)).data;
 
-                     return _light.Immutable.Map(newData);
+                        return _light.Immutable.Map(newData);
                     }
                 };
             }
@@ -787,7 +786,7 @@ var light = (function () {
         _light.Immutable = Immutable;
     }
     _light.copy = function (obj) {
-        _light.Immutable.Map({data:obj}).get('data');
+        _light.Immutable.Map({ data: obj }).get('data');
     };
 
     _light.version = 1;
