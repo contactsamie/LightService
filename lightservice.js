@@ -158,9 +158,11 @@ var light = (function () {
                 var result = inter.result();
             });
         },
-        getAllRecords: function (i) {
+        getAllRecords: function (i, j) {
+            i = i || 0;
+            
             //todo use an immutable library
-            return JSON.parse(JSON.stringify(GLOBAL.track.records));
+            return JSON.parse(JSON.stringify(GLOBAL.track.records.slice(i,j)));
             // return GLOBAL.track.records.map(function (o) { return o; });
         },
         recordStart: function () {

@@ -68,7 +68,7 @@ light.service("draw", function (arg) {
     });
 });
 light.service("visualizeCalls", function (arg, service, system) {
-    var records = system.getAllRecords();
+    var records = system.getAllRecords(50,60);
     for (var i = 0; i < records.length; i++) {
         var currentRecord = records[i];
         var nextRecord = records[i + 1] || { methodType: "end", methodName: "" };
