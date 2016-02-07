@@ -1198,7 +1198,8 @@ describe('light', function () {
         var map2 = map1.set('b', 50);
         console.log(map1.get('b')); // 2
         console.log(map2.get('b')); // 50
-
+        map1 = map1.set('b', 50);
+        console.log(map1.get('b')); // 50
 
 
     });
