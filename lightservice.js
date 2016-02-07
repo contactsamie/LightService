@@ -90,7 +90,7 @@ var light = (function () {
         var se = document.createElement('script');
         se.type = "text/javascript";
         se.text = xhrObj.responseText;
-        document.getElementsByTagName('body')[0].appendChild(se);
+        document.getElementsByTagName('head')[0].appendChild(se);
     };
     GLOBAL.eventSubscribers = {};
 
@@ -130,7 +130,7 @@ var light = (function () {
         }
     }
 
-    GLOBAL.system = {
+    GLOBAL.system = {       
         getRecord: function (i) {
             GLOBAL.track.records = GLOBAL.track.records || [];
             return GLOBAL.track.records[i] || [];
