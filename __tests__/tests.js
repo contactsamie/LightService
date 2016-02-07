@@ -1124,53 +1124,53 @@ describe('light', function () {
         });
     });
 
-    it('providing local temporary storage', function () {
+    it('providing local temporary state', function () {
         var haccess_1;
 
-        haccess_2 = light.service(function (arg, service, system, storage) {
+        haccess_2 = light.service(function (arg, service, system, state) {
             arg = arg || {};
             arg.x = arg.x || 0;
-            if (storage.get("answer")) {
-                return { x: 555 * storage.get("answer").x };
+            if (state.get("answer")) {
+                return { x: 555 * state.get("answer").x };
             }
 
             arg.x = arg.x + 100;
-            storage.set("answer", arg);
-            return storage.get("answer");
+            state.set("answer", arg);
+            return state.get("answer");
         });
-        haccess_1 = light.service(function (arg, service, system, storage) {
+        haccess_1 = light.service(function (arg, service, system, state) {
             arg = arg || {};
             arg.x = arg.x || 0;
-            if (storage.get("answer")) {
-                return { x: 555 * storage.get("answer").x };
+            if (state.get("answer")) {
+                return { x: 555 * state.get("answer").x };
             }
 
             arg.x = arg.x + 10;
-            storage.set("answer", arg);
-            return storage.get("answer");
+            state.set("answer", arg);
+            return state.get("answer");
         });
 
-        haccess_2r = light.service(function (arg, service, system, storage) {
+        haccess_2r = light.service(function (arg, service, system, state) {
             arg = arg || {};
             arg.x = arg.x || 0;
-            if (storage.getRef("answer")) {
-                return { x: 555 * storage.getRef("answer").x };
+            if (state.getRef("answer")) {
+                return { x: 555 * state.getRef("answer").x };
             }
 
             arg.x = arg.x + 100;
-            storage.setRef("answer", arg);
-            return storage.getRef("answer");
+            state.setRef("answer", arg);
+            return state.getRef("answer");
         });
-        haccess_1r = light.service(function (arg, service, system, storage) {
+        haccess_1r = light.service(function (arg, service, system, state) {
             arg = arg || {};
             arg.x = arg.x || 0;
-            if (storage.getRef("answer")) {
-                return { x: 555 * storage.getRef("answer").x };
+            if (state.getRef("answer")) {
+                return { x: 555 * state.getRef("answer").x };
             }
 
             arg.x = arg.x + 10;
-            storage.setRef("answer", arg);
-            return storage.getRef("answer");
+            state.setRef("answer", arg);
+            return state.getRef("answer");
         });
 
         light(function (service) {

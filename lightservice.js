@@ -1,27 +1,27 @@
 var light = (function () {
     var GLOBAL = {};
-    GLOBAL._STORE_ = {};
-    GLOBAL.storeFactory = function (systemName) {
-        GLOBAL._STORE_[systemName] = {
-            store: {},
+    GLOBAL._STATE_ = {};
+    GLOBAL.stateFactory = function (systemName) {
+        GLOBAL._STATE_[systemName] = {
+            state: {},
             ref: {},
             method: function () {
                 return {
                     get: function (name) {
-                        var data = GLOBAL._STORE_[systemName]["store"][name];
+                        var data = GLOBAL._STATE_[systemName]["state"][name];
                         if (!data) {
                             return data;
                         };
                         return JSON.parse(data).data;
                     },
                     set: function (name, obj) {
-                        GLOBAL._STORE_[systemName]["store"][name] = JSON.stringify({ data: obj });
+                        GLOBAL._STATE_[systemName]["state"][name] = JSON.stringify({ data: obj });
                     },
                     setRef: function (name, obj) {
-                        GLOBAL._STORE_[systemName]["ref"][name] = obj;
+                        GLOBAL._STATE_[systemName]["ref"][name] = obj;
                     },
                     getRef: function (name) {
-                        return GLOBAL._STORE_[systemName]["ref"][name];
+                        return GLOBAL._STATE_[systemName]["ref"][name];
                     }
                 };
             }
@@ -84,7 +84,7 @@ var light = (function () {
     }
 
     GLOBAL._GLOBAL_SCOPE_NAME = GLOBAL.generateUniqueSystemName("_GLOBAL_SCOPE_");
-    GLOBAL.storeFactory(GLOBAL._GLOBAL_SCOPE_NAME);
+    GLOBAL.stateFactory(GLOBAL._GLOBAL_SCOPE_NAME);
 
     GLOBAL.loadScript = function (src, onload) {
         // todo wrap require js
@@ -342,7 +342,7 @@ var light = (function () {
             link: testhandle
         });
 
-        tmpDefinition = testhandle.call(GLOBAL.systemServices, definition, arg, GLOBAL.system, GLOBAL._STORE_[serviceName].method());
+        tmpDefinition = testhandle.call(GLOBAL.systemServices, definition, arg, GLOBAL.system, GLOBAL._STATE_[serviceName].method());
 
         GLOBAL.track.record({
             entranceOrExit: GLOBAL.exitTag,
@@ -396,7 +396,7 @@ var light = (function () {
                     link: (testhandle || handle.definition)
                 });
 
-                tmpDefinition = (testhandle || handle.definition).call(GLOBAL.systemServices, definition, arg, GLOBAL.system, GLOBAL._STORE_[handleName].method());
+                tmpDefinition = (testhandle || handle.definition).call(GLOBAL.systemServices, definition, arg, GLOBAL.system, GLOBAL._STATE_[handleName].method());
 
                 GLOBAL.track.record({
                     entranceOrExit: GLOBAL.exitTag,
@@ -462,7 +462,7 @@ var light = (function () {
               lastResult = returnDefinitionFromHandle.call(GLOBAL.system, lastResult, chainService());
             */
 
-            lastResult = returnDefinitionFromHandle.call(GLOBAL.systemServices, lastResult, chainService(), GLOBAL.system, GLOBAL._STORE_[serviceName].method());
+            lastResult = returnDefinitionFromHandle.call(GLOBAL.systemServices, lastResult, chainService(), GLOBAL.system, GLOBAL._STATE_[serviceName].method());
         }
 
         return lastResult;
@@ -624,7 +624,7 @@ var light = (function () {
         //!! reg
         GLOBAL.registry.service[serviceName] = {};
 
-        GLOBAL.storeFactory(serviceName);
+        GLOBAL.stateFactory(serviceName);
 
         /*
          GLOBAL.system[serviceName] = function (arg) {
@@ -706,7 +706,7 @@ var light = (function () {
         // (function (f) {
         //   setTimeout(function () {
         chainService(function (cs) {
-            typeof f === "function" && f.call(GLOBAL.systemServices, cs, GLOBAL.system, GLOBAL._STORE_[GLOBAL._GLOBAL_SCOPE_NAME].method());
+            typeof f === "function" && f.call(GLOBAL.systemServices, cs, GLOBAL.system, GLOBAL._STATE_[GLOBAL._GLOBAL_SCOPE_NAME].method());
         });
         //    },0);
         // })(f);
@@ -743,7 +743,7 @@ var light = (function () {
             name: handleName,
             definition: definition
         });
-        GLOBAL.storeFactory(handleName);
+        GLOBAL.stateFactory(handleName);
         return handleName;
     }
 
@@ -752,7 +752,7 @@ var light = (function () {
     _light.advance = {
         serviceTest: function (setup, f) {
             GLOBAL._TEST_OBJECTS_ = setup;
-            f.call(GLOBAL.systemServices, chainService(), GLOBAL.system, GLOBAL._STORE_[GLOBAL._GLOBAL_SCOPE_NAME]);
+            f.call(GLOBAL.systemServices, chainService(), GLOBAL.system, GLOBAL._STATE_[GLOBAL._GLOBAL_SCOPE_NAME]);
             GLOBAL._TEST_OBJECTS_ = undefined
         }
     };
