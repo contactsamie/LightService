@@ -32,5 +32,9 @@
         });
     });
 
-   
+    it('visualize calls', function () {
+        light.service("visual.js").load(function (service) {
+            service.visualizeCalls();
+        });
+    });
 });

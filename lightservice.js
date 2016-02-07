@@ -75,7 +75,7 @@ var light = (function () {
         var script = document.createElement('script');
         script.src = src;
         script.onload = typeof onload === "function" ? onload : function () { };
-        document.body.appendChild(script);
+        document.getElementsByTagName('head')[0].appendChild(script);
     };
 
     GLOBAL.loadScriptSync = function (src) {

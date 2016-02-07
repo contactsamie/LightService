@@ -67,17 +67,15 @@ light.service("draw", function (arg) {
         var cy = window.cy = cytoscape(graphArg);
     });
 });
-light(function (service, system) {
+light.service("visualizeCalls", function (arg, service, system) {
     var records = system.getAllRecords();
     for (var i = 0; i < records.length; i++) {
         var currentRecord = records[i];
         var nextRecord = records[i + 1] || { methodType: "end", methodName: "" };
-
         service.connect({
             from: (currentRecord.dataType === "argument" ? "in:" : "out:") + currentRecord.methodType + ":" + currentRecord.methodName,//+ currentRecord.position,
             to: (nextRecord.dataType === "argument" ? "in:" : "out:") + nextRecord.methodType + ":" + nextRecord.methodName,//+ nextRecord.position,
         });
     }
-
     service.draw("cy");
 });
