@@ -1,4 +1,4 @@
-﻿$(function () {
+﻿
     var graphArg = {
         boxSelectionEnabled: false,
         autounselectify: true,
@@ -84,4 +84,3 @@
      
        
     });
-});
