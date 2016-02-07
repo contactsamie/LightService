@@ -1,5 +1,29 @@
 var light = (function () {
     var GLOBAL = {};
+    GLOBAL.registry = {
+        service: {},
+        handle: {},
+        scripts: {}
+    };
+    GLOBAL.isRegistered = function (str) {
+        if (GLOBAL.registry.service[str] || GLOBAL.registry.handle[str]) {
+            return true;
+        }
+        return false;
+    };
+
+    GLOBAL.generateUniqueSystemName = function (prefix) {
+        prefix = prefix || "";
+        var str = (prefix + '_xxxxxxxx_xxxx_4xxx_yxxx_xxxxxxxxxxxx')["replace"](/[xy]/g, function (c) { var r = Math.random() * 16 | 0, v = c == 'x' ? r : r & 0x3 | 0x8; return v.toString(16); });
+
+        if (GLOBAL.isRegistered(str)) {
+            return GLOBAL.generateUniqueSystemName(prefix);
+        }
+        return str;
+    }
+    GLOBAL.ImmutableStore = {};
+
+  
     GLOBAL._STATE_ = {};
     GLOBAL.stateFactory = function (systemName) {
         GLOBAL._STATE_[systemName] = {
@@ -38,21 +62,12 @@ var light = (function () {
 
     GLOBAL._TEST_OBJECTS_;
     GLOBAL.systemServices = {};
-    GLOBAL.registry = {
-        service: {},
-        handle: {},
-        scripts: {}
-    };
+
     GLOBAL.burnThread = function (seconds) {
         var e = new Date().getTime() + (seconds * 1000);
         while (new Date().getTime() <= e) { }
     };
-    GLOBAL.isRegistered = function (str) {
-        if (GLOBAL.registry.service[str] || GLOBAL.registry.handle[str]) {
-            return true;
-        }
-        return false;
-    };
+
     var XMLHttpFactories = [
 	function () { return new XMLHttpRequest() },
 	function () { return new ActiveXObject("Msxml2.XMLHTTP") },
@@ -72,15 +87,6 @@ var light = (function () {
             break;
         }
         return xmlhttp;
-    }
-    GLOBAL.generateUniqueSystemName = function (prefix) {
-        prefix = prefix || "";
-        var str = (prefix + '_xxxxxxxx_xxxx_4xxx_yxxx_xxxxxxxxxxxx')["replace"](/[xy]/g, function (c) { var r = Math.random() * 16 | 0, v = c == 'x' ? r : r & 0x3 | 0x8; return v.toString(16); });
-
-        if (GLOBAL.isRegistered(str)) {
-            return GLOBAL.generateUniqueSystemName(prefix);
-        }
-        return str;
     }
 
     GLOBAL._GLOBAL_SCOPE_NAME = GLOBAL.generateUniqueSystemName("_GLOBAL_SCOPE_");
@@ -756,6 +762,31 @@ var light = (function () {
             GLOBAL._TEST_OBJECTS_ = undefined
         }
     };
+    if (typeof Immutable === "undefined") {
+        _light.Immutable = {
+            Map: function (obj) {
+                var name = GLOBAL.generateUniqueSystemName("immu");
+                var data = { data: obj }
+                GLOBAL.ImmutableStore[name] = JSON.stringify(data);
+                return {
+                    get: function (n) {
+                        var out = JSON.parse(GLOBAL.ImmutableStore[name]);
+                        return out.data[n];
+                    },
+                    set: function (n, o) {
+                        var out = JSON.parse(GLOBAL.ImmutableStore[name]);
+                        out.data[n] = o;
+                     var newData=  JSON.parse(JSON.stringify(out)).data ;
+
+                     return _light.Immutable.Map(newData);
+                    }
+                };
+            }
+        };
+    } else {
+        _light.Immutable = Immutable;
+    }
+    
 
     _light.version = 1;
 

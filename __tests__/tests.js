@@ -1191,5 +1191,15 @@ describe('light', function () {
             expect(this[haccess_1]().x).toBe(5550);
             expect(this[haccess_2]().x).toBe(55500);
         });
+
+
+        var Immutable = light.Immutable;
+        var map1 = Immutable.Map({ a: 1, b: 2, c: 3 });
+        var map2 = map1.set('b', 50);
+        console.log(map1.get('b')); // 2
+        console.log(map2.get('b')); // 50
+
+
+
     });
 });
