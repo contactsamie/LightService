@@ -786,7 +786,9 @@ var light = (function () {
     } else {
         _light.Immutable = Immutable;
     }
-    
+    _light.copy = function (obj) {
+        _light.Immutable.Map({data:obj}).get('data');
+    };
 
     _light.version = 1;
 
