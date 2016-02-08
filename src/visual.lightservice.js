@@ -2,8 +2,7 @@
     boxSelectionEnabled: false,
     autounselectify: true,
     layout: {
-        //  padding: 10,
-        name: 'grid' // 'circle'//'concentric'// 'grid'// 'dagre'
+        name: 'grid' 
     }
 };
 graphArg.style = [{

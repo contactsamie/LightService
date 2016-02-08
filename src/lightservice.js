@@ -1,6 +1,15 @@
 var light = (typeof light === "undefined") ? (function () {
     var GLOBAL = {};
-
+    GLOBAL.getCurrentContext = function (stateName, arg) {
+        var incontext = {
+            event: GLOBAL.systemServices,
+            service: chainService(),
+            arg: arg,
+            system: GLOBAL.system,
+            state: GLOBAL._STATE_[stateName].method()
+        };
+        return incontext;
+    };
     GLOBAL.forbiddenNames = {
         result: true,
         service: true,
@@ -215,17 +224,6 @@ var light = (typeof light === "undefined") ? (function () {
                 }, e, context, "service-throws");
             }
         }
-    };
-
-    GLOBAL.getCurrentContext = function (stateName, arg) {
-        var incontext = {
-            event: GLOBAL.systemServices,
-            service: chainService(),
-            arg: arg,
-            system: GLOBAL.system,
-            state: GLOBAL._STATE_[stateName].method()
-        };
-        return incontext;
     };
 
     var XMLHttpFactories = [

@@ -1,6 +1,15 @@
 {
+  "version": "4.0.0",
   "name": "lightservice",
-  "version": "3.3.0",
+  "homepage": "https://github.com/contactsamie/LightService",
+  "bugs": {
+    "url": "https://github.com/contactsamie/LightService/issues",
+    "email": "contactsamie@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/contactsamie/LightService.git"
+  },
   "description": "",
   "main": "gulpfile.js",
   "scripts": {
