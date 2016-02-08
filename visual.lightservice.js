@@ -50,7 +50,7 @@ light.service("addNode", function (arg) {
 });
 light.service("connect", function (arg) {
     if (!nodes[arg.from]) {
-        this.addNode({
+        this.service.addNode({
             id: arg.from,
             error: arg.fromError,
             success: arg.fromSuccess,
@@ -59,7 +59,7 @@ light.service("connect", function (arg) {
         });
     }
     if (!nodes[arg.to]) {
-        this.addNode({
+        this.service.addNode({
             id: arg.to,
             error: arg.toError,
             success: arg.toSuccess,
@@ -94,10 +94,9 @@ light.service("draw", function (arg) {
         });
     });
 });
-light.service("visual", function (arg, service, system) {
-    arg = arg || {};
- 
-    var records = system.getAllRecords();
+light.service("visual", function (arg) {
+    arg = arg || {}; 
+    var records = this.system.getAllRecords();
     for (var i = 0; i < records.length; i++) {
         var currentRecord = records[i];
         var nextRecord = records[i + 1] || {
@@ -116,17 +115,45 @@ light.service("visual", function (arg, service, system) {
             from: (arg.useShortNames ? currentRecord.position : ((currentRecord.dataType === "argument" ? "in:" : "out:") + currentRecord.methodType + ":" + currentRecord.methodName)) + (arg.streatchOutCalls ? ("# " + currentRecord.position) : ""),
             to: (arg.useShortNames ? nextRecord.position : ((nextRecord.dataType === "argument" ? "in:" : "out:") + nextRecord.methodType + ":" + nextRecord.methodName)) + (arg.streatchOutCalls ? ("# " + nextRecord.position) : ""),
         };
-        service.connect(connectObj);
+        this.service.connect(connectObj);
     }
-    service.draw(arg);
+    this.service.draw(arg);
 });
-//default values
-//arg = {
-//    useShortNames: false,
-//    streatchOutCalls: false,
-//    containerId: "cy",
-//    resultId: "definition",
-//    layout: {
-//        name:"grid"
-//    }
-//};
+/*
+
+light.service("one", function() {
+   return "one";
+});
+light.service("two", function() {
+   return "two";
+});
+light.service("three", function() {
+   throw "three";
+});
+light.service("four", function() {
+   return "four";
+});
+light.service("five", function() {
+   return me;
+});
+light.service("six", function() {
+   return "six";
+});
+
+light(function(service, system) {
+   system.recordStart();
+   service.one().two().three().four().five().six();
+});
+light(function(service) {
+   service.visual({
+      useShortNames: false,
+      streatchOutCalls: false,
+      containerId: "cy",
+      resultId: "definition",
+      layout: {
+         name: "circle"//circle,concentric, preset, random,breadthfirst,grid
+      }
+   });
+});
+
+*/

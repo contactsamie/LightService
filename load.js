@@ -1,15 +1,15 @@
-﻿var __haccess_11=light.handle(function (definition) {
+﻿var __haccess_11=light.handle(function (method) {
     return function (arg) {
-        arg = this["__haccess_2"](arg);
-        result = definition(arg);
-        result = this["__haccess_2"](result);
+        arg = this.service["__haccess_2"](arg).result();
+        result = method(arg);
+        result = this.service["__haccess_2"](result).result();
         return result;
     };
 });
- var __haccess_22= light.handle(function (definition) {
+ var __haccess_22= light.handle(function (method) {
     return function (arg) {
         arg.x = arg.x + 1000
-        result = definition(arg);
+        result = method(arg);
         arg.x = arg.x + 1000
         return result;
     };

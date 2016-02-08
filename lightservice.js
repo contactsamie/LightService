@@ -217,6 +217,16 @@ var light = (typeof light === "undefined") ? (function () {
         }
     };
 
+    GLOBAL.getCurrentContext = function (stateName, arg) {
+        var incontext = {
+            service: chainService(),
+            arg: arg,
+            system: GLOBAL.system,
+            state: GLOBAL._STATE_[stateName].method()
+        };
+        return incontext;
+    };
+
     var XMLHttpFactories = [
   function () { return new XMLHttpRequest() },
   function () { return new ActiveXObject("Msxml2.XMLHTTP") },
@@ -327,17 +337,6 @@ var light = (typeof light === "undefined") ? (function () {
 
         var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handle;
 
-        /*
-         GLOBAL.system.$$currentContext = {
-            handles: GLOBAL.handles,
-            definition: definition,
-            serviceName: serviceName,
-            handleName: undefined,
-            arg: arg
-        };
-        tmpDefinition = testhandle.call(GLOBAL.system, definition);
-
-        */
         GLOBAL.track.record({
             entranceOrExit: GLOBAL.entranceTag,
             serviceOrHandleMethodName: GLOBAL.handleTag,
@@ -351,7 +350,7 @@ var light = (typeof light === "undefined") ? (function () {
             link: testhandle
         });
 
-        tmpDefinition = testhandle.call(GLOBAL.systemServices, definition, arg, GLOBAL.system, GLOBAL._STATE_[serviceName].method());
+        tmpDefinition = testhandle.call(GLOBAL.getCurrentContext(serviceName, definition), definition);
 
         GLOBAL.track.record({
             entranceOrExit: GLOBAL.exitTag,
@@ -380,18 +379,6 @@ var light = (typeof light === "undefined") ? (function () {
             var handle = GLOBAL.handles[j];
             isAMatch = handleName && (handle.name === handleName);
             if (isAMatch) {
-                /*
-                 GLOBAL.system.$$currentContext = {
-                    handles: GLOBAL.handles,
-                    definition: definition,
-                    serviceName: serviceName,
-                    handleName: handle.name,
-                    arg: arg
-                };
-
-              tmpDefinition = (testhandle || handle.definition).call(GLOBAL.system, definition);
-                */
-
                 GLOBAL.track.record({
                     entranceOrExit: GLOBAL.entranceTag,
                     serviceOrHandleMethodName: GLOBAL.handleTag,
@@ -405,7 +392,7 @@ var light = (typeof light === "undefined") ? (function () {
                     link: (testhandle || handle.definition)
                 });
 
-                tmpDefinition = (testhandle || handle.definition).call(GLOBAL.systemServices, definition, arg, GLOBAL.system, GLOBAL._STATE_[handleName].method());
+                tmpDefinition = (testhandle || handle.definition).call(GLOBAL.getCurrentContext(handleName, definition), definition);
 
                 GLOBAL.track.record({
                     entranceOrExit: GLOBAL.exitTag,
@@ -467,11 +454,7 @@ var light = (typeof light === "undefined") ? (function () {
                 throw message;
             }
 
-            /*
-              lastResult = returnDefinitionFromHandle.call(GLOBAL.system, lastResult, chainService());
-            */
-
-            lastResult = returnDefinitionFromHandle.call(GLOBAL.systemServices, lastResult, chainService(), GLOBAL.system, GLOBAL._STATE_[serviceName].method());
+            lastResult = returnDefinitionFromHandle.call(GLOBAL.getCurrentContext(serviceName, lastResult), lastResult);
         }
 
         return lastResult;
@@ -717,7 +700,7 @@ var light = (typeof light === "undefined") ? (function () {
         // (function (f) {
         //   setTimeout(function () {
         chainService(function (cs) {
-            typeof f === "function" && f.call(GLOBAL.systemServices, cs, GLOBAL.system, GLOBAL._STATE_[GLOBAL._GLOBAL_SCOPE_NAME].method());
+            typeof f === "function" && f.call(GLOBAL.getCurrentContext(GLOBAL._GLOBAL_SCOPE_NAME, cs), cs);
         });
         //    },0);
         // })(f);
@@ -763,7 +746,8 @@ var light = (typeof light === "undefined") ? (function () {
     _light.advance = {
         serviceTest: function (setup, f) {
             GLOBAL._TEST_OBJECTS_ = setup;
-            f.call(GLOBAL.systemServices, chainService(), GLOBAL.system, GLOBAL._STATE_[GLOBAL._GLOBAL_SCOPE_NAME]);
+
+            f.call(GLOBAL.getCurrentContext(GLOBAL._GLOBAL_SCOPE_NAME, chainService()), chainService());
             GLOBAL._TEST_OBJECTS_ = undefined
         }
     };
@@ -823,7 +807,7 @@ var light = (typeof light === "undefined") ? (function () {
     init();
 
     return _light;
-})(): console.log("light script already exists");
+})() : console.log("light script already exists");
 
 if (typeof module !== "undefined" && ('exports' in module)) {
     module.exports = light;

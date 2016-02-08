@@ -10,30 +10,30 @@ light.event(function (e, context,notificationInfo) {
 
 light.event(function (e, context, notificationInfo) { });
 
-light.service("test", function (arg, service) { });
-light.service("test-2", function (arg, service) { });
-light.service("test-2b2", function (arg, service) { });
-light.service("test_error", function (arg, service) { throw "error occured"; });
-light.service("sample1", function (arg, service) { return arg.x * arg.y; });
-light.service("sample2", function (arg, service) {
-    return this.sample1({ x: 2, y: 3 });
+light.service("test", function (arg) { });
+light.service("test-2", function (arg) { });
+light.service("test-2b2", function (arg) { });
+light.service("test_error", function (arg) { throw "error occured"; });
+light.service("sample1", function (arg) { return arg.x * arg.y; });
+light.service("sample2", function (arg) {
+    return this.service.sample1({ x: 2, y: 3 }).result();
 });
 
 describe('light', function () {
     it('recording history', function () {
         var haccess_1;
 
-        haccess_1 = light.service(function (arg, service, system) {
+        haccess_1 = light.service(function (arg, system) {
             arg.x = arg.x + 10;
             return arg;
         });
 
-        light(function (service, system) {
-            system.recordStart();
-            var answer = service[haccess_1]({ x: 0 }).result();
-            console.log(system.getAllRecords());
-            system.play(0, 1);
-            console.log(system.getAllRecords());
+        light(function ( system) {
+            this.system.recordStart();
+            var answer = this.service[haccess_1]({ x: 0 }).result();
+            console.log(this.system.getAllRecords());
+            this.system.play(0, 1);
+            console.log(this.system.getAllRecords());
             expect(answer.x).toBe(10);
         });
     });
@@ -41,15 +41,15 @@ describe('light', function () {
     it('exists', function () {
         expect(light.version).toBe(1);
     });
-
-    it('using new api', function () {
-        light(function (service) {
-            var test = this.test_error;
+    /*
+     it('using new api', function () {
+        light(function () {
+            var test = this.service.test_error;
             var path = [];
             test.before(function () { path.push("before"); });
             test.after(function () { path.push("after"); });
             test.error(function () { path.push("error"); });
-            test();
+            test().result();
             expect(path[0]).toBe("before");
             expect(path[1]).toBe("error");
             expect(path[2]).toBe("after");
@@ -57,23 +57,19 @@ describe('light', function () {
         });
     });
 
-    it('event listening are not available in service definition', function () {
+  it('event listening are not available in service method', function () {
         light.service("sample_no_event", function (arg) {
-            //expect(this.sample1.before).toBe(undefined);
-            //expect(this.sample1.error).toBe(undefined);
-            //expect(this.sample1.after).toBe(undefined);
-
-            return this.sample1({ x: 2, y: 3 });
+            return this.service.sample1({ x: 2, y: 3 }).result();
         });
 
-        light(function (service) {
-            this.sample_no_event();
+        light(function () {
+            this.service.sample_no_event().result();
         });
     });
 
     it('should allow event subscription - forEachSubscriber', function () {
-        light.startService("test-2", function (service) {
-            var test = this["test-2"];
+        light.startService("test-2", function () {
+            var test = this.service["test-2"];
 
             var path = [];
 
@@ -92,46 +88,38 @@ describe('light', function () {
             });
 
             expect(subs).toBe(subsExpected);
-            test();
+            test().result();
             expect(subs).toBe(subsExpected);
-            test();
+            test().result();
         });
     });
 
-    it('should allow light definition', function () {
-        light.startService("test", function (service) {
-            var test = this.test;
-            expect(test.me).toBe("test");
-            expect(test.position).toBe(1);
-        });
-    });
-
-    it('should allow event subscription 1', function () {
-        light.startService("test", function (service) {
-            var test = this.test;
+  it('should allow event subscription 1', function () {
+        light.startService("test", function () {
+            var test = this.service.test;
             var path = [];
             test.before(function () { path.push("before"); });
-            test();
+            test().result();
             expect(path[0]).toBe("before");
             expect(path.length).toBe(1);
         });
     });
     it('should allow event subscription 2', function () {
-        light.startService("test", function (service, system) {
-            var test = this.test;
+        light.startService("test", function ( system) {
+            var test = this.service.test;
             var path = [];
             test.after(function () {
                 path.push("after1");
             });
-            test();
+            test().result();
             expect(path[0]).toBe("after1");
             expect(path.length).toBe(1);
         });
     });
 
     it('should allow event subscription 2', function () {
-        light.startService("test", function (service) {
-            var test = this.test;
+        light.startService("test", function () {
+            var test = this.service.test;
             var path = [];
             test.after(function () {
                 path.push("after2");
@@ -141,15 +129,15 @@ describe('light', function () {
                 console.warn(it);
             });
 
-            test();
+            test().result();
             expect(path[0]).toBe("after2");
             expect(path.length).toBe(1);
         });
     });
 
     it('should allow event subscription - forEachSubscriber ', function () {
-        light.startService("test-2b2", function (service) {
-            var test = this["test-2b2"];
+        light.startService("test-2b2", function () {
+            var test = this.service["test-2b2"];
             var path = [];
 
             var subs = "";
@@ -172,30 +160,30 @@ describe('light', function () {
             });
 
             expect(subs).toBe(subsExpected);
-            test();
+            test().result();
             expect(subs).toBe(subsExpected);
-            test();
+            test().result();
         });
     });
 
     it('should allow event subscription 3', function () {
-        light.startService("test", function (service) {
-            var test = this.test;
+        light.startService("test", function () {
+            var test = this.service.test;
             var path = [];
             test.error(function () { path.push("error"); });
-            test();
+            test().result();
             expect(path.length).toBe(0);
         });
     });
 
     it('should allow event subscription 5', function () {
-        light.startService("test", function (service) {
-            var test = this.test;
+        light.startService("test", function () {
+            var test = this.service.test;
             var path = [];
             test.before(function () { path.push("before"); });
             test.after(function () { path.push("after"); });
             test.error(function () { path.push("error"); });
-            test();
+            test().result();
             expect(path[0]).toBe("before");
             expect(path[1]).toBe("after");
             expect(path.length).toBe(2);
@@ -203,23 +191,23 @@ describe('light', function () {
     });
 
     it('should allow event subscription 4', function () {
-        light.startService("test_error", function (service) {
-            var test = this["test_error"];
+        light.startService("test_error", function () {
+            var test = this.service["test_error"];
             var path = [];
             test.error(function () { path.push("error"); });
-            test();
+            test().result();
             expect(path.length).toBe(1);
         });
     });
 
     it('should allow event subscription 6', function () {
-        light.startService("test_error", function (service) {
-            var test = this["test_error"];
+        light.startService("test_error", function () {
+            var test = this.service["test_error"];
             var path = [];
             test.before(function () { path.push("before"); });
             test.after(function () { path.push("after"); });
             test.error(function () { path.push("error"); });
-            test();
+            test().result();
             expect(path[0]).toBe("before");
             expect(path[1]).toBe("error");
             expect(path[2]).toBe("after");
@@ -228,13 +216,13 @@ describe('light', function () {
     });
 
     it('should run 1', function () {
-        light.startService("sample2", function (service) {
-            var test = this.sample2;
+        light.startService("sample2", function () {
+            var test = this.service.sample2;
             var path = [];
             test.before(function () { path.push("before"); });
             test.after(function () { path.push("after"); });
             test.error(function (o) { path.push("error"); console.log(o); });
-            var answer = test();
+            var answer = test().result();
             expect(path[0]).toBe("before");
             expect(path[1]).toBe("after");
             expect(path.length).toBe(2);
@@ -243,17 +231,42 @@ describe('light', function () {
     });
 
     it('should run 2', function () {
-        light.startService("sample1", function (service) {
-            var test = this.sample1;
+        light.startService("sample1", function () {
+            var test = this.service.sample1;
             var path = [];
             test.before(function () { path.push("before"); });
             test.after(function () { path.push("after"); });
             test.error(function (o) { path.push("error"); console.log(o); });
-            var answer = test({ x: 2, y: 3 });
+            var answer = test({ x: 2, y: 3 }).result();
             expect(path[0]).toBe("before");
             expect(path[1]).toBe("after");
             expect(path.length).toBe(2);
             expect(answer).toBe(6);
+        });
+    });
+    it('native tests', function () {
+        light(function () {
+            light.advance.serviceTest(testObj, function () {
+                var test = this.service.sample2;
+                var path = [];
+                test.before(function () { path.push("before"); });
+                test.after(function () { path.push("after"); });
+                test.error(function (o) { path.push("error"); console.log(o); });
+                var answer = test().result();
+                expect(path[0]).toBe("before");
+                expect(path[1]).toBe("after");
+                expect(path.length).toBe(2);
+                expect(answer).toBe(5);
+            });
+        });
+    });
+    */
+
+    it('should allow light method', function () {
+        light.startService("test", function () {
+            var test = this.service.test;
+            expect(test.me).toBe("test");
+            expect(test.position).toBe(1);
         });
     });
 
@@ -265,45 +278,29 @@ describe('light', function () {
             }
         }
     };
-    it('native tests', function () {
-        light(function (service) {
-            light.advance.serviceTest(testObj, function (service) {
-                var test = this.sample2;
-                var path = [];
-                test.before(function () { path.push("before"); });
-                test.after(function () { path.push("after"); });
-                test.error(function (o) { path.push("error"); console.log(o); });
-                var answer = test();
-                expect(path[0]).toBe("before");
-                expect(path[1]).toBe("after");
-                expect(path.length).toBe(2);
-                expect(answer).toBe(5);
-            });
-        });
-    });
 
     it('native tests 2', function () {
-        light(function (service) {
-            light.advance.serviceTest(testObj, function (service) {
-                var test = this.sample2;
-                var answer = test();
+        light(function () {
+            light.advance.serviceTest(testObj, function () {
+                var test = this.service.sample2;
+                var answer = test().result();
                 expect(answer).toBe(5);
             });
-            var test = this.sample2;
-            var answer = test();
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(6);
         });
     });
 
     it('native tests 2', function () {
-        light.advance.serviceTest(testObj, function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light.advance.serviceTest(testObj, function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(5);
         });
-        light(function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light(function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(6);
         });
     });
@@ -311,8 +308,8 @@ describe('light', function () {
     it('native tests pipes 1', function () {
         var testType1 = {
             sample1: {
-                handle: function (definition) {
-                    return definition;
+                handle: function (method) {
+                    return method;
                 },
                 //handleName: "testType1",
                 service: function (arg) {
@@ -321,14 +318,14 @@ describe('light', function () {
             }
         };
 
-        light.advance.serviceTest(testType1, function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light.advance.serviceTest(testType1, function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(5);
         });
-        light(function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light(function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(6);
         });
     });
@@ -336,8 +333,8 @@ describe('light', function () {
     it('can use default function pipe 1', function () {
         var testType1 = {
             sample1: {
-                handle: function (definition) {
-                    return definition;
+                handle: function (method) {
+                    return method;
                 },
                 //handleName: "testType1", CAN USE DEFAULT PIPE
                 service: function (arg) {
@@ -347,13 +344,13 @@ describe('light', function () {
         };
 
         light.advance.serviceTest(testType1, function () {
-            var test = this.sample2;
-            var answer = test();
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(5);
         });
-        light(function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light(function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(6);
         });
     });
@@ -361,8 +358,8 @@ describe('light', function () {
     it('can use default function pipe 2', function () {
         var testType1 = {
             sample1: {
-                handle: function (definition) {
-                    return definition;
+                handle: function (method) {
+                    return method;
                 },
                 //handleName: "testType2",
                 service: function (arg) {
@@ -371,14 +368,14 @@ describe('light', function () {
             }
         };
 
-        light.advance.serviceTest(testType1, function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light.advance.serviceTest(testType1, function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(5);
         });
-        light(function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light(function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(6);
         });
     });
@@ -393,13 +390,13 @@ describe('light', function () {
         };
 
         light.advance.serviceTest(testType1, function () {
-            var test = this.sample2;
-            var answer = test();
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(5);
         });
-        light(function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light(function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(6);
         });
     });
@@ -413,14 +410,14 @@ describe('light', function () {
             }
         };
 
-        light.advance.serviceTest(testType1, function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light.advance.serviceTest(testType1, function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(5);
         });
-        light(function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light(function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(6);
         });
     });
@@ -433,14 +430,14 @@ describe('light', function () {
             }
         };
 
-        light.advance.serviceTest(testType1, function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light.advance.serviceTest(testType1, function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(5);
         });
-        light(function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light(function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(6);
         });
     });
@@ -448,9 +445,9 @@ describe('light', function () {
     it('can use default function pipe 6', function () {
         var testType1 = {
             sample1: {
-                handle: function (definition) {
+                handle: function (method) {
                     return function (arg) {
-                        return definition(arg) + 10;
+                        return method(arg) + 10;
                     };
                 },
                 service: function (arg) {
@@ -459,14 +456,14 @@ describe('light', function () {
             }
         };
 
-        light.advance.serviceTest(testType1, function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light.advance.serviceTest(testType1, function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(15);
         });
-        light(function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light(function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(6);
         });
     });
@@ -474,22 +471,22 @@ describe('light', function () {
     it('can use default function pipe 7', function () {
         var testType1 = {
             sample1: {
-                handle: function (definition) {
+                handle: function (method) {
                     return function (arg) {
-                        return definition(arg) + 10;
+                        return method(arg) + 10;
                     };
                 }
             }
         };
 
-        light.advance.serviceTest(testType1, function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light.advance.serviceTest(testType1, function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(16);
         });
-        light(function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light(function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(6);
         });
     });
@@ -497,22 +494,22 @@ describe('light', function () {
     it('can use default function pipe 8', function () {
         var testType1 = {
             sample1: {
-                handle: function (definition) {
+                handle: function (method) {
                     return function (arg) {
-                        return definition(arg) + 10;
+                        return method(arg) + 10;
                     };
                 }
             }
         };
 
-        light.advance.serviceTest(testType1, function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light.advance.serviceTest(testType1, function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(16);
         });
-        light(function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light(function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(6);
         });
     });
@@ -520,9 +517,9 @@ describe('light', function () {
     it('can use default function pipe 9', function () {
         var testType1 = {
             sample1: {
-                handle: function (definition) {
+                handle: function (method) {
                     return function (arg) {
-                        return definition(arg) + 10;
+                        return method(arg) + 10;
                     };
                 },
                 service: function (arg) {
@@ -531,14 +528,14 @@ describe('light', function () {
             }
         };
 
-        light.advance.serviceTest(testType1, function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light.advance.serviceTest(testType1, function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(15);
         });
-        light(function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light(function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(6);
         });
     });
@@ -552,14 +549,14 @@ describe('light', function () {
             }
         };
 
-        /* light.advance.serviceTest(testType1, function (service) {
-             var test = this.sample2;
-             var answer = test();
+        /* light.advance.serviceTest(testType1, function () {
+             var test = this.service.sample2;
+             var answer = test().result();
              expect(answer).toBe(undefined);
          });*/
-        light(function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light(function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(6);
         });
     });
@@ -573,30 +570,30 @@ describe('light', function () {
             }
         };
 
-        /* light.advance.serviceTest(testType1, function (service) {
-             var test = this.sample2;
-             var answer = test();
+        /* light.advance.serviceTest(testType1, function () {
+             var test = this.service.sample2;
+             var answer = test().result();
              expect(answer).toBe(undefined);
          });*/
-        light(function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light(function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(6);
         });
     });
 
-    light.handle("pipeRegular", function (definition) {
-        return definition
+    light.handle("pipeRegular", function (method) {
+        return method
     });
 
-    light.handle("pipeChange", function (definition) {
+    light.handle("pipeChange", function (method) {
         return function (arg) {
-            return definition(arg) + 10;
+            return method(arg) + 10;
         };
     });
 
-    light.handle("pipeWrong", function (definition) {
-        return definition() + 10;
+    light.handle("pipeWrong", function (method) {
+        return method() + 10;
     });
 
     it('can use default function pipe 12', function () {
@@ -606,14 +603,14 @@ describe('light', function () {
             }
         };
 
-        light.advance.serviceTest(testType1, function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light.advance.serviceTest(testType1, function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(6);
         });
-        light(function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light(function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(6);
         });
     });
@@ -625,14 +622,14 @@ describe('light', function () {
             }
         };
 
-        light.advance.serviceTest(testType1, function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light.advance.serviceTest(testType1, function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(16);
         });
-        light(function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light(function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(6);
         });
     });
@@ -644,64 +641,64 @@ describe('light', function () {
             }
         };
 
-        light.advance.serviceTest(testType1, function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light.advance.serviceTest(testType1, function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(undefined);
         });
-        light(function (service) {
-            var test = this.sample2;
-            var answer = test();
+        light(function () {
+            var test = this.service.sample2;
+            var answer = test().result();
             expect(answer).toBe(6);
         });
     });
 
     it('should run with service', function () {
-        light.startService("sample21", function (service) {
-            var answer = service.sample2().result();
+        light.startService("sample21", function () {
+            var answer = this.service.sample2().result();
             expect(answer).toBe(6);
         });
     });
     it('should run with service', function () {
-        light.startService("sample22", function (service) {
-            var answer = service.sample1({ x: 2, y: 3 }).result();
+        light.startService("sample22", function () {
+            var answer = this.service.sample1({ x: 2, y: 3 }).result();
             expect(answer).toBe(6);
         });
     });
 
     it('should run with service', function () {
-        light.startService("sample23", function (service) {
-            var answer = service.sample1({ x: 2, y: 3 }).sample2().result();
+        light.startService("sample23", function () {
+            var answer = this.service.sample1({ x: 2, y: 3 }).sample2().result();
             expect(answer).toBe(6);
         });
     });
     it('should run with service', function () {
-        light.startService("sample24", function (service) {
-            var answer = service.sample2().sample1({ x: 2, y: 3 }).result();
+        light.startService("sample24", function () {
+            var answer = this.service.sample2().sample1({ x: 2, y: 3 }).result();
             expect(answer).toBe(6);
         });
     });
 
-    light.service("c1", function (arg, service) {
+    light.service("c1", function (arg) {
         return arg.x + 2;
     });
-    light.service("c2", function (arg, service) {
-        return this.c1({ x: 5 + arg.y });
+    light.service("c2", function (arg) {
+        return this.service.c1({ x: 5 + arg.y }).result();
     });
-    light.service("c3", function (arg, service) {
-        return service.c2({ y: arg.z }).result();
+    light.service("c3", function (arg) {
+        return this.service.c2({ y: arg.z }).result();
     });
-    light.service("c4", function (arg, service) {
+    light.service("c4", function (arg) {
         return { z: arg.w };
     });
-    light.service("c5", function (arg, service) {
+    light.service("c5", function (arg) {
         return arg;
     });
-    light.service("c6", function (arg, service) {
+    light.service("c6", function (arg) {
         arg.x = arg.x + 100;
         return arg;
     });
-    light.service("c7", function (arg, service) {
+    light.service("c7", function (arg) {
         arg = arg || {};
         arg.x = 1;
         arg.y = 2;
@@ -709,33 +706,33 @@ describe('light', function () {
     });
 
     it('default behaviour', function () {
-        light(function (service) {
-            var answer = service.c1({ x: 20 }).result();
+        light(function () {
+            var answer = this.service.c1({ x: 20 }).result();
             expect(answer).toBe(22);
         });
     });
     it('simple arg passing', function () {
-        light(function (service) {
-            var answer = service.c5({ x: 10 }).c1().result();
+        light(function () {
+            var answer = this.service.c5({ x: 10 }).c1().result();
             expect(answer).toBe(12);
         });
     });
 
     it('method can accept argument as usual', function () {
-        light(function (service) {
-            var answer = service.c5({ x: 10 }).c6().c1().result();
+        light(function () {
+            var answer = this.service.c5({ x: 10 }).c6().c1().result();
             expect(answer).toBe(112);
         });
     });
     it('previous results should be passed into new method', function () {
-        light(function (service) {
-            var answer = service.c7().c5().c6().c1().result();
+        light(function () {
+            var answer = this.service.c7().c5().c6().c1().result();
             expect(answer).toBe(103);
         });
     });
     it('passing arg overrides previous result', function () {
-        light(function (service, system) {
-            var answer = service.c7().c5().c6().c1().c5({ x: 10 }).c6().c1().result();
+        light(function ( system) {
+            var answer = this.service.c7().c5().c6().c1().c5({ x: 10 }).c6().c1().result();
             expect(answer).toBe(112);
         });
     });
@@ -750,19 +747,19 @@ describe('light', function () {
             }
         };
 
-        light.advance.serviceTest(testType1, function (service) {
-            var answer = service.c7().c5().c6().c1().result();
+        light.advance.serviceTest(testType1, function () {
+            var answer = this.service.c7().c5().c6().c1().result();
             expect(answer).toBe(114);
         });
 
-        light(function (service) {
-            var answer = service.c7().c5().c6().c1().result();
+        light(function () {
+            var answer = this.service.c7().c5().c6().c1().result();
             expect(answer).toBe(103);
         });
     });
 
-    light.service("c8", function (arg, service) {
-        return service.c7().c5().c6().result();
+    light.service("c8", function (arg) {
+        return this.service.c7().c5().c6().result();
     });
 
     it('test service in a service', function () {
@@ -775,13 +772,13 @@ describe('light', function () {
             }
         };
 
-        light.advance.serviceTest(testType1, function (service) {
-            var answer = service.c8().c1().result();
+        light.advance.serviceTest(testType1, function () {
+            var answer = this.service.c8().c1().result();
             expect(answer).toBe(114);
         });
 
-        light(function (service) {
-            var answer = service.c8().c1().result();
+        light(function () {
+            var answer = this.service.c8().c1().result();
             expect(answer).toBe(103);
         });
     });
@@ -796,15 +793,15 @@ describe('light', function () {
             }
         };
 
-        light.advance.serviceTest(testType1, function (service) {
-            var answer = this.c8();
-            answer = this.c1(answer);
+        light.advance.serviceTest(testType1, function () {
+            var answer = this.service.c8().result();
+            answer = this.service.c1(answer).result();
             expect(answer).toBe(114);
         });
 
-        light(function (service) {
-            var answer = this.c8();
-            answer = this.c1(answer);
+        light(function () {
+            var answer = this.service.c8().result();
+            answer = this.service.c1(answer).result();
             expect(answer).toBe(103);
         });
     });
@@ -828,23 +825,23 @@ describe('light', function () {
         var  total = 100;
          a = performance.now();
         for (var i = 0; i < total; i++) {
-            light(function (service) {
-                 answer = service["dynamic_" + i](answer).result();
+            light(function () {
+                 answer = this.service["dynamic_" + i](answer).result();
             });
          }
          b = performance.now();
          console.log('It took ' + Math.floor(b - a) + ' ms to execute ' + total + ' in ' + totalBuild+' services');
 
          a = performance.now();
-         light(function (service) {
-             answer = service["dynamic_0"](answer).result();
+         light(function () {
+             answer = this.service["dynamic_0"](answer).result();
          });
          b = performance.now();
          console.log('It took ' + Math.floor(b - a) + ' ms to execute the FIRST one in ' + totalBuild + ' services');
 
          a = performance.now();
-         light(function (service) {
-             answer = service["dynamic_" + (totalBuild - 1)](answer).result();
+         light(function () {
+             answer = this.service["dynamic_" + (totalBuild - 1)](answer).result();
          });
          b = performance.now();
          console.log('It took ' + Math.floor(b - a) + ' ms to execute the LAST one in ' + totalBuild + ' services');
@@ -863,13 +860,13 @@ describe('light', function () {
             throw "failure";
         });
 
-        light.handle("pass2Pipe", function (definition) {
+        light.handle("pass2Pipe", function (method) {
             return function (arg) {
                 var result;
                 var standardResult;
 
                 if (arg) {
-                    result = definition(arg);
+                    result = method(arg);
                     standardResult = {
                         success: result ? true : false,
                         result: result,
@@ -891,28 +888,28 @@ describe('light', function () {
             return arg;
         });
 
-        light(function (service) {
-            var answer = service.pass1().fail().pass2().result();
+        light(function () {
+            var answer = this.service.pass1().fail().pass2().result();
             expect(answer.exceptions.length).toBe(1);
         });
     });
     it('test service in a service', function () {
-        light.handle("handle10", function (definition) {
+        light.handle("handle10", function (method) {
             return function (arg) {
                 arg = arg || {};
                 arg.x = arg.x || 0;
                 arg.x = arg.x + 1;
-                result = definition(arg);
+                result = method(arg);
                 arg.x = arg.x + 1;
                 return result;
             };
         });
-        light.handle("handle20", function (definition) {
+        light.handle("handle20", function (method) {
             return function (arg) {
                 arg = arg || {};
                 arg.x = arg.x || 0;
                 arg.x = arg.x + 2;
-                result = definition(arg);
+                result = method(arg);
                 arg.x = arg.x + 2;
                 return result;
             };
@@ -937,41 +934,41 @@ describe('light', function () {
                 return arg;
             });
 
-        light(function (service, system) {
-            var answer = service.pass100().result();
+        light(function ( system) {
+            var answer = this.service.pass100().result();
             expect(answer.x).toBe(3);
 
-            answer = service.pass200().result();
+            answer = this.service.pass200().result();
             expect(answer.x).toBe(8);
 
-            answer = service.pass300().result();
+            answer = this.service.pass300().result();
             expect(answer.x).toBe(12);
 
-            answer = service.pass300().pass200().pass100().result();
+            answer = this.service.pass300().pass200().pass100().result();
             expect(answer.x).toBe(23);
         });
 
-        light(function (service) {
-            var answer = this.pass100();
+        light(function () {
+            var answer = this.service.pass100().result();
             expect(answer.x).toBe(3);
 
-            answer = this.pass200();
+            answer = this.service.pass200().result();
             expect(answer.x).toBe(8);
 
-            answer = this.pass300();
+            answer = this.service.pass300().result();
             expect(answer.x).toBe(12);
 
-            answer = this.pass100(this.pass200(this.pass300()));
+            answer = this.service.pass100(this.service.pass200(this.service.pass300().result()).result()).result();
             expect(answer.x).toBe(23);
         });
     });
 
     it('access to other services inside a handle 1', function () {
-        light.handle("haccess11", function (definition) {
+        light.handle("haccess11", function (method) {
             return function (arg) {
-                arg = this.haccess2(arg);
-                result = definition(arg);
-                result = this.haccess2(result);
+                arg = this.service.haccess2(arg).result();
+                result = method(arg);
+                result = this.service.haccess2(result).result();
                 return result;
             };
         });
@@ -989,25 +986,25 @@ describe('light', function () {
                 return arg;
             });
 
-        light(function (service) {
-            var answer = service.haccess1({ x: 0 }).result();
+        light(function () {
+            var answer = this.service.haccess1({ x: 0 }).result();
             expect(answer.x).toBe(12);
         });
     });
 
     it('access to other services inside a handle 2', function () {
-        light.handle("haccess_11", function (definition) {
+        light.handle("haccess_11", function (method) {
             return function (arg) {
-                arg = this.haccess_2(arg);
-                result = definition(arg);
-                result = this.haccess_2(result);
+                arg = this.service.haccess_2(arg).result();
+                result = method(arg);
+                result = this.service.haccess_2(result).result();
                 return result;
             };
         });
-        light.handle("haccess_22", function (definition) {
+        light.handle("haccess_22", function (method) {
             return function (arg) {
                 arg.x = arg.x + 100
-                result = definition(arg);
+                result = method(arg);
                 arg.x = arg.x + 100
                 return result;
             };
@@ -1027,8 +1024,8 @@ describe('light', function () {
                 return arg;
             });
 
-        light(function (service) {
-            var answer = service.haccess_1({ x: 0 }).result();
+        light(function () {
+            var answer = this.service.haccess_1({ x: 0 }).result();
             expect(answer.x).toBe(412);
         });
     });
@@ -1036,18 +1033,18 @@ describe('light', function () {
     it('auto generate handle names', function () {
         var haccess_2;
         var haccess_1;
-        var haccess_11 = light.handle(function (definition) {
+        var haccess_11 = light.handle(function (method) {
             return function (arg) {
-                arg = this[haccess_2](arg);
-                result = definition(arg);
-                result = this[haccess_2](result);
+                arg = this.service[haccess_2](arg).result();
+                result = method(arg);
+                result = this.service[haccess_2](result).result();
                 return result;
             };
         });
-        var haccess_22 = light.handle(function (definition) {
+        var haccess_22 = light.handle(function (method) {
             return function (arg) {
                 arg.x = arg.x + 100
-                result = definition(arg);
+                result = method(arg);
                 arg.x = arg.x + 100
                 return result;
             };
@@ -1068,8 +1065,8 @@ describe('light', function () {
         expect(haccess_1).toBe("haccess_1a");
         expect(haccess_2).toBe("haccess_2a");
 
-        light(function (service) {
-            var answer = service[haccess_1]({ x: 0 }).result();
+        light(function () {
+            var answer = this.service[haccess_1]({ x: 0 }).result();
             expect(answer.x).toBe(412);
         });
     });
@@ -1077,18 +1074,18 @@ describe('light', function () {
     it('auto generate service names', function () {
         var haccess_2;
         var haccess_1;
-        var haccess_11 = light.handle(function (definition) {
+        var haccess_11 = light.handle(function (method) {
             return function (arg) {
-                arg = this[haccess_2](arg);
-                result = definition(arg);
-                result = this[haccess_2](result);
+                arg = this.service[haccess_2](arg).result();
+                result = method(arg);
+                result = this.service[haccess_2](result).result();
                 return result;
             };
         });
-        var haccess_22 = light.handle(function (definition) {
+        var haccess_22 = light.handle(function (method) {
             return function (arg) {
                 arg.x = arg.x + 100
-                result = definition(arg);
+                result = method(arg);
                 arg.x = arg.x + 100
                 return result;
             };
@@ -1104,13 +1101,13 @@ describe('light', function () {
             return arg;
         });
 
-        light(function (service) {
-            var answer = service[haccess_1]({ x: 0 }).result();
+        light(function () {
+            var answer = this.service[haccess_1]({ x: 0 }).result();
             expect(answer.x).toBe(412);
         });
     });
 
-    it('auto generate service names when only definition is provided', function () {
+    it('auto generate service names when only method is provided', function () {
         var haccess_1;
 
         haccess_1 = light.service(function (arg) {
@@ -1118,8 +1115,8 @@ describe('light', function () {
             return arg;
         });
 
-        light(function (service) {
-            var answer = service[haccess_1]({ x: 0 }).result();
+        light(function () {
+            var answer = this.service[haccess_1]({ x: 0 }).result();
             expect(answer.x).toBe(10);
         });
     });
@@ -1127,132 +1124,122 @@ describe('light', function () {
     it('providing local temporary state', function () {
         var haccess_1;
 
-        haccess_2 = light.service(function (arg, service, system, state) {
+        haccess_2 = light.service(function (arg, system, state) {
             arg = arg || {};
             arg.x = arg.x || 0;
-            if (state.get("answer")) {
-                return { x: 555 * state.get("answer").x };
+            if (this.state.get("answer")) {
+                return { x: 555 * this.state.get("answer").x };
             }
 
             arg.x = arg.x + 100;
-            state.set("answer", arg);
-            return state.get("answer");
+            this.state.set("answer", arg);
+            return this.state.get("answer");
         });
-        haccess_1 = light.service(function (arg, service, system, state) {
+        haccess_1 = light.service(function (arg, system, state) {
             arg = arg || {};
             arg.x = arg.x || 0;
-            if (state.get("answer")) {
-                return { x: 555 * state.get("answer").x };
+            if (this.state.get("answer")) {
+                return { x: 555 * this.state.get("answer").x };
             }
 
             arg.x = arg.x + 10;
-            state.set("answer", arg);
-            return state.get("answer");
-        });     
+            this.state.set("answer", arg);
+            return this.state.get("answer");
+        });
 
-        light(function (service) {
-            expect(this[haccess_1]().x).toBe(10);
-            expect(this[haccess_1]().x).toBe(5550);
-            expect(this[haccess_1]().x).toBe(5550);
+        light(function () {
+            expect(this.service[haccess_1]().result().x).toBe(10);
+            expect(this.service[haccess_1]().result().x).toBe(5550);
+            expect(this.service[haccess_1]().result().x).toBe(5550);
 
-            var answer = this[haccess_1]();
+            var answer = this.service[haccess_1]().result();
             answer.x = 1;
 
-            expect(this[haccess_2]().x).toBe(100);
-            expect(this[haccess_2]().x).toBe(55500);
-            expect(this[haccess_2]().x).toBe(55500);
+            expect(this.service[haccess_2]().result().x).toBe(100);
+            expect(this.service[haccess_2]().result().x).toBe(55500);
+            expect(this.service[haccess_2]().result().x).toBe(55500);
 
-            var answer1 = this[haccess_2]();
+            var answer1 = this.service[haccess_2]().result();
             answer1.x = 1;
 
-            expect(this[haccess_1]().x).toBe(5550);
-            expect(this[haccess_2]().x).toBe(55500);
+            expect(this.service[haccess_1]().result().x).toBe(5550);
+            expect(this.service[haccess_2]().result().x).toBe(55500);
         });
-       
-        haccess_1r = light.service(function (arg, service, system, state) {
+
+        haccess_1r = light.service(function (arg, system, state) {
             arg = arg || {};
             arg.x = arg.x || 10;
-            var ref=state.getRef("answer");
+            var ref = this.state.getRef("answer");
             if (ref && ref.fn && ref.fn()) {
                 return ref;
             }
-            state.set("answer", { fn: function () { return arg; } });
-            return state.getRef("answer");
+            this.state.set("answer", { fn: function () { return arg; } });
+            return this.state.getRef("answer");
         });
-        light(function (service) {
-            var answer= this[haccess_1r]();
+        light(function () {
+            var answer = this.service[haccess_1r]().result();
             expect(answer.fn().x).toBe(10);
-           
-            answer.fn = function () { return { x: 11 };}
 
-            var answer = this[haccess_1r]();
-            expect(answer.fn().x).toBe(11);        
+            answer.fn = function () { return { x: 11 }; }
 
+            var answer = this.service[haccess_1r]().result();
+            expect(answer.fn().x).toBe(11);
         });
 
-
-
-        haccess_1rr = light.service(function (arg, service, system, state) {
+        haccess_1rr = light.service(function (arg, system, state) {
             arg = arg || {};
             arg.x = arg.x || 10;
-            var ref = state.get("answer");
+            var ref = this.state.get("answer");
             if (ref && ref.fn && ref.fn()) {
                 return ref;
             }
-            state.set("answer", { fn: function () { return arg; } });
-            return state.get("answer");
+            this.state.set("answer", { fn: function () { return arg; } });
+            return this.state.get("answer");
         });
-        light(function (service) {
-            var answer = this[haccess_1rr]();
+        light(function () {
+            var answer = this.service[haccess_1rr]().result();
             expect(typeof answer.fn).toBe("undefined");
         });
 
-
-
-        haccess_1r1 = light.service(function (arg, service, system, state) {
+        haccess_1r1 = light.service(function (arg, system, state) {
             arg = arg || {};
             arg.x = arg.x || 10;
-            var ref = state.getRef("answer");
+            var ref = this.state.getRef("answer");
             if (ref && ref.fn && ref.fn.arg) {
                 return ref;
             }
-            state.set("answer", { fn: {arg:arg} });
-            return state.getRef("answer");
+            this.state.set("answer", { fn: { arg: arg } });
+            return this.state.getRef("answer");
         });
-        light(function (service) {
-            var answer = this[haccess_1r1]();
+        light(function () {
+            var answer = this.service[haccess_1r1]().result();
             expect(answer.fn.arg.x).toBe(10);
 
             answer.fn.arg.x = 11;
 
-            var answer = this[haccess_1r1]();
+            var answer = this.service[haccess_1r1]().result();
             expect(answer.fn.arg.x).toBe(11);
-
         });
 
-
-        haccess_1r1r = light.service(function (arg, service, system, state) {
+        haccess_1r1r = light.service(function (arg, system, state) {
             arg = arg || {};
             arg.x = arg.x || 10;
-            var ref = state.get("answer");
+            var ref = this.state.get("answer");
             if (ref && ref.fn && ref.fn.arg) {
                 return ref;
             }
-            state.set("answer", { fn: { arg: arg } });
-            return state.get("answer");
+            this.state.set("answer", { fn: { arg: arg } });
+            return this.state.get("answer");
         });
-        light(function (service) {
-            var answer = this[haccess_1r1r]();
+        light(function () {
+            var answer = this.service[haccess_1r1r]().result();
             expect(answer.fn.arg.x).toBe(10);
 
             answer.fn.arg.x = 11;
 
-            var answer = this[haccess_1r1r]();
+            var answer = this.service[haccess_1r1r]().result();
             expect(answer.fn.arg.x).toBe(10);
-
         });
-
-
 
         var Immutable = light.Immutable;
         var map1 = Immutable.Map({ a: 1, b: 2, c: 3 });
