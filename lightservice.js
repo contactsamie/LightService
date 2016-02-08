@@ -1,4 +1,4 @@
-var light = (function () {
+var light = (typeof light === "undefined") ? (function () {
     var GLOBAL = {};
 
     GLOBAL.forbiddenNames = {
@@ -823,7 +823,7 @@ var light = (function () {
     init();
 
     return _light;
-})();
+})(): console.log("light script already exists");
 
 if (typeof module !== "undefined" && ('exports' in module)) {
     module.exports = light;
