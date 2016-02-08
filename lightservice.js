@@ -219,6 +219,7 @@ var light = (typeof light === "undefined") ? (function () {
 
     GLOBAL.getCurrentContext = function (stateName, arg) {
         var incontext = {
+            event: GLOBAL.systemServices,
             service: chainService(),
             arg: arg,
             system: GLOBAL.system,
