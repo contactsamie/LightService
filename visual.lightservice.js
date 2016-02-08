@@ -85,6 +85,7 @@ light.service("draw", function (arg) {
     arg.layout = arg.layout || {};
     arg.layout.name = arg.layout.name || "grid";
     $(function () {
+        graphArg.layout = arg.layout;
         graphArg.container = document.getElementById(arg.containerId);
         var cy = window.cy = cytoscape(graphArg);
         cy.on('tap', function (evt) {
