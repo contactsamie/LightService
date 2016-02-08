@@ -79,16 +79,23 @@ light.service("connect", function (arg) {
     });
 });
 light.service("draw", function (arg) {
+    arg = arg || {};
+    arg.containerId = arg.containerId || "cy";
+    arg.resultId = arg.resultId || "definition";
+    arg.layout = arg.layout || {};
+    arg.layout.name = arg.layout.name || "grid";
     $(function () {
-        graphArg.container = document.getElementById(arg);
+        graphArg.container = document.getElementById(arg.containerId);
         var cy = window.cy = cytoscape(graphArg);
         cy.on('tap', function (evt) {
             console.info(nodes[evt.cyTarget.id()]);
-            $('#definition').html((nodes[evt.cyTarget.id()]).toString());
+            $('#' + arg.resultId).html((nodes[evt.cyTarget.id()]).toString());
         });
     });
 });
 light.service("visual", function (arg, service, system) {
+    arg = arg || {};
+ 
     var records = system.getAllRecords();
     for (var i = 0; i < records.length; i++) {
         var currentRecord = records[i];
@@ -105,10 +112,20 @@ light.service("visual", function (arg, service, system) {
             toError: nextRecord.info === "event:error" ? 10 : 0,
             toSuccess: ((nextRecord.dataType === "argument") || (nextRecord.info !== "event:error")) ? 10 : 0,
             toUnknown: 0,
-            from: (currentRecord.dataType === "argument" ? "in:" : "out:") + currentRecord.methodType + ":" + currentRecord.methodName, // + "# " + currentRecord.position,
-            to: (nextRecord.dataType === "argument" ? "in:" : "out:") + nextRecord.methodType + ":" + nextRecord.methodName, //+"# "+ nextRecord.position,
+            from: (arg.useShortNames ? currentRecord.position : ((currentRecord.dataType === "argument" ? "in:" : "out:") + currentRecord.methodType + ":" + currentRecord.methodName)) + (arg.streatchOutCalls ? ("# " + currentRecord.position) : ""),
+            to: (arg.useShortNames ? nextRecord.position : ((nextRecord.dataType === "argument" ? "in:" : "out:") + nextRecord.methodType + ":" + nextRecord.methodName)) + (arg.streatchOutCalls ? ("# " + nextRecord.position) : ""),
         };
         service.connect(connectObj);
     }
-    service.draw("cy");
+    service.draw(arg);
 });
+//default values
+//arg = {
+//    useShortNames: false,
+//    streatchOutCalls: false,
+//    containerId: "cy",
+//    resultId: "definition",
+//    layout: {
+//        name:"grid"
+//    }
+//};
