@@ -29,6 +29,11 @@ var light = (function () {
             state: {},
             ref: {},
             method: function () {
+
+                var set = function (name, obj) {
+                    GLOBAL._STATE_[systemName]["ref"][name] = { data: obj };
+                    GLOBAL._STATE_[systemName]["state"][name] = JSON.stringify(GLOBAL._STATE_[systemName]["ref"][name]);                   
+                };    
                 return {
                     get: function (name) {
                         var data = GLOBAL._STATE_[systemName]["state"][name];
@@ -38,13 +43,11 @@ var light = (function () {
                         return JSON.parse(data).data;
                     },
                     set: function (name, obj) {
-                        GLOBAL._STATE_[systemName]["state"][name] = JSON.stringify({ data: obj });
-                    },
-                    setRef: function (name, obj) {
-                        GLOBAL._STATE_[systemName]["ref"][name] = obj;
+                        set(name,obj);
                     },
                     getRef: function (name) {
-                        return GLOBAL._STATE_[systemName]["ref"][name];
+                        GLOBAL._STATE_[systemName]["ref"][name]=GLOBAL._STATE_[systemName]["ref"][name]||{};
+                        return  GLOBAL._STATE_[systemName]["ref"][name].data;
                     }
                 };
             }

@@ -1148,30 +1148,7 @@ describe('light', function () {
             arg.x = arg.x + 10;
             state.set("answer", arg);
             return state.get("answer");
-        });
-
-        haccess_2r = light.service(function (arg, service, system, state) {
-            arg = arg || {};
-            arg.x = arg.x || 0;
-            if (state.getRef("answer")) {
-                return { x: 555 * state.getRef("answer").x };
-            }
-
-            arg.x = arg.x + 100;
-            state.setRef("answer", arg);
-            return state.getRef("answer");
-        });
-        haccess_1r = light.service(function (arg, service, system, state) {
-            arg = arg || {};
-            arg.x = arg.x || 0;
-            if (state.getRef("answer")) {
-                return { x: 555 * state.getRef("answer").x };
-            }
-
-            arg.x = arg.x + 10;
-            state.setRef("answer", arg);
-            return state.getRef("answer");
-        });
+        });     
 
         light(function (service) {
             expect(this[haccess_1]().x).toBe(10);
@@ -1191,6 +1168,91 @@ describe('light', function () {
             expect(this[haccess_1]().x).toBe(5550);
             expect(this[haccess_2]().x).toBe(55500);
         });
+       
+        haccess_1r = light.service(function (arg, service, system, state) {
+            arg = arg || {};
+            arg.x = arg.x || 10;
+            var ref=state.getRef("answer");
+            if (ref && ref.fn && ref.fn()) {
+                return ref;
+            }
+            state.set("answer", { fn: function () { return arg; } });
+            return state.getRef("answer");
+        });
+        light(function (service) {
+            var answer= this[haccess_1r]();
+            expect(answer.fn().x).toBe(10);
+           
+            answer.fn = function () { return { x: 11 };}
+
+            var answer = this[haccess_1r]();
+            expect(answer.fn().x).toBe(11);        
+
+        });
+
+
+
+        haccess_1rr = light.service(function (arg, service, system, state) {
+            arg = arg || {};
+            arg.x = arg.x || 10;
+            var ref = state.get("answer");
+            if (ref && ref.fn && ref.fn()) {
+                return ref;
+            }
+            state.set("answer", { fn: function () { return arg; } });
+            return state.get("answer");
+        });
+        light(function (service) {
+            var answer = this[haccess_1rr]();
+            expect(typeof answer.fn).toBe("undefined");
+        });
+
+
+
+        haccess_1r1 = light.service(function (arg, service, system, state) {
+            arg = arg || {};
+            arg.x = arg.x || 10;
+            var ref = state.getRef("answer");
+            if (ref && ref.fn && ref.fn.arg) {
+                return ref;
+            }
+            state.set("answer", { fn: {arg:arg} });
+            return state.getRef("answer");
+        });
+        light(function (service) {
+            var answer = this[haccess_1r1]();
+            expect(answer.fn.arg.x).toBe(10);
+
+            answer.fn.arg.x = 11;
+
+            var answer = this[haccess_1r1]();
+            expect(answer.fn.arg.x).toBe(11);
+
+        });
+
+
+        haccess_1r1r = light.service(function (arg, service, system, state) {
+            arg = arg || {};
+            arg.x = arg.x || 10;
+            var ref = state.get("answer");
+            if (ref && ref.fn && ref.fn.arg) {
+                return ref;
+            }
+            state.set("answer", { fn: { arg: arg } });
+            return state.get("answer");
+        });
+        light(function (service) {
+            var answer = this[haccess_1r1r]();
+            expect(answer.fn.arg.x).toBe(10);
+
+            answer.fn.arg.x = 11;
+
+            var answer = this[haccess_1r1r]();
+            expect(answer.fn.arg.x).toBe(10);
+
+        });
+
+
 
         var Immutable = light.Immutable;
         var map1 = Immutable.Map({ a: 1, b: 2, c: 3 });
