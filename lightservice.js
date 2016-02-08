@@ -1,20 +1,24 @@
 var light = (function () {
     var GLOBAL = {};
+
     GLOBAL.forbiddenNames = {
         result: true,
         service: true,
         handle: true
     };
+
     GLOBAL.expectNoForbiddenName = function (name) {
         if (GLOBAL.forbiddenNames[name]) {
             throw "You cannot use the name '" + name + "'";
         }
     };
+
     GLOBAL.registry = {
         service: {},
         handle: {},
         scripts: {}
     };
+
     GLOBAL.isRegistered = function (str) {
         if (GLOBAL.registry.service[str] || GLOBAL.registry.handle[str]) {
             return true;
@@ -31,9 +35,7 @@ var light = (function () {
         }
         return str;
     }
-    GLOBAL.ImmutableStore = {};
 
-    GLOBAL._STATE_ = {};
     GLOBAL.stateFactory = function (systemName) {
         GLOBAL._STATE_[systemName] = {
             state: {},
@@ -63,45 +65,10 @@ var light = (function () {
         }
     };
 
-    GLOBAL.DEFAULT_HANDLE_NAME = "$$default";
-    GLOBAL.entranceTag = "argument";
-    GLOBAL.exitTag = "result";
-    GLOBAL.serviceTag = "service";
-    GLOBAL.handleTag = "handle";
-    GLOBAL.eventTag = "event";
-    GLOBAL.unknownTag = "unknown";
-
-    GLOBAL._TEST_OBJECTS_;
-    GLOBAL.systemServices = {};
-
     GLOBAL.burnThread = function (seconds) {
         var e = new Date().getTime() + (seconds * 1000);
         while (new Date().getTime() <= e) { }
     };
-
-    var XMLHttpFactories = [
-	function () { return new XMLHttpRequest() },
-	function () { return new ActiveXObject("Msxml2.XMLHTTP") },
-	function () { return new ActiveXObject("Msxml3.XMLHTTP") },
-	function () { return new ActiveXObject("Microsoft.XMLHTTP") }
-    ];
-
-    function createXMLHTTPObject() {
-        var xmlhttp = false;
-        for (var i = 0; i < XMLHttpFactories.length; i++) {
-            try {
-                xmlhttp = XMLHttpFactories[i]();
-            }
-            catch (e) {
-                continue;
-            }
-            break;
-        }
-        return xmlhttp;
-    }
-
-    GLOBAL._GLOBAL_SCOPE_NAME = GLOBAL.generateUniqueSystemName("_GLOBAL_SCOPE_");
-    GLOBAL.stateFactory(GLOBAL._GLOBAL_SCOPE_NAME);
 
     GLOBAL.loadScript = function (src, onload) {
         // todo wrap require js
@@ -138,7 +105,6 @@ var light = (function () {
         se.text = xhrObj.responseText;
         document.getElementsByTagName('head')[0].appendChild(se);
     };
-    GLOBAL.eventSubscribers = {};
 
     GLOBAL.track = {
         // record not yet able to track arguments because it gets mutated
@@ -228,29 +194,49 @@ var light = (function () {
         }
     };
 
-    GLOBAL.utility = {};
-    GLOBAL.utility.execSurpressError = function (o, e, context, notificationInfo) {
-        _light["event"].notify(e, context, notificationInfo);
-        if (typeof o === "function") {
-            try { o(e, context, notificationInfo); } catch (ex) {
-                console.error("SUPRESSED ERROR : " + ex);
+    GLOBAL.utility = {
+        execSurpressError: function (o, e, context, notificationInfo) {
+            _light["event"].notify(e, context, notificationInfo);
+            if (typeof o === "function") {
+                try { o(e, context, notificationInfo); } catch (ex) {
+                    console.error("SUPRESSED ERROR : " + ex);
+                }
+            }
+        },
+        tryCatch: function (context, f, success, error) {
+            try {
+                var result = f();
+                GLOBAL.utility.execSurpressError(function () {
+                    success(result, context);
+                }, null, context, "trying-service");
+            } catch (e) {
+                GLOBAL.utility.execSurpressError(function () {
+                    error(e, context);
+                }, e, context, "service-throws");
             }
         }
     };
-    GLOBAL.utility.tryCatch = function (context, f, success, error) {
-        try {
-            var result = f();
-            GLOBAL.utility.execSurpressError(function () {
-                success(result, context);
-            }, null, context, "trying-service");
-        } catch (e) {
-            GLOBAL.utility.execSurpressError(function () {
-                error(e, context);
-            }, e, context, "service-throws");
-        }
-    };
 
-    GLOBAL.handles = [];
+    var XMLHttpFactories = [
+  function () { return new XMLHttpRequest() },
+  function () { return new ActiveXObject("Msxml2.XMLHTTP") },
+  function () { return new ActiveXObject("Msxml3.XMLHTTP") },
+  function () { return new ActiveXObject("Microsoft.XMLHTTP") }
+    ];
+
+    var createXMLHTTPObject = function () {
+        var xmlhttp = false;
+        for (var i = 0; i < XMLHttpFactories.length; i++) {
+            try {
+                xmlhttp = XMLHttpFactories[i]();
+            }
+            catch (e) {
+                continue;
+            }
+            break;
+        }
+        return xmlhttp;
+    }
 
     var setUpEventSubscriberBase = function (name, id, o) {
         setUpEventSubscriberBase.ref = setUpEventSubscriberBase.ref || 0;
@@ -263,6 +249,7 @@ var light = (function () {
         });
         return setUpEventSubscriberBase.ref;
     };
+
     var createEventEmitter = function (name, id, f) {
         GLOBAL.eventSubscribers[id] = GLOBAL.eventSubscribers[id] || {};
         GLOBAL.eventSubscribers[id].sub = GLOBAL.eventSubscribers[id].sub || [];
@@ -279,11 +266,13 @@ var light = (function () {
             }
         };
     };
+
     var setUpNotification = function (name, id) {
         return createEventEmitter(name, id, function (item, o, context, notificationInfo) {
             GLOBAL.utility.tryCatch(context, function () { return item.service(); }, function () { }, function () { GLOBAL.utility.execSurpressError(item.service.error, o, context, notificationInfo); });
         });
     };
+
     var setUpSystemEventSubscriptionFx = function (name, that, id) {
         that[name] = function (e) {
             setUpEventSubscriberBase(name, id, e);
@@ -296,10 +285,12 @@ var light = (function () {
             }
         });
     };
+
     var setUpSystemEvent = function (that, event, name) {
         setUpSystemEventSubscriptionFx(event, that, name + "." + event);
         that[event].notify = GLOBAL.eventSubscribers[name + "." + event].notify;
     };
+
     var setUpServiceEvent = function (that, event, name) {
         var id = name + "." + event;
         that[event] = function (o) {
@@ -320,6 +311,7 @@ var light = (function () {
         var item = GLOBAL.systemServices[serviceName];
         return item;
     };
+
     function parseJSON(data) {
         return JSON && JSON.parse ? JSON.parse(data) : (new Function("return " + data))();
     }
@@ -768,8 +760,6 @@ var light = (function () {
         return handleName;
     }
 
-    _light.service = defineService;
-
     _light.advance = {
         serviceTest: function (setup, f) {
             GLOBAL._TEST_OBJECTS_ = setup;
@@ -777,6 +767,7 @@ var light = (function () {
             GLOBAL._TEST_OBJECTS_ = undefined
         }
     };
+
     if (typeof Immutable === "undefined") {
         _light.Immutable = {
             Map: function (obj) {
@@ -801,15 +792,35 @@ var light = (function () {
     } else {
         _light.Immutable = Immutable;
     }
+
     _light.copy = function (obj) {
         _light.Immutable.Map({ data: obj }).get('data');
     };
 
-    _light.version = 1;
+    var init = function () {
+        _light.version = 1;
+        _light.service = defineService;
+        GLOBAL.entranceTag = "argument";
+        GLOBAL.exitTag = "result";
+        GLOBAL.serviceTag = "service";
+        GLOBAL.handleTag = "handle";
+        GLOBAL.eventTag = "event";
+        GLOBAL.unknownTag = "unknown";
 
-    setUpSystemEvent(_light, "event", "$system");
+        GLOBAL._TEST_OBJECTS_ = {};
+        GLOBAL.systemServices = {};
+        GLOBAL.ImmutableStore = {};
+        GLOBAL._STATE_ = {};
+        GLOBAL.eventSubscribers = {};
+        GLOBAL.handles = [];
+        GLOBAL._GLOBAL_SCOPE_NAME = GLOBAL.generateUniqueSystemName("_GLOBAL_SCOPE_");
+        GLOBAL.stateFactory(GLOBAL._GLOBAL_SCOPE_NAME);
+        GLOBAL.DEFAULT_HANDLE_NAME = GLOBAL.generateUniqueSystemName("defHandle");
+        setUpSystemEvent(_light, "event", "$system");
+        _light.handle(GLOBAL.DEFAULT_HANDLE_NAME, function (definition) { return definition; });
+    };
 
-    _light.handle(GLOBAL.DEFAULT_HANDLE_NAME, function (definition) { return definition; });
+    init();
 
     return _light;
 })();
