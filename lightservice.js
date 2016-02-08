@@ -1,5 +1,15 @@
 var light = (function () {
     var GLOBAL = {};
+    GLOBAL.forbiddenNames = {
+        result: true,
+        service: true,
+        handle: true
+    };
+    GLOBAL.expectNoForbiddenName = function (name) {
+        if (GLOBAL.forbiddenNames[name]) {
+            throw "You cannot use the name '" + name + "'";
+        }
+    };
     GLOBAL.registry = {
         service: {},
         handle: {},
@@ -29,11 +39,10 @@ var light = (function () {
             state: {},
             ref: {},
             method: function () {
-
                 var set = function (name, obj) {
                     GLOBAL._STATE_[systemName]["ref"][name] = { data: obj };
-                    GLOBAL._STATE_[systemName]["state"][name] = JSON.stringify(GLOBAL._STATE_[systemName]["ref"][name]);                   
-                };    
+                    GLOBAL._STATE_[systemName]["state"][name] = JSON.stringify(GLOBAL._STATE_[systemName]["ref"][name]);
+                };
                 return {
                     get: function (name) {
                         var data = GLOBAL._STATE_[systemName]["state"][name];
@@ -43,11 +52,11 @@ var light = (function () {
                         return JSON.parse(data).data;
                     },
                     set: function (name, obj) {
-                        set(name,obj);
+                        set(name, obj);
                     },
                     getRef: function (name) {
-                        GLOBAL._STATE_[systemName]["ref"][name]=GLOBAL._STATE_[systemName]["ref"][name]||{};
-                        return  GLOBAL._STATE_[systemName]["ref"][name].data;
+                        GLOBAL._STATE_[systemName]["ref"][name] = GLOBAL._STATE_[systemName]["ref"][name] || {};
+                        return GLOBAL._STATE_[systemName]["ref"][name].data;
                     }
                 };
             }
@@ -601,6 +610,8 @@ var light = (function () {
             return;
         }
 
+        GLOBAL.expectNoForbiddenName(serviceName);
+
         //!!!!
         //experiment ----start
         /*
@@ -744,6 +755,8 @@ var light = (function () {
             throw "Unable to create handle with name '" + handleName + "'.Name already exists in registry";
             return;
         }
+
+        GLOBAL.expectNoForbiddenName(handleName);
 
         GLOBAL.registry.handle[handleName] = {};
 
