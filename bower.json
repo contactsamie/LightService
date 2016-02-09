@@ -1,7 +1,7 @@
 {
   "name": "lightservice",
   "description": "",
-  "main": "lightservice.js",
+  "main": "src/lightservice.min.js",
   "authors": [
     "sam <contactsamie@gmail.com> Samuel"
   ],
@@ -11,6 +11,7 @@
     "amd",
     "node"
   ],
+    "version": "4.0.0",
   "ignore": [
     "**/.*",
     "node_modules",
