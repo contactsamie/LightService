@@ -1,7 +1,12 @@
-﻿jest.dontMock('../src/lightservice');
-var light = require('../src/lightservice') || light;
-
-xdescribe('light used in the dom', function () {
+﻿var it=function(a,b){};
+var expect=function(a){
+return{
+toBe:function(b){
+    a===b||throw "expected "+a+" to be "+b;
+}
+};
+};
+//describe('light used in the dom', function () {
     it('load file sync', function () {
         light.service("__tests__/load.js").load();
 
@@ -40,4 +45,4 @@ xdescribe('light used in the dom', function () {
             this.service.visual();
         });
     });
-});
+//});
