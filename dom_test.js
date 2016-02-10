@@ -1,12 +1,5 @@
-﻿var it=function(a,b){};
-var expect=function(a){
-return{
-toBe:function(b){
-    a===b||throw "expected "+a+" to be "+b;
-}
-};
-};
-//describe('light used in the dom', function () {
+﻿
+describe('light used in the dom', function () {
     it('load file sync', function () {
         light.service("__tests__/load.js").load();
 
@@ -45,4 +38,4 @@ toBe:function(b){
             this.service.visual();
         });
     });
-//});
+});
