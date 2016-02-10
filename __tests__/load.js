@@ -1,4 +1,6 @@
-﻿var __haccess_11=light.handle(function (method) {
+﻿jest.dontMock('../src/lightservice');
+var light = require('../src/lightservice') || light;
+var __haccess_11=light.handle(function (method) {
     return function (arg) {
         arg = this.service["__haccess_2"](arg).result();
         result = method(arg);

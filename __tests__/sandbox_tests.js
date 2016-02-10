@@ -1,5 +1,5 @@
-jest.dontMock('../lightservice');
-var light = require('../lightservice') || light;
+jest.dontMock('../src/lightservice');
+var light = require('../src/lightservice') || light;
 /*
 light.event(function (e, context,notificationInfo) {
  console.log("logging full ---- " );
