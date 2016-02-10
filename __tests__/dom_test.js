@@ -1,7 +1,7 @@
 ﻿jest.dontMock('../src/lightservice');
 var light = require('../src/lightservice') || light;
 
-describe('light used in the dom', function () {
+xdescribe('light used in the dom', function () {
     it('load file sync', function () {
         light.service("__tests__/load.js").load();
 
