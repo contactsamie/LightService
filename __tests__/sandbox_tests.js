@@ -1246,4 +1246,38 @@ describe('light', function () {
         map1 = map1.set('b', 50);
         expect(map1.get('b')).toBe(50);
     });
+
+    it('time machine test', function () {
+        var log = "";
+
+        var service = light.service(function () {
+            var i = this.state.get("i");
+            i = i || 0;
+            i++;
+            this.state.set("i", i);
+            log = log + "," + i;
+            return i;
+        });
+
+        light(function () {
+            this.service[service]();
+            this.service[service]();
+            this.service[service]()
+            var answer = this.service[service]().result();
+
+            var timeMachine = light.advance.timeMachine();
+
+            timeMachine.previous();
+            timeMachine.previous();
+            timeMachine.previous();
+            timeMachine.next();
+            timeMachine.previous();
+            timeMachine.next();
+            timeMachine.next();
+            timeMachine.previous();
+            timeMachine.current();
+            expect(answer).toBe(4);
+            expect(log).toBe(",1,2,3,4,4,3,2,3,2,3,4,3,4");
+        });
+    });
 });

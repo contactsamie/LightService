@@ -1,12 +1,15 @@
 var light = (typeof light === "undefined") ? (function () {
     var GLOBAL = {};
-    GLOBAL.getCurrentContext = function (stateName, arg) {
+    GLOBAL.getCurrentContext = function (stateName, arg, stateOverride) {
+       
+        var state = stateOverride ? JSON.parse(JSON.stringify({ data: stateOverride })).data : stateOverride
+
         var incontext = {
             event: GLOBAL.systemServices,
             service: chainService(),
             arg: arg,
             system: GLOBAL.system,
-            state: GLOBAL._STATE_[stateName].method()
+            state:  GLOBAL._STATE_[stateName].api(state) 
         };
         return incontext;
     };
@@ -45,25 +48,36 @@ var light = (typeof light === "undefined") ? (function () {
         return str;
     }
 
+    GLOBAL.$setState = function (systemName, name, obj) {
+        GLOBAL._STATE_[systemName]["ref"][name] = { data: obj };
+        GLOBAL._STATE_[systemName]["state"][name] = JSON.stringify(GLOBAL._STATE_[systemName]["ref"][name]);
+    };
+    GLOBAL.$getState = function (systemName) {
+        var stateRoot = GLOBAL._STATE_[systemName];
+        return stateRoot && (GLOBAL._STATE_[systemName]["state"] || {});
+    };
+
+    //$stateOverride
+
     GLOBAL.stateFactory = function (systemName) {
         GLOBAL._STATE_[systemName] = {
             state: {},
             ref: {},
-            method: function () {
-                var set = function (name, obj) {
-                    GLOBAL._STATE_[systemName]["ref"][name] = { data: obj };
-                    GLOBAL._STATE_[systemName]["state"][name] = JSON.stringify(GLOBAL._STATE_[systemName]["ref"][name]);
-                };
+            api: function (stateOverride) {
+                if (stateOverride) {
+                    GLOBAL._STATE_[systemName]["state"] = stateOverride;
+                }
+
                 return {
                     get: function (name) {
-                        var data = GLOBAL._STATE_[systemName]["state"][name];
+                        var data = GLOBAL.$getState(systemName)[name];
                         if (!data) {
                             return data;
                         };
                         return JSON.parse(data).data;
                     },
                     set: function (name, obj) {
-                        set(name, obj);
+                        GLOBAL.$setState(systemName, name, obj);
                     },
                     getRef: function (name) {
                         GLOBAL._STATE_[systemName]["ref"][name] = GLOBAL._STATE_[systemName]["ref"][name] || {};
@@ -139,7 +153,8 @@ var light = (typeof light === "undefined") ? (function () {
                 isTest: arg.isTest || false,
                 info: arg.info,
                 infoType: arg.infoType,
-                link: typeof arg.link === "function" ? arg.link.toString() : arg.link
+                link: typeof arg.link === "function" ? arg.link.toString() : arg.link,
+                state: GLOBAL.$getState(arg.methodName)
             };
             //todo use an immutable library
 
@@ -176,8 +191,15 @@ var light = (typeof light === "undefined") ? (function () {
                     if (!playGround) {
                         throw "unable to find service to play service";
                     }
+
+                    // GLOBAL.getCurrentContext = function (stateName, arg,stateOverride)
+
                     if ((playGround.methodType === GLOBAL.serviceTag) && (playGround.dataType === GLOBAL.entranceTag)) {
-                        inter = (m === i) ? inter[playGround.methodName](playGround.data) : inter[playGround.methodName]();
+                        if ((m === i)) {
+                            inter = inter[playGround.methodName].call(GLOBAL.getCurrentContext(playGround.methodName, playGround.data, playGround.state), playGround.data);
+                        } else {
+                            inter = inter[playGround.methodName]();
+                        }
                     }
                 }
                 var result = inter.result();
@@ -743,6 +765,25 @@ var light = (typeof light === "undefined") ? (function () {
     }
 
     _light.advance = {
+        timeMachine: function () {
+          var records=  GLOBAL.system.getAllRecords();
+          var recordLength = records.length;
+            var pointer = -1;
+
+            return {
+                next: function () {
+                    pointer = pointer-2;
+                    pointer === -1 ? this.current() : GLOBAL.system.play(recordLength - (1 + pointer), recordLength - pointer);
+                },
+                previous: function () {
+                    pointer = pointer + 2;
+                    pointer >= recordLength ? this.current() : GLOBAL.system.play(recordLength - (1 + pointer), recordLength - pointer);
+                },
+                current: function () {
+                    GLOBAL.system.play(recordLength - 2, recordLength - 1);
+                }
+            }
+        },
         serviceTest: function (setup, f) {
             GLOBAL._TEST_OBJECTS_ = setup;
 
