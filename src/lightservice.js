@@ -865,9 +865,9 @@ var light = (typeof light === "undefined") ? (function () {
         GLOBAL._STATE_ = {};
         GLOBAL.eventSubscribers = {};
         GLOBAL.handles = [];
-        GLOBAL._GLOBAL_SCOPE_NAME = GLOBAL.generateUniqueSystemName("_GLOBAL_SCOPE_");
+        GLOBAL._GLOBAL_SCOPE_NAME = GLOBAL.generateUniqueSystemName();
         GLOBAL.stateFactory(GLOBAL._GLOBAL_SCOPE_NAME);
-        GLOBAL.DEFAULT_HANDLE_NAME = GLOBAL.generateUniqueSystemName("defHandle");
+        GLOBAL.DEFAULT_HANDLE_NAME = GLOBAL.generateUniqueSystemName();
         /*
            setup like setUpSystemEvent(_light, "event", GLOBAL.generateUniqueSystemName("some id"));
            notify like  _light.event.notify(e, context, notificationInfo);
@@ -877,12 +877,12 @@ var light = (typeof light === "undefined") ? (function () {
         _light.version = 1;
         _light.service = defineService;
 
-        setUpSystemEvent(_light, GLOBAL.systemEventName.beforeServiceRun, GLOBAL.generateUniqueSystemName("system_event"));
-        setUpSystemEvent(_light, GLOBAL.systemEventName.afterServiceRun, GLOBAL.generateUniqueSystemName("system_event"));
-        setUpSystemEvent(_light, GLOBAL.systemEventName.beforeHandleRun, GLOBAL.generateUniqueSystemName("system_event"));
-        setUpSystemEvent(_light, GLOBAL.systemEventName.afterHandleRun, GLOBAL.generateUniqueSystemName("system_event"));
-        setUpSystemEvent(_light, GLOBAL.systemEventName.onServiceError, GLOBAL.generateUniqueSystemName("system_event"));
-        setUpSystemEvent(_light, GLOBAL.systemEventName.onServiceSuccess, GLOBAL.generateUniqueSystemName("system_event"));
+        setUpSystemEvent(_light, GLOBAL.systemEventName.beforeServiceRun, GLOBAL.generateUniqueSystemName());
+        setUpSystemEvent(_light, GLOBAL.systemEventName.afterServiceRun, GLOBAL.generateUniqueSystemName());
+        setUpSystemEvent(_light, GLOBAL.systemEventName.beforeHandleRun, GLOBAL.generateUniqueSystemName());
+        setUpSystemEvent(_light, GLOBAL.systemEventName.afterHandleRun, GLOBAL.generateUniqueSystemName());
+        setUpSystemEvent(_light, GLOBAL.systemEventName.onServiceError, GLOBAL.generateUniqueSystemName());
+        setUpSystemEvent(_light, GLOBAL.systemEventName.onServiceSuccess, GLOBAL.generateUniqueSystemName());
 
         _light.handle(GLOBAL.DEFAULT_HANDLE_NAME, function (definition) { return definition; });
     };
