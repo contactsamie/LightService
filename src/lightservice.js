@@ -132,7 +132,7 @@ var light = (typeof light === "undefined") ? (function () {
         // record not yet able to track arguments because it gets mutated
         // TODO resolve above problem
         record: function (arg) {
-            GLOBAL.track.records = GLOBAL.track.records || [];
+          
             if (!GLOBAL.recordServices) {
                 return;
             }
@@ -145,7 +145,6 @@ var light = (typeof light === "undefined") ? (function () {
                 methodType: arg.serviceOrHandleMethodName,
                 methodName: arg.methodName,
                 time: Date.now ? Date.now() : new Date().getTime(),
-                position: GLOBAL.track.records.length,
                 isFirst: arg.isFirstCallInServiceRun,
                 isLast: arg.isLastCallInServiceRun,
                 data: arg.argumentOrReturnData,
@@ -160,7 +159,7 @@ var light = (typeof light === "undefined") ? (function () {
             //todo use an immutable library
 
             var recordStr = JSON.stringify(recordObject)
-            GLOBAL.track.records.push(JSON.parse(recordStr));
+            GLOBAL.system.records.push(JSON.parse(recordStr));
 
             if (arg.serviceOrHandleMethodName === GLOBAL.serviceTag) {
                 GLOBAL.systemServices[arg.methodName][GLOBAL.serviceEventName[arg.eventType]].notify(recordStr);
@@ -172,20 +171,18 @@ var light = (typeof light === "undefined") ? (function () {
             // notify event subscribers
             _light[arg.event].notify(recordStr);
             _light[GLOBAL.systemEventName.onSystemEvent].notify(recordStr);
-        },
-        clearAllRecords: function () {
-            GLOBAL.track.records = [];
         }
     }
 
     GLOBAL.system = {
+        records:[],
         getRecord: function (i) {
-            GLOBAL.track.records = GLOBAL.track.records || [];
-            return GLOBAL.track.records[i] || [];
+            GLOBAL.system.records = GLOBAL.system.records || [];
+            return GLOBAL.system.records[i] || [];
         },
         getLastRecord: function () {
-            GLOBAL.track.records = GLOBAL.track.records || [];
-            return GLOBAL.track.records.length ? GLOBAL.track.records[GLOBAL.track.records.length - 1] : [];
+            GLOBAL.system.records = GLOBAL.system.records || [];
+            return GLOBAL.system.records.length ? GLOBAL.system.records[GLOBAL.track.records.length - 1] : [];
         },
         play: function (i, j) {
             var that = this;
@@ -215,7 +212,7 @@ var light = (typeof light === "undefined") ? (function () {
             i = i || 0;
 
             //todo use an immutable library
-            var result = GLOBAL.track.records.slice(i, j);
+            var result = GLOBAL.system.records.slice(i, j);
 
             return result;
         },
