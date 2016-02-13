@@ -1,0 +1,87 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>lightsource sandbox</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+
+    <style>
+        body {
+            font-family: helvetica;
+            font-size: 14px;
+        }
+
+        #cy {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: 999;
+        }
+
+        h1 {
+            opacity: 0.5;
+            font-size: 1em;
+        }
+    </style>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.14/angular.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.2/underscore-min.js"></script>
+    <script src="http://cytoscape.github.io/cytoscape.js/api/cytoscape.js-latest/cytoscape.min.js"></script>
+    <script src="https://cdn.rawgit.com/cpettitt/dagre/v0.7.4/dist/dagre.min.js"></script>
+    <script src="https://cdn.rawgit.com/cytoscape/cytoscape.js-dagre/1.1.2/cytoscape-dagre.js"></script>
+    <script src="src/lightservice.js"> </script>
+    <script src="__tests__/testinterface.js"> </script>
+    <script src="src/tm.lightservice.js"></script>
+    <script src="src/visual.lightservice.js"></script>
+</head>
+<body>
+    <div id="cy"></div>
+    <code id="definition"></code>
+    <script>
+
+        light.service("LoadOrder", function () {
+            return "one";
+        });
+        light.service("ToStandardResponse", function () {
+            return "two";
+        });
+        light.service("NotifySubscribers", function () {
+            throw "three";
+        });
+        light.service("LoadOrderSections", function () {
+            return "four";
+        });
+        light.service("DisplayOrder", function () {
+            return me;
+        });
+        light.service("DisplaySections", function () {
+            return "six";
+        });
+
+        light(function () {
+            this.system.startRecording();
+            this.service
+               .LoadOrder()
+               .ToStandardResponse()
+               .NotifySubscribers()
+               .LoadOrderSections()
+               .DisplayOrder()
+               .DisplaySections();
+        });
+        light(function () {
+            this.service.visual({
+                useShortNames: false,
+                streatchOutCalls: false,
+                containerId: "cy",
+                resultId: "definition",
+                layout: {
+                    name: "grid"//circle,concentric, preset, random,breadthfirst,grid
+                }
+            });
+        });
+    </script>
+</body>
+</html>
