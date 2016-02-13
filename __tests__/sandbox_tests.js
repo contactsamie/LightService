@@ -1261,7 +1261,7 @@ describe('light', function () {
             this.service[service]()
             var answer = this.service[service]().result();
 
-            var timeMachine = light.advance.timeMachine();
+            var timeMachine = this.system.timeMachine();
 
             timeMachine.previous();
             timeMachine.previous();

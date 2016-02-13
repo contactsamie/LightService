@@ -227,7 +227,26 @@ var light = (typeof light === "undefined") ? (function () {
         },
         recordClear: function () {
             GLOBAL.track.clearAllRecords();
-        }
+        },
+        timeMachine: function () {
+            var records = GLOBAL.system.getAllRecords();
+            var recordLength = records.length;
+            var pointer = -1;
+
+            return {
+                next: function () {
+                    pointer = pointer - 2;
+                    pointer === -1 ? this.current() : GLOBAL.system.play(recordLength - (1 + pointer), recordLength - pointer);
+                },
+                previous: function () {
+                    pointer = pointer + 2;
+                    pointer >= recordLength ? this.current() : GLOBAL.system.play(recordLength - (1 + pointer), recordLength - pointer);
+                },
+                current: function () {
+                    GLOBAL.system.play(recordLength - 2, recordLength - 1);
+                }
+            }
+        },
     };
 
     GLOBAL.utility = {
@@ -761,25 +780,6 @@ var light = (typeof light === "undefined") ? (function () {
     }
 
     _light.advance = {
-        timeMachine: function () {
-            var records = GLOBAL.system.getAllRecords();
-            var recordLength = records.length;
-            var pointer = -1;
-
-            return {
-                next: function () {
-                    pointer = pointer - 2;
-                    pointer === -1 ? this.current() : GLOBAL.system.play(recordLength - (1 + pointer), recordLength - pointer);
-                },
-                previous: function () {
-                    pointer = pointer + 2;
-                    pointer >= recordLength ? this.current() : GLOBAL.system.play(recordLength - (1 + pointer), recordLength - pointer);
-                },
-                current: function () {
-                    GLOBAL.system.play(recordLength - 2, recordLength - 1);
-                }
-            }
-        },
         serviceTest: function (setup, f) {
             GLOBAL._TEST_OBJECTS_ = setup;
 
