@@ -1,7 +1,6 @@
 var light = (typeof light === "undefined") ? (function () {
     var GLOBAL = {};
     GLOBAL.getCurrentContext = function (stateName, arg, stateOverride) {
-       
         var state = stateOverride ? JSON.parse(JSON.stringify({ data: stateOverride })).data : stateOverride
 
         var incontext = {
@@ -9,7 +8,7 @@ var light = (typeof light === "undefined") ? (function () {
             service: chainService(),
             arg: arg,
             system: GLOBAL.system,
-            state:  GLOBAL._STATE_[stateName].api(state) 
+            state: GLOBAL._STATE_[stateName].api(state)
         };
         return incontext;
     };
@@ -269,7 +268,7 @@ var light = (typeof light === "undefined") ? (function () {
         return xmlhttp;
     }
 
-    var setUpEventSubscriberBase = function (name, id, o) {
+    var setUpEventSubscriberBase = function (id, o) {
         setUpEventSubscriberBase.ref = setUpEventSubscriberBase.ref || 0;
         setUpEventSubscriberBase.ref++;
         GLOBAL.eventSubscribers[id] = GLOBAL.eventSubscribers[id] || {};
@@ -281,7 +280,7 @@ var light = (typeof light === "undefined") ? (function () {
         return setUpEventSubscriberBase.ref;
     };
 
-    var createEventEmitter = function (name, id, f) {
+    var createEventEmitter = function (id, f) {
         GLOBAL.eventSubscribers[id] = GLOBAL.eventSubscribers[id] || {};
         GLOBAL.eventSubscribers[id].sub = GLOBAL.eventSubscribers[id].sub || [];
         GLOBAL.eventSubscribers[id].notify = GLOBAL.eventSubscribers[id].notify || function (o, context, notificationType) {
@@ -298,17 +297,17 @@ var light = (typeof light === "undefined") ? (function () {
         };
     };
 
-    var setUpNotification = function (name, id) {
-        return createEventEmitter(name, id, function (item, o, context, notificationInfo) {
+    var setUpNotification = function (id) {
+        return createEventEmitter(id, function (item, o, context, notificationInfo) {
             GLOBAL.utility.tryCatch(context, function () { return item.service(); }, function () { }, function () { GLOBAL.utility.execSurpressError(item.service.error, o, context, notificationInfo); });
         });
     };
 
-    var setUpSystemEventSubscriptionFx = function (name, that, id) {
+    var setUpSystemEventSubscriptionFx = function (that, name, id) {
         that[name] = function (e) {
-            setUpEventSubscriberBase(name, id, e);
+            setUpEventSubscriberBase(id, e);
         };
-        createEventEmitter(name, id, function (item, o, context, notificationInfo) {
+        createEventEmitter(id, function (item, o, context, notificationInfo) {
             if (typeof item === "function") {
                 try {
                     item(o, context, notificationInfo)
@@ -318,14 +317,13 @@ var light = (typeof light === "undefined") ? (function () {
     };
 
     var setUpSystemEvent = function (that, event, name) {
-        setUpSystemEventSubscriptionFx(event, that, name + "." + event);
+        setUpSystemEventSubscriptionFx(that, event, name + "." + event);
         that[event].notify = GLOBAL.eventSubscribers[name + "." + event].notify;
     };
 
-    var setUpServiceEvent = function (that, event, name) {
-        var id = name + "." + event;
+    var setUpServiceEvent = function (that, event, id) {
         that[event] = function (o) {
-            return setUpEventSubscriberBase(name, id, o);
+            return setUpEventSubscriberBase(id, o);
         };
         that[event].forEachSubscriber = that[event].forEachSubscriber || function (f) {
             var l = GLOBAL.eventSubscribers[id].sub.length;
@@ -334,7 +332,7 @@ var light = (typeof light === "undefined") ? (function () {
                 f && f(item);
             }
         };
-        setUpNotification(name, id);
+        setUpNotification(id);
         that[event].notify = GLOBAL.eventSubscribers[id].notify;
     };
 
@@ -482,10 +480,10 @@ var light = (typeof light === "undefined") ? (function () {
     };
 
     var createServiceDefinitionFromSuppliedFn = function (context, serviceItem, handleName, definition, serviceName) {
-        setUpServiceEvent(serviceItem, "before", serviceName);
-        setUpServiceEvent(serviceItem, "after", serviceName);
-        setUpServiceEvent(serviceItem, "error", serviceName);
-        setUpServiceEvent(serviceItem, "success", serviceName);
+        setUpServiceEvent(serviceItem, "before", serviceName + ".before");
+        setUpServiceEvent(serviceItem, "after", serviceName + ".after");
+        setUpServiceEvent(serviceItem, "error", serviceName + ".error");
+        setUpServiceEvent(serviceItem, "success", serviceName + ".success");
 
         return function (arg, callerContext) {
             var tArg = {};
@@ -766,13 +764,13 @@ var light = (typeof light === "undefined") ? (function () {
 
     _light.advance = {
         timeMachine: function () {
-          var records=  GLOBAL.system.getAllRecords();
-          var recordLength = records.length;
+            var records = GLOBAL.system.getAllRecords();
+            var recordLength = records.length;
             var pointer = -1;
 
             return {
                 next: function () {
-                    pointer = pointer-2;
+                    pointer = pointer - 2;
                     pointer === -1 ? this.current() : GLOBAL.system.play(recordLength - (1 + pointer), recordLength - pointer);
                 },
                 previous: function () {
