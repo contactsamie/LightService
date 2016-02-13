@@ -129,8 +129,7 @@ var light = (typeof light === "undefined") ? (function () {
     };
 
     GLOBAL.track = {
-        // record not yet able to track arguments because it gets mutated
-        // TODO resolve above problem
+      
         record: function (arg) {
           
             
@@ -812,7 +811,7 @@ var light = (typeof light === "undefined") ? (function () {
            subscribe like light.event(function (e, context,notificationInfo) {}));
         */
 
-        _light.version = 1;
+        _light.version = "6.0.0";
         _light.service = defineService;
 
         setUpSystemEvent(_light, GLOBAL.systemEventName.onSystemEvent, GLOBAL.generateUniqueSystemName());

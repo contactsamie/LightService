@@ -2,7 +2,7 @@
     boxSelectionEnabled: false,
     autounselectify: true,
     layout: {
-        name: 'grid' 
+        name: 'grid'
     }
 };
 graphArg.style = [{
@@ -94,7 +94,7 @@ light.service("draw", function (arg) {
     });
 });
 light.service("visual", function (arg) {
-    arg = arg || {}; 
+    arg = arg || {};
     var records = this.service.timemachine_record().result();
     for (var i = 0; i < records.length; i++) {
         var currentRecord = records[i];
