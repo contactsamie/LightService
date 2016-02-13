@@ -158,20 +158,20 @@ var light = (typeof light === "undefined") ? (function () {
             var recordStr = JSON.stringify(recordObject);
            
             if (GLOBAL.recordServices) {
-                 _light[GLOBAL.systemEventName.onSystemRecordEvent].notify(recordStr);
+                 _light[GLOBAL.systemEventName.onSystemRecordEvent].dispatch(recordStr);
             }
           
 
             if (arg.serviceOrHandleMethodName === GLOBAL.serviceTag) {
-                GLOBAL.systemServices[arg.methodName][GLOBAL.serviceEventName[arg.eventType]].notify(recordStr);
+                GLOBAL.systemServices[arg.methodName][GLOBAL.serviceEventName[arg.eventType]].dispatch(recordStr);
                 if ((arg.eventType === GLOBAL.serviceEventName.error) || (arg.eventType === GLOBAL.serviceEventName.success)) {
-                    GLOBAL.systemServices[arg.methodName][GLOBAL.serviceEventName[GLOBAL.serviceEventName.after]].notify(recordStr);
+                    GLOBAL.systemServices[arg.methodName][GLOBAL.serviceEventName[GLOBAL.serviceEventName.after]].dispatch(recordStr);
                 }
             }
 
             // notify event subscribers
-            _light[arg.event].notify(recordStr);
-            _light[GLOBAL.systemEventName.onSystemEvent].notify(recordStr);
+            _light[arg.event].dispatch(recordStr);
+            _light[GLOBAL.systemEventName.onSystemEvent].dispatch(recordStr);
         }
     }
 
@@ -235,7 +235,7 @@ var light = (typeof light === "undefined") ? (function () {
     var createEventEmitter = function (id, f) {
         GLOBAL.eventSubscribers[id] = GLOBAL.eventSubscribers[id] || {};
         GLOBAL.eventSubscribers[id].sub = GLOBAL.eventSubscribers[id].sub || [];
-        GLOBAL.eventSubscribers[id].notify = GLOBAL.eventSubscribers[id].notify || function (o, context, notificationType) {
+        GLOBAL.eventSubscribers[id].dispatch = GLOBAL.eventSubscribers[id].dispatch || function (o, context, notificationType) {
             var _id = id;
             var l = GLOBAL.eventSubscribers[_id].sub.length;
             for (var i = 0; i < l; i++) {
@@ -255,10 +255,19 @@ var light = (typeof light === "undefined") ? (function () {
         });
     };
 
-    var setUpSystemEventSubscriptionFx = function (that, name, id) {
-        that[name] = function (e) {
+
+    var setUpEventSubscriber = function (that, event, id) {
+        that[event] = function (e) {
             setUpEventSubscriberBase(id, e);
         };
+        that["on"] = that["on"] || function (name, o) {
+            that[name](o);
+        };
+    };
+
+
+    var publishSystemEventSubscriptionFx = function (that, event, id) {
+        setUpEventSubscriber(that, event, id);
         createEventEmitter(id, function (item, o, context, notificationInfo) {
             if (item && (typeof item.service === "function")) {
                 try {
@@ -268,15 +277,9 @@ var light = (typeof light === "undefined") ? (function () {
         });
     };
 
-    var setUpSystemEvent = function (that, event, name) {
-        setUpSystemEventSubscriptionFx(that, event, name + "." + event);
-        that[event].notify = GLOBAL.eventSubscribers[name + "." + event].notify;
-    };
 
-    var setUpServiceEvent = function (that, event, id) {
-        that[event] = function (o) {
-            return setUpEventSubscriberBase(id, o);
-        };
+    var publishServiceEvent = function (that, event, id) {
+        setUpEventSubscriber(that, event, id);
         that[event].forEachSubscriber = that[event].forEachSubscriber || function (f) {
             var l = GLOBAL.eventSubscribers[id].sub.length;
             for (var i = 0; i < l; i++) {
@@ -285,17 +288,20 @@ var light = (typeof light === "undefined") ? (function () {
             }
         };
         setUpNotification(id);
-        that[event].notify = GLOBAL.eventSubscribers[id].notify;
+        that[event].dispatch = GLOBAL.eventSubscribers[id].dispatch;
     };
+
+    var publishSystemEvent = function (that, event, name) {
+        publishSystemEventSubscriptionFx(that, event, name + "." + event);
+        that[event].dispatch = GLOBAL.eventSubscribers[name + "." + event].dispatch;
+    };
+
 
     var getServiceByName = function (serviceName) {
         var item = GLOBAL.systemServices[serviceName];
         return item;
     };
 
-    function parseJSON(data) {
-        return JSON && JSON.parse ? JSON.parse(data) : (new Function("return " + data))();
-    }
     /*
      !!!!!!!!!!!!!!!!
     */
@@ -440,10 +446,10 @@ var light = (typeof light === "undefined") ? (function () {
     };
 
     var createServiceDefinitionFromSuppliedFn = function (context, serviceItem, handleName, definition, serviceName) {
-        setUpServiceEvent(serviceItem, GLOBAL.serviceEventName.before, serviceName + "." + GLOBAL.serviceEventName.before);
-        setUpServiceEvent(serviceItem, GLOBAL.serviceEventName.after, serviceName + "." + GLOBAL.serviceEventName.after);
-        setUpServiceEvent(serviceItem, GLOBAL.serviceEventName.error, serviceName + "." + GLOBAL.serviceEventName.error);
-        setUpServiceEvent(serviceItem, GLOBAL.serviceEventName.success, serviceName + "." + GLOBAL.serviceEventName.success);
+        publishServiceEvent(serviceItem, GLOBAL.serviceEventName.before, serviceName + "." + GLOBAL.serviceEventName.before);
+        publishServiceEvent(serviceItem, GLOBAL.serviceEventName.after, serviceName + "." + GLOBAL.serviceEventName.after);
+        publishServiceEvent(serviceItem, GLOBAL.serviceEventName.error, serviceName + "." + GLOBAL.serviceEventName.error);
+        publishServiceEvent(serviceItem, GLOBAL.serviceEventName.success, serviceName + "." + GLOBAL.serviceEventName.success);
 
         return function (arg, callerContext) {
             var tArg = {};
@@ -806,23 +812,23 @@ var light = (typeof light === "undefined") ? (function () {
         GLOBAL.stateFactory(GLOBAL._GLOBAL_SCOPE_NAME);
         GLOBAL.DEFAULT_HANDLE_NAME = GLOBAL.generateUniqueSystemName();
         /*
-           setup like setUpSystemEvent(_light, "event", GLOBAL.generateUniqueSystemName("some id"));
-           notify like  _light.event.notify(e, context, notificationInfo);
+           setup like publishSystemEvent(_light, "event", GLOBAL.generateUniqueSystemName("some id"));
+           notify like  _light.event.dispatch(e, context, notificationInfo);
            subscribe like light.event(function (e, context,notificationInfo) {}));
         */
 
         _light.version = "6.0.0";
         _light.service = defineService;
 
-        setUpSystemEvent(_light, GLOBAL.systemEventName.onSystemEvent, GLOBAL.generateUniqueSystemName());
-        setUpSystemEvent(_light, GLOBAL.systemEventName.onSystemRecordEvent, GLOBAL.generateUniqueSystemName());
+        publishSystemEvent(_light, GLOBAL.systemEventName.onSystemEvent, GLOBAL.generateUniqueSystemName());
+        publishSystemEvent(_light, GLOBAL.systemEventName.onSystemRecordEvent, GLOBAL.generateUniqueSystemName());
 
-        setUpSystemEvent(_light, GLOBAL.systemEventName.beforeServiceRun, GLOBAL.generateUniqueSystemName());
-        setUpSystemEvent(_light, GLOBAL.systemEventName.afterServiceRun, GLOBAL.generateUniqueSystemName());
-        setUpSystemEvent(_light, GLOBAL.systemEventName.beforeHandleRun, GLOBAL.generateUniqueSystemName());
-        setUpSystemEvent(_light, GLOBAL.systemEventName.afterHandleRun, GLOBAL.generateUniqueSystemName());
-        setUpSystemEvent(_light, GLOBAL.systemEventName.onServiceError, GLOBAL.generateUniqueSystemName());
-        setUpSystemEvent(_light, GLOBAL.systemEventName.onServiceSuccess, GLOBAL.generateUniqueSystemName());
+        publishSystemEvent(_light, GLOBAL.systemEventName.beforeServiceRun, GLOBAL.generateUniqueSystemName());
+        publishSystemEvent(_light, GLOBAL.systemEventName.afterServiceRun, GLOBAL.generateUniqueSystemName());
+        publishSystemEvent(_light, GLOBAL.systemEventName.beforeHandleRun, GLOBAL.generateUniqueSystemName());
+        publishSystemEvent(_light, GLOBAL.systemEventName.afterHandleRun, GLOBAL.generateUniqueSystemName());
+        publishSystemEvent(_light, GLOBAL.systemEventName.onServiceError, GLOBAL.generateUniqueSystemName());
+        publishSystemEvent(_light, GLOBAL.systemEventName.onServiceSuccess, GLOBAL.generateUniqueSystemName());
 
         _light.handle(GLOBAL.DEFAULT_HANDLE_NAME, function (definition) { return definition; });
     };
