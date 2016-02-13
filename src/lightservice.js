@@ -129,10 +129,7 @@ var light = (typeof light === "undefined") ? (function () {
     };
 
     GLOBAL.track = {
-      
         record: function (arg) {
-          
-            
             if (arg.methodName === GLOBAL.DEFAULT_HANDLE_NAME) {
                 return;
             }
@@ -153,14 +150,12 @@ var light = (typeof light === "undefined") ? (function () {
                 event: arg.event,
                 eventType: arg.eventType
             };
-            //todo use an immutable library
 
             var recordStr = JSON.stringify(recordObject);
-           
+
             if (GLOBAL.recordServices) {
-                 _light[GLOBAL.systemEventName.onSystemRecordEvent].dispatch(recordStr);
+                _light[GLOBAL.systemEventName.onSystemRecordEvent].dispatch(recordStr);
             }
-          
 
             if (arg.serviceOrHandleMethodName === GLOBAL.serviceTag) {
                 GLOBAL.systemServices[arg.methodName][GLOBAL.serviceEventName[arg.eventType]].dispatch(recordStr);
@@ -174,8 +169,6 @@ var light = (typeof light === "undefined") ? (function () {
             _light[GLOBAL.systemEventName.onSystemEvent].dispatch(recordStr);
         }
     }
-
-  
 
     GLOBAL.utility = {
         execSurpressError: function (o, e, context, notificationInfo) {
@@ -255,7 +248,6 @@ var light = (typeof light === "undefined") ? (function () {
         });
     };
 
-
     var setUpEventSubscriber = function (that, event, id) {
         that[event] = function (e) {
             setUpEventSubscriberBase(id, e);
@@ -264,7 +256,6 @@ var light = (typeof light === "undefined") ? (function () {
             that[name](o);
         };
     };
-
 
     var publishSystemEventSubscriptionFx = function (that, event, id) {
         setUpEventSubscriber(that, event, id);
@@ -276,7 +267,6 @@ var light = (typeof light === "undefined") ? (function () {
             }
         });
     };
-
 
     var publishServiceEvent = function (that, event, id) {
         setUpEventSubscriber(that, event, id);
@@ -295,7 +285,6 @@ var light = (typeof light === "undefined") ? (function () {
         publishSystemEventSubscriptionFx(that, event, name + "." + event);
         that[event].dispatch = GLOBAL.eventSubscribers[name + "." + event].dispatch;
     };
-
 
     var getServiceByName = function (serviceName) {
         var item = GLOBAL.systemServices[serviceName];
@@ -622,7 +611,7 @@ var light = (typeof light === "undefined") ? (function () {
                 return function (arg) {
                     var currentResult;
                     var res = {};
-                    //TODO use immutable lib
+
                     res.previousOrMostCurrentResultToBePassedToTheNextActor = arguments.length ? arg : result;
                     var previousOrMostCurrentResultToBePassedToTheNextActor = JSON.parse(JSON.stringify(res)).previousOrMostCurrentResultToBePassedToTheNextActor;
 
@@ -720,8 +709,7 @@ var light = (typeof light === "undefined") ? (function () {
             f.call(GLOBAL.getCurrentContext(GLOBAL._GLOBAL_SCOPE_NAME, chainService()), chainService());
             GLOBAL._TEST_OBJECTS_ = undefined
         },
-        play: function (records,i, j) {
-           
+        play: function (records, i, j) {
             i = i || 0;
             j = j || (GLOBAL.track.records.length - 1);
 
@@ -747,7 +735,7 @@ var light = (typeof light === "undefined") ? (function () {
     };
 
     if (typeof Immutable === "undefined") {
-        _light.Immutable = {
+        GLOBAL.Immutable = {
             Map: function (obj) {
                 var name = GLOBAL.generateUniqueSystemName("immu");
                 var data = { data: obj }
@@ -762,17 +750,17 @@ var light = (typeof light === "undefined") ? (function () {
                         out.data[n] = o;
                         var newData = JSON.parse(JSON.stringify(out)).data;
 
-                        return _light.Immutable.Map(newData);
+                        return GLOBAL.Immutable.Map(newData);
                     }
                 };
             }
         };
     } else {
-        _light.Immutable = Immutable;
+        GLOBAL.Immutable = Immutable;
     }
 
-    _light.copy = function (obj) {
-        _light.Immutable.Map({ data: obj }).get('data');
+    GLOBAL.copy = function (obj) {
+        GLOBAL.Immutable.Map({ data: obj }).get('data');
     };
 
     var init = function () {
@@ -819,6 +807,7 @@ var light = (typeof light === "undefined") ? (function () {
 
         _light.version = "6.0.0";
         _light.service = defineService;
+        _light.Immutable = GLOBAL.Immutable;
 
         publishSystemEvent(_light, GLOBAL.systemEventName.onSystemEvent, GLOBAL.generateUniqueSystemName());
         publishSystemEvent(_light, GLOBAL.systemEventName.onSystemRecordEvent, GLOBAL.generateUniqueSystemName());
@@ -843,7 +832,6 @@ var light = (typeof light === "undefined") ? (function () {
             GLOBAL.recordServices = false;
         },
     };
- 
 
     return _light;
 })() : console.log("light script already exists");
@@ -883,6 +871,3 @@ if (typeof module !== "undefined" && ('exports' in module)) {
 if (typeof define === 'function' && define.amd) {
     define('light', [], function () { return light; });
 }
-
-
-
