@@ -2,9 +2,7 @@ jest.dontMock('../src/lightservice');
 jest.dontMock('../src/timemachine.lightservice');
 
 var light = require('../src/lightservice') || light;
-require('../src/timemachine.lightservice') ;
-
-
+require('../src/timemachine.lightservice');
 
 light.service("test", function (arg) { });
 light.service("test-2", function (arg) { });
@@ -44,9 +42,9 @@ describe('light', function () {
         light(function () {
             var test = this.service.test_error;
             var path = [];
-            this.event.test_error.on("before",function () { path.push("before"); });
-            this.event.test_error.on("after",function () { path.push("after"); });
-            this.event.test_error.on("error",function () { path.push("error"); });
+            this.event.test_error.on("before", function () { path.push("before"); });
+            this.event.test_error.on("after", function () { path.push("after"); });
+            this.event.test_error.on("error", function () { path.push("error"); });
             test().result();
             expect(path[0]).toBe("before");
             expect(path[1]).toBe("error");
@@ -62,11 +60,11 @@ describe('light', function () {
 
             var subs = "";
             var subsExpected = "";
-            subs += this.event["test-2"].on("after",function () {
+            subs += this.event["test-2"].on("after", function () {
                 path.push("2");
             });
 
-            subs += this.event["test-2"].on("after",function () {
+            subs += this.event["test-2"].on("after", function () {
                 path.push("1");
             });
 
@@ -85,7 +83,7 @@ describe('light', function () {
         light.startService("test", function () {
             var test = this.service.test;
             var path = [];
-            this.event.test.on("before",function () { path.push("before"); });
+            this.event.test.on("before", function () { path.push("before"); });
             test().result();
             expect(path[0]).toBe("before");
             expect(path.length).toBe(1);
@@ -95,7 +93,7 @@ describe('light', function () {
         light.startService("test", function (system) {
             var test = this.service.test;
             var path = [];
-            this.event.test.on("after",function () {
+            this.event.test.on("after", function () {
                 path.push("after1");
             });
             test().result();
@@ -108,7 +106,7 @@ describe('light', function () {
         light.startService("test", function () {
             var test = this.service.test;
             var path = [];
-            this.event.test.on("after",function () {
+            this.event.test.on("after", function () {
                 path.push("after2");
             });
 
@@ -128,16 +126,16 @@ describe('light', function () {
 
             var subs = "";
             var subsExpected = "";
-            subs += this.event["test-2b2"].on("after",function () {
+            subs += this.event["test-2b2"].on("after", function () {
                 path.push("2");
             });
-            this.event["test-2b2"].on("before",function () {
+            this.event["test-2b2"].on("before", function () {
                 path.push("1");
             });
-            subs += this.event["test-2b2"].on("after",function () {
+            subs += this.event["test-2b2"].on("after", function () {
                 path.push("1");
             });
-            this.event["test-2b2"].on("error",function () {
+            this.event["test-2b2"].on("error", function () {
                 path.push("1");
             });
 
@@ -156,7 +154,7 @@ describe('light', function () {
         light.startService("test", function () {
             var test = this.service.test;
             var path = [];
-            this.event.test.on("error",function () { path.push("error"); });
+            this.event.test.on("error", function () { path.push("error"); });
             test().result();
             expect(path.length).toBe(0);
         });
@@ -166,9 +164,9 @@ describe('light', function () {
         light.startService("test", function () {
             var test = this.service.test;
             var path = [];
-            this.event.test.on("before",function () { path.push("before"); });
-            this.event.test.on("after",function () { path.push("after"); });
-            this.event.test.on("error",function () { path.push("error"); });
+            this.event.test.on("before", function () { path.push("before"); });
+            this.event.test.on("after", function () { path.push("after"); });
+            this.event.test.on("error", function () { path.push("error"); });
             test().result();
             expect(path[0]).toBe("before");
             expect(path[1]).toBe("after");
@@ -180,7 +178,7 @@ describe('light', function () {
         light.startService("test_error", function () {
             var test = this.service["test_error"];
             var path = [];
-            this.event["test_error"].on("error",function () { path.push("error"); });
+            this.event["test_error"].on("error", function () { path.push("error"); });
             test().result();
             expect(path.length).toBe(1);
         });
@@ -190,9 +188,9 @@ describe('light', function () {
         light.startService("test_error", function () {
             var test = this.service["test_error"];
             var path = [];
-            this.event["test_error"].on("before",function () { path.push("before"); });
-            this.event["test_error"].on("after",function () { path.push("after"); });
-            this.event["test_error"].on("error",function () { path.push("error"); });
+            this.event["test_error"].on("before", function () { path.push("before"); });
+            this.event["test_error"].on("after", function () { path.push("after"); });
+            this.event["test_error"].on("error", function () { path.push("error"); });
             test().result();
             expect(path[0]).toBe("before");
             expect(path[1]).toBe("error");
@@ -205,9 +203,9 @@ describe('light', function () {
         light.startService("sample2", function () {
             var test = this.service.sample2;
             var path = [];
-            this.event.sample2.on("before",function () { path.push("before"); });
-            this.event.sample2.on("after",function () { path.push("after"); });
-            this.event.sample2.on("error",function (o) { path.push("error"); console.log(o); });
+            this.event.sample2.on("before", function () { path.push("before"); });
+            this.event.sample2.on("after", function () { path.push("after"); });
+            this.event.sample2.on("error", function (o) { path.push("error");  });
             var answer = test().result();
             expect(path[0]).toBe("before");
             expect(path[1]).toBe("after");
@@ -220,9 +218,9 @@ describe('light', function () {
         light.startService("sample1", function () {
             var test = this.service.sample1;
             var path = [];
-            this.event.sample1.on("before",function () { path.push("before"); });
-            this.event.sample1.on("after",function () { path.push("after"); });
-            this.event.sample1.on("error",function (o) { path.push("error"); console.log(o); });
+            this.event.sample1.on("before", function () { path.push("before"); });
+            this.event.sample1.on("after", function () { path.push("after"); });
+            this.event.sample1.on("error", function (o) { path.push("error");  });
             var answer = test({ x: 2, y: 3 }).result();
             expect(path[0]).toBe("before");
             expect(path[1]).toBe("after");
@@ -254,9 +252,9 @@ describe('light', function () {
             light.advanced.test(testObj, function () {
                 var test = this.service.sample2;
                 var path = [];
-                this.event.sample2.on("before",function () { path.push("before"); });
-                this.event.sample2.on("after",function () { path.push("after"); });
-                this.event.sample2.on("error",function (o) { path.push("error"); console.log(o); });
+                this.event.sample2.on("before", function () { path.push("before"); });
+                this.event.sample2.on("after", function () { path.push("after"); });
+                this.event.sample2.on("error", function (o) { path.push("error");  });
                 var answer = test().result();
                 expect(path[0]).toBe("before");
                 expect(path[1]).toBe("after");
@@ -801,47 +799,7 @@ describe('light', function () {
         });
     });
 
-    /*
-     it('speed', function () {
-        var totalBuild = 1000;
-        var answer = {};
-
-        var a = performance.now();
-        for (var i = 0; i < totalBuild; i++) {
-            light.service("dynamic_" + i, function (arg) {
-                arg.x = arg.x || 0;
-                arg.x = arg.x + 1;
-                return arg;
-            });
-        }
-        var b = performance.now();
-        console.log('It took ' + Math.floor(b - a) + ' ms to create '+totalBuild+'  services');
-
-        var  total = 100;
-         a = performance.now();
-        for (var i = 0; i < total; i++) {
-            light(function () {
-                 answer = this.service["dynamic_" + i](answer).result();
-            });
-         }
-         b = performance.now();
-         console.log('It took ' + Math.floor(b - a) + ' ms to execute ' + total + ' in ' + totalBuild+' services');
-
-         a = performance.now();
-         light(function () {
-             answer = this.service["dynamic_0"](answer).result();
-         });
-         b = performance.now();
-         console.log('It took ' + Math.floor(b - a) + ' ms to execute the FIRST one in ' + totalBuild + ' services');
-
-         a = performance.now();
-         light(function () {
-             answer = this.service["dynamic_" + (totalBuild - 1)](answer).result();
-         });
-         b = performance.now();
-         console.log('It took ' + Math.floor(b - a) + ' ms to execute the LAST one in ' + totalBuild + ' services');
-    });
-    */
+  
 
     it('test service in a service', function () {
         light.service("pass1", function (arg) {
@@ -1283,19 +1241,9 @@ describe('light', function () {
         });
     });
 
-
-
-
-
-
-
-
-
-
-
     it('time machine test with message dispatcher', function () {
         var log = "";
-        
+
         var service = light.receive("DELETE_USER_MESSAGE", function () {
             var i = this.state.get("i");
             i = i || 0;
@@ -1325,12 +1273,157 @@ describe('light', function () {
             this.service.timemachine_previous();
             this.service.timemachine_current();
             expect(log).toBe(",1,2,3,4,4,3,2,3,2,3,4,3,4");
-
-           
         });
     });
 
+    it('message dispatcher1', function () {
+        var log = "";
+        var data;
+        light.send("ADD_USER_MESSAGE", { arg: 100 });
+        var service = light.receive("ADD_USER_MESSAGE", function (arg) {
+            data = arg.arg;
+            var i = this.state.get("i");
+            i = i || 0;
+            i++;
+            this.state.set("i", i);
+            log = log + "," + i;
+            return i;
+        });
 
+        light(function () {
+            this.system.startRecording();
+            expect(typeof data).toBe("undefined");
+            light.send("ADD_USER_MESSAGE", { arg: 200 });
+            light.send("ADD_USER_MESSAGE", { arg: 300 });
+            light.send("ADD_USER_MESSAGE", { arg: 400 });
+            light.send("ADD_USER_MESSAGE", { arg: 500 });
 
+            this.system.stopRecording();
 
+            this.service.timemachine_previous();
+            this.service.timemachine_previous();
+            this.service.timemachine_previous();
+            this.service.timemachine_next();
+            this.service.timemachine_previous();
+            this.service.timemachine_next();
+            this.service.timemachine_next();
+            this.service.timemachine_previous();
+            this.service.timemachine_current();
+            expect(log).toBe(",1,2,3,4,4,3,2,3,2,3,4,3,4");
+
+            expect(data).toBe(500);
+        });
+    });
+
+    it('message dispatcher - NO RECEIVERS', function () {
+        light.send("NO_RECEIVERS_USER_MESSAGE", { arg: 1 });
+        light.send("NO_RECEIVERS_USER_MESSAGE", { arg: 2 });
+        light.send("NO_RECEIVERS_USER_MESSAGE", { arg: 3 });
+        light.send("NO_RECEIVERS_USER_MESSAGE", { arg: 4 });
+    });
+
+    it('message dispatcher - NO SENDERS', function () {
+        var data = 0;
+        var service = light.receive("NO_SENDERS_USER_MESSAGE", function () {
+            data++;
+        });
+        var service = light.receive("NO_SENDERS_USER_MESSAGE", function () {
+            data++;
+        });
+        var service = light.receive("NO_SENDERS_USER_MESSAGE", function () {
+            data++;
+        });
+
+        expect(data).toBe(0);
+    });
+
+    it('message dispatcher - one sender multiple receivers 1', function () {
+        var data = 0;
+        var service = light.receive("MANY_RECEIVERS_USER_MESSAGE", function () {
+            data++;
+        });
+        var service = light.receive("MANY_RECEIVERS_USER_MESSAGE", function () {
+            data++;
+        });
+        var service = light.receive("MANY_RECEIVERS_USER_MESSAGE", function () {
+            data++;
+        });
+        light.send("MANY_RECEIVERS_USER_MESSAGE");
+        expect(data).toBe(3);
+    });
+
+    it('message dispatcher - one sender multiple receivers 2', function () {
+        var data = 0;
+        var service = light.receive("MANY_RECEIVERS_USER_MESSAGE", function () {
+            data++;
+        });
+        var service = light.receive("MANY_RECEIVERS_USER_MESSAGE", function () {
+            data++;
+        });
+        light.send("MANY_RECEIVERS_USER_MESSAGE");
+        var service = light.receive("MANY_RECEIVERS_USER_MESSAGE", function () {
+            data++;
+        });
+
+        expect(data).toBe(2);
+    });
+
+    it('message dispatcher - one sender multiple receivers 3', function () {
+        var data = 0;
+        var service = light.receive("MANY_RECEIVERS_USER_MESSAGE", function () {
+            data++;
+        });
+        light.send("MANY_RECEIVERS_USER_MESSAGE");
+        var service = light.receive("MANY_RECEIVERS_USER_MESSAGE", function () {
+            data++;
+        });
+
+        var service = light.receive("MANY_RECEIVERS_USER_MESSAGE", function () {
+            data++;
+        });
+
+        expect(data).toBe(1);
+    });
+
+    /*
+   it('speed', function () {
+      var totalBuild = 1000;
+      var answer = {};
+
+      var a = performance.now();
+      for (var i = 0; i < totalBuild; i++) {
+          light.service("dynamic_" + i, function (arg) {
+              arg.x = arg.x || 0;
+              arg.x = arg.x + 1;
+              return arg;
+          });
+      }
+      var b = performance.now();
+      console.log('It took ' + Math.floor(b - a) + ' ms to create '+totalBuild+'  services');
+
+      var  total = 100;
+       a = performance.now();
+      for (var i = 0; i < total; i++) {
+          light(function () {
+               answer = this.service["dynamic_" + i](answer).result();
+          });
+       }
+       b = performance.now();
+       console.log('It took ' + Math.floor(b - a) + ' ms to execute ' + total + ' in ' + totalBuild+' services');
+
+       a = performance.now();
+       light(function () {
+           answer = this.service["dynamic_0"](answer).result();
+       });
+       b = performance.now();
+       console.log('It took ' + Math.floor(b - a) + ' ms to execute the FIRST one in ' + totalBuild + ' services');
+
+       a = performance.now();
+       light(function () {
+           answer = this.service["dynamic_" + (totalBuild - 1)](answer).result();
+       });
+       b = performance.now();
+       console.log('It took ' + Math.floor(b - a) + ' ms to execute the LAST one in ' + totalBuild + ' services');
+  });
+  */
 });
