@@ -13,30 +13,16 @@ http://codepen.io/contactsamie/pen/RrqXqZ
 
 GOALS: 
 
-This provides a Simple, convinient and consistent interface for service consumption
+It is based on the idea that a system is predictable when it is defined as a pure function of the state and arguments of the components of the system 
+
+Provides a Simple, convinient and consistent interface for service consumption
 
 It provides a way for client to define services and also specify how those service definition should be interpreted
 
-It also provides event propagation and handling interfaces
-
-Finally , it provides native logging and testing capabilites
-
-It favours function argument as an object over argument as params
-
-FURTHER GOALS:
-
-Easy Drop-in .NET intergration including SignalR 
-and try some level of isomorphic javascripting
 
 
 
-npm install lightservice
-
-bower install lightservice
-
-Install-Package LightService
-
-#todo
+#todo use
 
 http://www.jointjs.com/demos/devs
 
