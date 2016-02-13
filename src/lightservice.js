@@ -162,6 +162,14 @@ var light = (typeof light === "undefined") ? (function () {
             var recordStr = JSON.stringify(recordObject)
             GLOBAL.track.records.push(JSON.parse(recordStr));
 
+            if (arg.serviceOrHandleMethodName === GLOBAL.serviceTag) {
+                GLOBAL.systemServices[arg.methodName][GLOBAL.serviceEventName[arg.eventType]].notify(JSON.parse(recordStr));
+
+                if ((arg.eventType === GLOBAL.serviceEventName.error) || (arg.eventType === GLOBAL.serviceEventName.success)) {
+                    GLOBAL.systemServices[arg.methodName][GLOBAL.serviceEventName[GLOBAL.serviceEventName.after]].notify(JSON.parse(recordStr));
+                }
+            }
+
             // notify event subscribers
             _light[arg.event].notify(JSON.parse(recordStr));
             _light[GLOBAL.systemEventName.onSystemEvent].notify(JSON.parse(recordStr));
@@ -193,8 +201,6 @@ var light = (typeof light === "undefined") ? (function () {
                         throw "unable to find service to play service";
                     }
 
-                    // GLOBAL.getCurrentContext = function (stateName, arg,stateOverride)
-
                     if ((playGround.methodType === GLOBAL.serviceTag) && (playGround.dataType === GLOBAL.entranceTag)) {
                         if ((m === i)) {
                             inter = inter[playGround.methodName].call(GLOBAL.getCurrentContext(playGround.methodName, playGround.data, playGround.state), playGround.data);
@@ -213,7 +219,6 @@ var light = (typeof light === "undefined") ? (function () {
             var result = GLOBAL.track.records.slice(i, j);
 
             return result;
-            // return GLOBAL.track.records.map(function (o) { return o; });
         },
         recordStart: function () {
             GLOBAL.recordServices = true;
@@ -501,12 +506,6 @@ var light = (typeof light === "undefined") ? (function () {
             var result;
             context.callerContext = callerContext;
             GLOBAL.utility.tryCatch(context, function () {
-                return serviceItem[GLOBAL.serviceEventName.before].notify();
-            }, function (o) {
-            }, function (o) {
-            });
-
-            GLOBAL.utility.tryCatch(context, function () {
                 GLOBAL.track.record({
                     entranceOrExit: GLOBAL.entranceTag,
                     serviceOrHandleMethodName: GLOBAL.serviceTag,
@@ -521,62 +520,46 @@ var light = (typeof light === "undefined") ? (function () {
                     event: GLOBAL.systemEventName.beforeServiceRun,
                     eventType: GLOBAL.serviceEventName.before
                 });
+            }, function (o) {
+            }, function (o) {
+            });
 
+            GLOBAL.utility.tryCatch(context, function () {
                 result = runSuppliedServiceFunction(context, serviceItem, handleName, definition, serviceName, tArg.arg);
 
+                return result;
+            }, function (o) {
                 GLOBAL.track.record({
                     entranceOrExit: GLOBAL.exitTag,
                     serviceOrHandleMethodName: GLOBAL.serviceTag,
                     methodName: serviceName,
-                    argumentOrReturnData: result,
-                    info: handleName,
-                    infoType: GLOBAL.handleTag,
+                    argumentOrReturnData: o,
+                    info: "event:success",
+                    infoType: GLOBAL.eventTag,
                     isTest: false,
                     isFirstCallInServiceRun: GLOBAL.unknownTag,
                     isLastCallInServiceRun: GLOBAL.unknownTag,
                     link: definition,
-                    event: GLOBAL.systemEventName.afterServiceRun,
-                    eventType: GLOBAL.serviceEventName.after
+                    event: GLOBAL.systemEventName.onServiceSuccess,
+                    eventType: GLOBAL.serviceEventName.success
                 });
-
-                return result;
             }, function (o) {
-                //GLOBAL.track.record({
-                //    entranceOrExit: GLOBAL.exitTag,
-                //    serviceOrHandleMethodName: GLOBAL.serviceTag,
-                //    methodName: serviceName,
-                //    argumentOrReturnData: o,
-                //    info: "event:success",
-                //    infoType: GLOBAL.eventTag,
-                //    isTest: false,
-                //    isFirstCallInServiceRun: GLOBAL.unknownTag,
-                //    isLastCallInServiceRun: GLOBAL.unknownTag,
-                //    link: definition,
-                //    event: GLOBAL.systemEventName.onServiceSuccess,
-                //    eventType: GLOBAL.serviceEventName.success
-                //});
-
-                return serviceItem[GLOBAL.serviceEventName.success].notify(o, context, "service-success");
-            }, function (o) {
-                //GLOBAL.track.record({
-                //    entranceOrExit: GLOBAL.exitTag,
-                //    serviceOrHandleMethodName: GLOBAL.serviceTag,
-                //    methodName: serviceName,
-                //    argumentOrReturnData: o,
-                //    info: "event:error",
-                //    infoType: GLOBAL.eventTag,
-                //    isTest: false,
-                //    isFirstCallInServiceRun: GLOBAL.unknownTag,
-                //    isLastCallInServiceRun: GLOBAL.unknownTag,
-                //    link: definition,
-                //    event: GLOBAL.systemEventName.onServiceError,
-                //    eventType: GLOBAL.serviceEventName.error
-                //});
-
-                return serviceItem[GLOBAL.serviceEventName.error].notify(o, context, "service-error");
+                GLOBAL.track.record({
+                    entranceOrExit: GLOBAL.exitTag,
+                    serviceOrHandleMethodName: GLOBAL.serviceTag,
+                    methodName: serviceName,
+                    argumentOrReturnData: o,
+                    info: "event:error",
+                    infoType: GLOBAL.eventTag,
+                    isTest: false,
+                    isFirstCallInServiceRun: GLOBAL.unknownTag,
+                    isLastCallInServiceRun: GLOBAL.unknownTag,
+                    link: definition,
+                    event: GLOBAL.systemEventName.onServiceError,
+                    eventType: GLOBAL.serviceEventName.error
+                });
             });
 
-            GLOBAL.utility.tryCatch(context, function () { return serviceItem[GLOBAL.serviceEventName.after].notify(); }, function () { }, function () { });
             return result;
         }
     };
@@ -881,13 +864,12 @@ var light = (typeof light === "undefined") ? (function () {
 
         setUpSystemEvent(_light, GLOBAL.systemEventName.onSystemEvent, GLOBAL.generateUniqueSystemName());
 
-
         setUpSystemEvent(_light, GLOBAL.systemEventName.beforeServiceRun, GLOBAL.generateUniqueSystemName());
         setUpSystemEvent(_light, GLOBAL.systemEventName.afterServiceRun, GLOBAL.generateUniqueSystemName());
         setUpSystemEvent(_light, GLOBAL.systemEventName.beforeHandleRun, GLOBAL.generateUniqueSystemName());
         setUpSystemEvent(_light, GLOBAL.systemEventName.afterHandleRun, GLOBAL.generateUniqueSystemName());
         setUpSystemEvent(_light, GLOBAL.systemEventName.onServiceError, GLOBAL.generateUniqueSystemName());
-        setUpSystemEvent(_light, GLOBAL.systemEventName.onServiceSuccess, GLOBAL.generateUniqueSystemName());       
+        setUpSystemEvent(_light, GLOBAL.systemEventName.onServiceSuccess, GLOBAL.generateUniqueSystemName());
 
         _light.handle(GLOBAL.DEFAULT_HANDLE_NAME, function (definition) { return definition; });
     };
@@ -914,7 +896,6 @@ var light = (typeof light === "undefined") ? (function () {
                 state:
                 event:
 
-
 light.onSystemEvent(function (e) { });
 
 light.beforeServiceRun(function (e) { });
@@ -923,7 +904,6 @@ light.beforeHandleRun(function (e) { });
 light.afterHandleRun(function (e) { });
 light.onServiceError(function (e) { });
 light.onServiceSuccess(function (e) { });
-
 
 */
 
