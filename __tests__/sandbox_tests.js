@@ -25,7 +25,7 @@ describe('light', function () {
         });
 
         light(function (system) {
-            this.system.recordStart();
+            this.system.startRecording();
             var answer = this.service[haccess_1]({ x: 0 }).result();
             console.log(this.system.getAllRecords());
             this.system.play(0, 1);

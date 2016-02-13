@@ -216,10 +216,10 @@ var light = (typeof light === "undefined") ? (function () {
 
             return result;
         },
-        recordStart: function () {
+        startRecording: function () {
             GLOBAL.recordServices = true;
         },
-        recordStop: function () {
+        stopRecording: function () {
             GLOBAL.recordServices = false;
         },
         recordClear: function () {
