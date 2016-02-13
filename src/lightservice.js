@@ -159,7 +159,7 @@ var light = (typeof light === "undefined") ? (function () {
             //todo use an immutable library
 
             var recordStr = JSON.stringify(recordObject)
-            GLOBAL.system.records.push(JSON.parse(recordStr));
+           
 
             if (arg.serviceOrHandleMethodName === GLOBAL.serviceTag) {
                 GLOBAL.systemServices[arg.methodName][GLOBAL.serviceEventName[arg.eventType]].notify(recordStr);
@@ -827,6 +827,15 @@ var light = (typeof light === "undefined") ? (function () {
     init();
 
     GLOBAL.system = {
+        startRecording: function () {
+            GLOBAL.recordServices = true;
+        },
+        stopRecording: function () {
+            GLOBAL.recordServices = false;
+        },
+    };
+    /*
+     {
         records: [],
         getRecord: function (i) {
             return GLOBAL.system.records && (GLOBAL.system.records || [])[i] || [];
@@ -865,7 +874,8 @@ var light = (typeof light === "undefined") ? (function () {
                 }
             }
         },
-    };
+    }
+    */
 
     return _light;
 })() : console.log("light script already exists");
@@ -905,3 +915,6 @@ if (typeof module !== "undefined" && ('exports' in module)) {
 if (typeof define === 'function' && define.amd) {
     define('light', [], function () { return light; });
 }
+
+
+

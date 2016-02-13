@@ -2,9 +2,61 @@ jest.dontMock('../src/lightservice');
 var light = require('../src/lightservice') || light;
 
 
+
+
+var records = [];
+
+var system = {
+
+    getRecord: function (i) {
+        return this.records && (records || [])[i] || [];
+    },
+    getLastRecord: function () {
+        records = records || [];
+        return records.length ? records[records.length - 1] : [];
+    },
+    play: function (i, j) {
+        light.advanced.play(records, i, j)
+    },
+
+    timeMachine: function () {      
+        var recordLength = records.length;
+        var pointer = -1;
+
+        return {
+            next: function () {
+                pointer = pointer - 2;
+                pointer === -1 ? this.current() : light.advanced.play(records, recordLength - (1 + pointer), recordLength - pointer);
+            },
+            previous: function () {
+                pointer = pointer + 2;
+                pointer >= recordLength ? this.current() : light.advanced.play(records, recordLength - (1 + pointer), recordLength - pointer);
+            },
+            current: function () {
+                light.advanced.play(records, recordLength - 2, recordLength - 1);
+            }
+        }
+    },
+};
+
 light.onSystemEvent(function (e) {
-    //console.log(e);
+    records.push(JSON.parse(e));
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 light.service("test", function (arg) { });
 light.service("test-2", function (arg) { });
@@ -24,11 +76,11 @@ describe('light', function () {
             return arg;
         });
 
-        light(function (system) {
+        light(function () {
             this.system.startRecording();
             var answer = this.service[haccess_1]({ x: 0 }).result();
            // console.log(this.system.getAllRecords());
-            this.system.play(0, 1);
+            system.play(0, 1);
           //  console.log(this.system.getAllRecords());
             expect(answer.x).toBe(10);
         });
@@ -1261,7 +1313,7 @@ describe('light', function () {
             this.service[service]()
             var answer = this.service[service]().result();
 
-            var timeMachine = this.system.timeMachine();
+            var timeMachine = system.timeMachine();
 
             timeMachine.previous();
             timeMachine.previous();
