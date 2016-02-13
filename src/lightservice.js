@@ -736,6 +736,9 @@ var light = (typeof light === "undefined") ? (function () {
 
     if (typeof Immutable === "undefined") {
         GLOBAL.Immutable = {
+            List: function (obj) {
+                return this.Map(obj);
+            },
             Map: function (obj) {
                 var name = GLOBAL.generateUniqueSystemName("immu");
                 var data = { data: obj }
