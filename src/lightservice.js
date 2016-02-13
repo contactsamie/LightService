@@ -153,16 +153,19 @@ var light = (typeof light === "undefined") ? (function () {
                 info: arg.info,
                 infoType: arg.infoType,
                 link: typeof arg.link === "function" ? arg.link.toString() : arg.link,
-                state: GLOBAL.$getState(arg.methodName)
+                state: GLOBAL.$getState(arg.methodName),
+                event: arg.event
             };
             //todo use an immutable library
 
             //recordObject.link = arg.link;
-            GLOBAL.track.records.push(JSON.parse(JSON.stringify(recordObject)));
+            var recordStr = JSON.stringify(recordObject)
+            GLOBAL.track.records.push(JSON.parse(recordStr));
             // GLOBAL.track.records[GLOBAL.track.records.length - 1].link = arg.link;
             //  GLOBAL.track.records = JSON.parse(JSON.stringify(GLOBAL.track.records));
 
-            // console.log();
+            // notify event subscribers
+            _light[arg.event].notify(JSON.parse(recordStr));
         },
         clearAllRecords: function () {
             GLOBAL.track.records = [];
@@ -226,7 +229,6 @@ var light = (typeof light === "undefined") ? (function () {
 
     GLOBAL.utility = {
         execSurpressError: function (o, e, context, notificationInfo) {
-            _light.error.notify(e, context, notificationInfo);
             if (typeof o === "function") {
                 try { o(e, context, notificationInfo); } catch (ex) {
                     console.error("SUPRESSED ERROR : " + ex);
@@ -366,7 +368,8 @@ var light = (typeof light === "undefined") ? (function () {
             isTest: true,
             isFirstCallInServiceRun: GLOBAL.unknownTag,
             isLastCallInServiceRun: GLOBAL.unknownTag,
-            link: testhandle
+            link: testhandle,
+            event: GLOBAL.systemEventName.beforeHandleRun
         });
 
         tmpDefinition = testhandle.call(GLOBAL.getCurrentContext(serviceName, definition), definition);
@@ -381,7 +384,8 @@ var light = (typeof light === "undefined") ? (function () {
             isTest: true,
             isFirstCallInServiceRun: GLOBAL.unknownTag,
             isLastCallInServiceRun: GLOBAL.unknownTag,
-            link: testhandle
+            link: testhandle,
+            event: GLOBAL.systemEventName.afterHandleRun
         });
         return tmpDefinition;
     };
@@ -408,7 +412,8 @@ var light = (typeof light === "undefined") ? (function () {
                     isTest: false,
                     isFirstCallInServiceRun: GLOBAL.unknownTag,
                     isLastCallInServiceRun: GLOBAL.unknownTag,
-                    link: (testhandle || handle.definition)
+                    link: (testhandle || handle.definition),
+                    event: GLOBAL.systemEventName.beforeHandleRun
                 });
 
                 tmpDefinition = (testhandle || handle.definition).call(GLOBAL.getCurrentContext(handleName, definition), definition);
@@ -423,7 +428,8 @@ var light = (typeof light === "undefined") ? (function () {
                     isTest: false,
                     isFirstCallInServiceRun: GLOBAL.unknownTag,
                     isLastCallInServiceRun: GLOBAL.unknownTag,
-                    link: (testhandle || handle.definition)
+                    link: (testhandle || handle.definition),
+                    event: GLOBAL.systemEventName.afterHandleRun
                 });
 
                 break;
@@ -508,7 +514,8 @@ var light = (typeof light === "undefined") ? (function () {
                     isTest: false,
                     isFirstCallInServiceRun: GLOBAL.unknownTag,
                     isLastCallInServiceRun: GLOBAL.unknownTag,
-                    link: definition
+                    link: definition,
+                    event: GLOBAL.systemEventName.beforeServiceRun
                 });
 
                 result = runSuppliedServiceFunction(context, serviceItem, handleName, definition, serviceName, tArg.arg);
@@ -523,25 +530,41 @@ var light = (typeof light === "undefined") ? (function () {
                     isTest: false,
                     isFirstCallInServiceRun: GLOBAL.unknownTag,
                     isLastCallInServiceRun: GLOBAL.unknownTag,
-                    link: definition
+                    link: definition,
+                    event: GLOBAL.systemEventName.afterServiceRun
                 });
 
                 return result;
             }, function (o) {
+                //GLOBAL.track.record({
+                //    entranceOrExit: GLOBAL.exitTag,
+                //    serviceOrHandleMethodName: GLOBAL.serviceTag,
+                //    methodName: serviceName,
+                //    argumentOrReturnData: o,
+                //    info: "event:success",
+                //    infoType: GLOBAL.eventTag,
+                //    isTest: false,
+                //    isFirstCallInServiceRun: GLOBAL.unknownTag,
+                //    isLastCallInServiceRun: GLOBAL.unknownTag,
+                //    link: definition,
+                //    event: GLOBAL.systemEventName.onServiceSuccess
+                //});
+
                 return serviceItem["success"].notify(o, context, "service-success");
             }, function (o) {
-                GLOBAL.track.record({
-                    entranceOrExit: GLOBAL.exitTag,
-                    serviceOrHandleMethodName: GLOBAL.serviceTag,
-                    methodName: serviceName,
-                    argumentOrReturnData: o,
-                    info: "event:error",
-                    infoType: GLOBAL.eventTag,
-                    isTest: false,
-                    isFirstCallInServiceRun: GLOBAL.unknownTag,
-                    isLastCallInServiceRun: GLOBAL.unknownTag,
-                    link: definition
-                });
+                //GLOBAL.track.record({
+                //    entranceOrExit: GLOBAL.exitTag,
+                //    serviceOrHandleMethodName: GLOBAL.serviceTag,
+                //    methodName: serviceName,
+                //    argumentOrReturnData: o,
+                //    info: "event:error",
+                //    infoType: GLOBAL.eventTag,
+                //    isTest: false,
+                //    isFirstCallInServiceRun: GLOBAL.unknownTag,
+                //    isLastCallInServiceRun: GLOBAL.unknownTag,
+                //    link: definition,
+                //    event: GLOBAL.systemEventName.onServiceError
+                //});
 
                 return serviceItem["error"].notify(o, context, "service-error");
             });
@@ -806,14 +829,31 @@ var light = (typeof light === "undefined") ? (function () {
     };
 
     var init = function () {
-        _light.version = 1;
-        _light.service = defineService;
         GLOBAL.entranceTag = "argument";
         GLOBAL.exitTag = "result";
         GLOBAL.serviceTag = "service";
         GLOBAL.handleTag = "handle";
         GLOBAL.eventTag = "event";
         GLOBAL.unknownTag = "unknown";
+
+        //SYSTEM EVENTS API
+        GLOBAL.systemEventName = {
+            beforeServiceRun: "beforeServiceRun",
+            afterServiceRun: "afterServiceRun",
+            beforeHandleRun: "beforeHandleRun",
+            afterHandleRun: "afterHandleRun",
+            onServiceError: "onServiceError",
+            onServiceSuccess: "onServiceSuccess"
+        };
+        /*
+        ==SERVICE EVENTS API ==
+        =======================
+        setUpServiceEvent(serviceItem, "before", serviceName + ".before");
+        setUpServiceEvent(serviceItem, "after", serviceName + ".after");
+        setUpServiceEvent(serviceItem, "error", serviceName + ".error");
+        setUpServiceEvent(serviceItem, "success", serviceName + ".success");
+
+        */
 
         GLOBAL._TEST_OBJECTS_ = {};
         GLOBAL.systemServices = {};
@@ -829,8 +869,17 @@ var light = (typeof light === "undefined") ? (function () {
            notify like  _light.event.notify(e, context, notificationInfo);
            subscribe like light.event(function (e, context,notificationInfo) {}));
         */
-        setUpSystemEvent(_light, "error", GLOBAL.generateUniqueSystemName("system_event"));
-        setUpSystemEvent(_light, "event", GLOBAL.generateUniqueSystemName("system_event"));
+
+        _light.version = 1;
+        _light.service = defineService;
+
+        setUpSystemEvent(_light, "beforeServiceRun", GLOBAL.generateUniqueSystemName("system_event"));
+        setUpSystemEvent(_light, "afterServiceRun", GLOBAL.generateUniqueSystemName("system_event"));
+        setUpSystemEvent(_light, "beforeHandleRun", GLOBAL.generateUniqueSystemName("system_event"));
+        setUpSystemEvent(_light, "afterHandleRun", GLOBAL.generateUniqueSystemName("system_event"));
+        setUpSystemEvent(_light, "onServiceError", GLOBAL.generateUniqueSystemName("system_event"));
+        setUpSystemEvent(_light, "onServiceSuccess", GLOBAL.generateUniqueSystemName("system_event"));
+
         _light.handle(GLOBAL.DEFAULT_HANDLE_NAME, function (definition) { return definition; });
     };
 
