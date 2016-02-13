@@ -192,6 +192,25 @@ var light = (typeof light === "undefined") ? (function () {
         }
     };
 
+    GLOBAL.messageReceivers = {};
+
+    GLOBAL.send = function (messageName, messageArg) {
+        GLOBAL.messageReceivers[messageName] = GLOBAL.messageReceivers[messageName] || [];
+        var total = GLOBAL.messageReceivers[messageName].length;
+        for (var i = 0; i < total; i++) {
+            var receiver = GLOBAL.messageReceivers[messageName][i];
+            _light(function () {
+                this.service[receiver.link](messageArg);
+            });
+        }
+    };
+    GLOBAL.receive = function (messageName, fn) {
+        GLOBAL.messageReceivers[messageName] = GLOBAL.messageReceivers[messageName] || [];
+        var messageItem = { message: messageName };
+        messageItem.link = _light.service(GLOBAL.generateUniqueSystemName(), fn);
+        GLOBAL.messageReceivers[messageName].push(messageItem);
+    };
+
     var XMLHttpFactories = [
   function () { return new XMLHttpRequest() },
   function () { return new ActiveXObject("Msxml2.XMLHTTP") },
