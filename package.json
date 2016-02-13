@@ -18,6 +18,7 @@
   "author": "sam <contactsamie@gmail.com> Samuel",
   "license": "MIT",
   "devDependencies": {
+    "coveralls": "^2.11.6",
     "jest-cli": "^0.8.2"
   }
 }
