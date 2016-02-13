@@ -3,7 +3,7 @@ var light = require('../src/lightservice') || light;
 
 
 light.onSystemEvent(function (e) {
-    console.log(e);
+    //console.log(e);
 });
 
 light.service("test", function (arg) { });

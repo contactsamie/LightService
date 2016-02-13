@@ -309,9 +309,9 @@ var light = (typeof light === "undefined") ? (function () {
             setUpEventSubscriberBase(id, e);
         };
         createEventEmitter(id, function (item, o, context, notificationInfo) {
-            if (typeof item === "function") {
+            if (item && (typeof item.service === "function")) {
                 try {
-                    item(o, context, notificationInfo)
+                    item.service(o, context, notificationInfo)
                 } catch (e) { }
             }
         });
