@@ -780,7 +780,7 @@ var light = (typeof light === "undefined") ? (function () {
     }
 
     _light.advance = {
-        serviceTest: function (setup, f) {
+        test: function (setup, f) {
             GLOBAL._TEST_OBJECTS_ = setup;
 
             f.call(GLOBAL.getCurrentContext(GLOBAL._GLOBAL_SCOPE_NAME, chainService()), chainService());
