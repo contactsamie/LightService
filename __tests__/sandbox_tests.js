@@ -1282,4 +1282,55 @@ describe('light', function () {
             expect(answer).toBe(4);
         });
     });
+
+
+
+
+
+
+
+
+
+
+
+    it('time machine test with message dispatcher', function () {
+        var log = "";
+        
+        var service = light.receive("DELETE_USER_MESSAGE", function () {
+            var i = this.state.get("i");
+            i = i || 0;
+            i++;
+            this.state.set("i", i);
+            log = log + "," + i;
+            return i;
+        });
+
+        light(function () {
+            this.system.startRecording();
+
+            light.send("DELETE_USER_MESSAGE");
+            light.send("DELETE_USER_MESSAGE");
+            light.send("DELETE_USER_MESSAGE");
+            light.send("DELETE_USER_MESSAGE");
+
+            this.system.stopRecording();
+
+            this.service.timemachine_previous();
+            this.service.timemachine_previous();
+            this.service.timemachine_previous();
+            this.service.timemachine_next();
+            this.service.timemachine_previous();
+            this.service.timemachine_next();
+            this.service.timemachine_next();
+            this.service.timemachine_previous();
+            this.service.timemachine_current();
+            expect(log).toBe(",1,2,3,4,4,3,2,3,2,3,4,3,4");
+
+           
+        });
+    });
+
+
+
+
 });

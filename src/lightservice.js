@@ -830,6 +830,8 @@ var light = (typeof light === "undefined") ? (function () {
         _light.version = "6.0.0";
         _light.service = defineService;
         _light.Immutable = GLOBAL.Immutable;
+        _light.send = GLOBAL.send;
+        _light.receive = GLOBAL.receive;
 
         publishSystemEvent(_light, GLOBAL.systemEventName.onSystemEvent, GLOBAL.generateUniqueSystemName());
         publishSystemEvent(_light, GLOBAL.systemEventName.onSystemRecordEvent, GLOBAL.generateUniqueSystemName());
