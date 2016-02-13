@@ -37,9 +37,9 @@ describe('light', function () {
     });
     */
 
-    it('exists', function () {
-        expect(light.version).toBe(1);
-    });
+    //it('exists', function () {
+    //    expect(light.version).toBe(1);
+    //});
     it('using new api', function () {
         light(function () {
             var test = this.service.test_error;
