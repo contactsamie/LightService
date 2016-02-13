@@ -33,7 +33,7 @@ gulp.task('clean', function () {
 });
 
 gulp.task('build',["clean"], function () {
-    var scripts = gulp.src(['./src/*.js']).pipe(uglify()).pipe(rename({suffix: '.min'})).pipe(header(banner, { pkg: pkg })).pipe(gulp.dest('./dist/src'));
+    var scripts = gulp.src(['./src/*.js']).pipe(uglify()).pipe(rename({suffix: '.min'})).pipe(header(banner, { pkg: pkg })).pipe(gulp.dest('./dist'));
     return es.concat.apply(null, [scripts]);
 });
 
