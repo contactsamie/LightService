@@ -2,7 +2,7 @@ jest.dontMock('../src/lightservice');
 jest.dontMock('../src/tm.lightservice');
 
 var light = require('../src/lightservice') || light;
-require('../src/tm.lightservice') ;
+require('../src/timemachine.lightservice') ;
 
 
 
