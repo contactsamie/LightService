@@ -133,9 +133,7 @@ var light = (typeof light === "undefined") ? (function () {
         // TODO resolve above problem
         record: function (arg) {
           
-            if (!GLOBAL.recordServices) {
-                return;
-            }
+            
             if (arg.methodName === GLOBAL.DEFAULT_HANDLE_NAME) {
                 return;
             }
@@ -158,8 +156,12 @@ var light = (typeof light === "undefined") ? (function () {
             };
             //todo use an immutable library
 
-            var recordStr = JSON.stringify(recordObject)
+            var recordStr = JSON.stringify(recordObject);
            
+            if (GLOBAL.recordServices) {
+                 _light[GLOBAL.systemEventName.onSystemRecordEvent].notify(recordStr);
+            }
+          
 
             if (arg.serviceOrHandleMethodName === GLOBAL.serviceTag) {
                 GLOBAL.systemServices[arg.methodName][GLOBAL.serviceEventName[arg.eventType]].notify(recordStr);
@@ -784,7 +786,8 @@ var light = (typeof light === "undefined") ? (function () {
             afterHandleRun: "afterHandleRun",
             onServiceError: "onServiceError",
             onServiceSuccess: "onServiceSuccess",
-            onSystemEvent: "onSystemEvent"
+            onSystemEvent: "onSystemEvent",
+            onSystemRecordEvent: "onSystemRecordEvent"
         };
         // ==SERVICE EVENTS API ==
         GLOBAL.serviceEventName = {
@@ -813,6 +816,7 @@ var light = (typeof light === "undefined") ? (function () {
         _light.service = defineService;
 
         setUpSystemEvent(_light, GLOBAL.systemEventName.onSystemEvent, GLOBAL.generateUniqueSystemName());
+        setUpSystemEvent(_light, GLOBAL.systemEventName.onSystemRecordEvent, GLOBAL.generateUniqueSystemName());
 
         setUpSystemEvent(_light, GLOBAL.systemEventName.beforeServiceRun, GLOBAL.generateUniqueSystemName());
         setUpSystemEvent(_light, GLOBAL.systemEventName.afterServiceRun, GLOBAL.generateUniqueSystemName());
@@ -834,48 +838,7 @@ var light = (typeof light === "undefined") ? (function () {
             GLOBAL.recordServices = false;
         },
     };
-    /*
-     {
-        records: [],
-        getRecord: function (i) {
-            return GLOBAL.system.records && (GLOBAL.system.records || [])[i] || [];
-        },
-        getLastRecord: function () {
-            GLOBAL.system.records = GLOBAL.system.records || [];
-            return GLOBAL.system.records.length ? GLOBAL.system.records[GLOBAL.system.records.length - 1] : [];
-        },
-        play: function (i,j) {
-            _light.advanced.play(GLOBAL.system.records,i,j)
-        },
-       
-        startRecording: function () {
-            GLOBAL.recordServices = true;
-        },
-        stopRecording: function () {
-            GLOBAL.recordServices = false;
-        },
-      
-        timeMachine: function () {
-            var records = GLOBAL.system.records;
-            var recordLength = records.length;
-            var pointer = -1;
-
-            return {
-                next: function () {
-                    pointer = pointer - 2;
-                    pointer === -1 ? this.current() : _light.advanced.play(GLOBAL.system.records,recordLength - (1 + pointer), recordLength - pointer);
-                },
-                previous: function () {
-                    pointer = pointer + 2;
-                    pointer >= recordLength ? this.current() : _light.advanced.play(GLOBAL.system.records,recordLength - (1 + pointer), recordLength - pointer);
-                },
-                current: function () {
-                    _light.advanced.play(GLOBAL.system.records,recordLength - 2, recordLength - 1);
-                }
-            }
-        },
-    }
-    */
+ 
 
     return _light;
 })() : console.log("light script already exists");

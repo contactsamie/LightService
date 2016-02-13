@@ -39,7 +39,11 @@ var system = {
     },
 };
 
-light.onSystemEvent(function (e) {
+
+
+
+
+light.onSystemRecordEvent(function (e) {
     records.push(JSON.parse(e));
 });
 
