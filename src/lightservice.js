@@ -851,6 +851,7 @@ var light = (typeof light === "undefined") ? (function () {
             afterHandleRun: "afterHandleRun",
             onServiceError: "onServiceError",
             onServiceSuccess: "onServiceSuccess",
+            onSystemEvent: "onSystemEvent"
         };
         // ==SERVICE EVENTS API ==
         GLOBAL.serviceEventName = {

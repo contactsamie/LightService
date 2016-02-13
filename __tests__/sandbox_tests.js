@@ -1,14 +1,10 @@
 jest.dontMock('../src/lightservice');
 var light = require('../src/lightservice') || light;
-/*
-light.event(function (e, context,notificationInfo) {
- console.log("logging full ---- " );
-   console.log(JSON.stringify(context));
-   console.log(notificationInfo);
-   console.log(e);
-});*/
 
-//light.event(function (e, context, notificationInfo) { });
+
+light.onSystemEvent(function (e) {
+    console.log(e);
+});
 
 light.service("test", function (arg) { });
 light.service("test-2", function (arg) { });
