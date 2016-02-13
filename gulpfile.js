@@ -37,4 +37,9 @@ gulp.task('build',["clean"], function () {
     return es.concat.apply(null, [scripts]);
 });
 
-gulp.task('default', ['build'], function () { });
+gulp.task('post-build', ["build"], function () {
+    var scripts = gulp.src(['lib/js/cytoscape-dagre.js', 'lib/js/dagre.min.js', 'lib/js/cytoscape.min.js', './dist/visual.lightservice.min.js']).pipe(concat("visual.lightservice.min.js")).pipe(gulp.dest('./dist'));
+    return es.concat.apply(null, [scripts]);
+});
+
+gulp.task('default', ['post-build'], function () { });
