@@ -10,12 +10,12 @@
     "type": "git",
     "url": "https://github.com/contactsamie/LightService.git"
   },
-  "description": "",
+  "description": "Simple and convinient interface for service consumption",
   "main": "src/lightservice.min.js",
   "scripts": {
     "test": "jest"
   },
-  "author": "sam <contactsamie@gmail.com> Samuel",
+  "author": "Samuel Bamgboye <contactsamie@gmail.com> ",
   "license": "MIT",
   "devDependencies": {
     "coveralls": "^2.11.6",

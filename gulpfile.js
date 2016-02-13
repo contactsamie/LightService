@@ -20,7 +20,7 @@ var rename = require('gulp-rename');
 var banner = ['/**',
   ' * <%= pkg.name %> - <%= pkg.description %>',
   ' * @version v<%= pkg.version %>',
-  new Date(),
+//  new Date(),
   ' * @link <%= pkg.homepage %>',
   ' * @license <%= pkg.license %>',
   ' * @license <%= pkg.author %>',
