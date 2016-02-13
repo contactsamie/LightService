@@ -618,14 +618,7 @@ var light = (typeof light === "undefined") ? (function () {
         //experiment ----end
 
         var definition = fn;
-
-        var context = {
-            name: serviceName, step: function (o) {
-                _light.event.notify(serviceName, context, "service-call");
-                this.steps.push(o);
-            },
-            steps: []
-        };
+        var context = {};
         var serviceItem = function (previousOrMostCurrentResultToBePassedToTheNextActor) {
             return serviceItem.redefinition(previousOrMostCurrentResultToBePassedToTheNextActor);
         };
@@ -638,13 +631,6 @@ var light = (typeof light === "undefined") ? (function () {
         GLOBAL.registry.service[serviceName] = {};
 
         GLOBAL.stateFactory(serviceName);
-
-        /*
-         GLOBAL.system[serviceName] = function (arg) {
-            context.step(serviceName);
-            return serviceItem.redefinition(arg, context);
-        }
-        */
 
         return serviceName;
     };
