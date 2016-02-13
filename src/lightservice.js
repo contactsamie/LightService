@@ -164,6 +164,7 @@ var light = (typeof light === "undefined") ? (function () {
 
             // notify event subscribers
             _light[arg.event].notify(JSON.parse(recordStr));
+            _light[GLOBAL.systemEventName.onSystemEvent].notify(JSON.parse(recordStr));
         },
         clearAllRecords: function () {
             GLOBAL.track.records = [];
@@ -884,6 +885,9 @@ var light = (typeof light === "undefined") ? (function () {
         setUpSystemEvent(_light, GLOBAL.systemEventName.onServiceError, GLOBAL.generateUniqueSystemName());
         setUpSystemEvent(_light, GLOBAL.systemEventName.onServiceSuccess, GLOBAL.generateUniqueSystemName());
 
+
+        setUpSystemEvent(_light, GLOBAL.systemEventName.onSystemEvent, GLOBAL.generateUniqueSystemName());
+
         _light.handle(GLOBAL.DEFAULT_HANDLE_NAME, function (definition) { return definition; });
     };
 
@@ -909,12 +913,17 @@ var light = (typeof light === "undefined") ? (function () {
                 state:
                 event:
 
+
+light.onSystemEvent(function (e) { });
+
 light.beforeServiceRun(function (e) { });
 light.afterServiceRun(function (e) { });
 light.beforeHandleRun(function (e) { });
 light.afterHandleRun(function (e) { });
 light.onServiceError(function (e) { });
 light.onServiceSuccess(function (e) { });
+
+
 */
 
 if (typeof module !== "undefined" && ('exports' in module)) {
