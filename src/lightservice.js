@@ -163,16 +163,15 @@ var light = (typeof light === "undefined") ? (function () {
             GLOBAL.track.records.push(JSON.parse(recordStr));
 
             if (arg.serviceOrHandleMethodName === GLOBAL.serviceTag) {
-                GLOBAL.systemServices[arg.methodName][GLOBAL.serviceEventName[arg.eventType]].notify(JSON.parse(recordStr));
-
+                GLOBAL.systemServices[arg.methodName][GLOBAL.serviceEventName[arg.eventType]].notify(recordStr);
                 if ((arg.eventType === GLOBAL.serviceEventName.error) || (arg.eventType === GLOBAL.serviceEventName.success)) {
-                    GLOBAL.systemServices[arg.methodName][GLOBAL.serviceEventName[GLOBAL.serviceEventName.after]].notify(JSON.parse(recordStr));
+                    GLOBAL.systemServices[arg.methodName][GLOBAL.serviceEventName[GLOBAL.serviceEventName.after]].notify(recordStr);
                 }
             }
 
             // notify event subscribers
-            _light[arg.event].notify(JSON.parse(recordStr));
-            _light[GLOBAL.systemEventName.onSystemEvent].notify(JSON.parse(recordStr));
+            _light[arg.event].notify(recordStr);
+            _light[GLOBAL.systemEventName.onSystemEvent].notify(recordStr);
         },
         clearAllRecords: function () {
             GLOBAL.track.records = [];
