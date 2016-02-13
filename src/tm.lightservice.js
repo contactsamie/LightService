@@ -1,4 +1,4 @@
-﻿var light = (require && require('../src/lightservice')) || light;
+﻿var light = ((typeof require !== "undefined") && require('../src/lightservice')) || light;
 light.service("timemachine_next", function (arg) {
     var records = this.service.timemachine_record().result();
     var recordLength = records.length;
