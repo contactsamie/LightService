@@ -226,7 +226,7 @@ var light = (typeof light === "undefined") ? (function () {
 
     GLOBAL.utility = {
         execSurpressError: function (o, e, context, notificationInfo) {
-            _light["event"].notify(e, context, notificationInfo);
+            _light.error.notify(e, context, notificationInfo);
             if (typeof o === "function") {
                 try { o(e, context, notificationInfo); } catch (ex) {
                     console.error("SUPRESSED ERROR : " + ex);
@@ -621,7 +621,7 @@ var light = (typeof light === "undefined") ? (function () {
 
         var context = {
             name: serviceName, step: function (o) {
-                _light["event"].notify(serviceName, context, "service-call");
+                _light.event.notify(serviceName, context, "service-call");
                 this.steps.push(o);
             },
             steps: []
@@ -838,7 +838,13 @@ var light = (typeof light === "undefined") ? (function () {
         GLOBAL._GLOBAL_SCOPE_NAME = GLOBAL.generateUniqueSystemName("_GLOBAL_SCOPE_");
         GLOBAL.stateFactory(GLOBAL._GLOBAL_SCOPE_NAME);
         GLOBAL.DEFAULT_HANDLE_NAME = GLOBAL.generateUniqueSystemName("defHandle");
-        setUpSystemEvent(_light, "event", "$system");
+        /*
+           setup like setUpSystemEvent(_light, "event", GLOBAL.generateUniqueSystemName("some id"));
+           notify like  _light.event.notify(e, context, notificationInfo);
+           subscribe like light.event(function (e, context,notificationInfo) {}));
+        */
+        setUpSystemEvent(_light, "error", GLOBAL.generateUniqueSystemName("system_event"));
+        setUpSystemEvent(_light, "event", GLOBAL.generateUniqueSystemName("system_event"));
         _light.handle(GLOBAL.DEFAULT_HANDLE_NAME, function (definition) { return definition; });
     };
 
