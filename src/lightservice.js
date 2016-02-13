@@ -779,7 +779,7 @@ var light = (typeof light === "undefined") ? (function () {
         return handleName;
     }
 
-    _light.advance = {
+    _light.advanced = {
         test: function (setup, f) {
             GLOBAL._TEST_OBJECTS_ = setup;
 
