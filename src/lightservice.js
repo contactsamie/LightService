@@ -174,77 +174,7 @@ var light = (typeof light === "undefined") ? (function () {
         }
     }
 
-    GLOBAL.system = {
-        records:[],
-        getRecord: function (i) {
-            GLOBAL.system.records = GLOBAL.system.records || [];
-            return GLOBAL.system.records[i] || [];
-        },
-        getLastRecord: function () {
-            GLOBAL.system.records = GLOBAL.system.records || [];
-            return GLOBAL.system.records.length ? GLOBAL.system.records[GLOBAL.track.records.length - 1] : [];
-        },
-        play: function (i, j) {
-            var that = this;
-            i = i || 0;
-            j = j || (GLOBAL.track.records.length - 1);
-
-            _light(function (service) {
-                var inter = service;
-                for (var m = i; m <= j; m++) {
-                    var playGround = that.getRecord(m);
-                    if (!playGround) {
-                        throw "unable to find service to play service";
-                    }
-
-                    if ((playGround.methodType === GLOBAL.serviceTag) && (playGround.dataType === GLOBAL.entranceTag)) {
-                        if ((m === i)) {
-                            inter = inter[playGround.methodName].call(GLOBAL.getCurrentContext(playGround.methodName, playGround.data, playGround.state), playGround.data);
-                        } else {
-                            inter = inter[playGround.methodName]();
-                        }
-                    }
-                }
-                var result = inter.result();
-            });
-        },
-        getAllRecords: function (i, j) {
-            i = i || 0;
-
-            //todo use an immutable library
-            var result = GLOBAL.system.records.slice(i, j);
-
-            return result;
-        },
-        startRecording: function () {
-            GLOBAL.recordServices = true;
-        },
-        stopRecording: function () {
-            GLOBAL.recordServices = false;
-        },
-        recordClear: function () {
-            GLOBAL.track.clearAllRecords();
-        },
-        timeMachine: function () {
-            var records = GLOBAL.system.getAllRecords();
-            var recordLength = records.length;
-            var pointer = -1;
-
-            return {
-                next: function () {
-                    pointer = pointer - 2;
-                    pointer === -1 ? this.current() : GLOBAL.system.play(recordLength - (1 + pointer), recordLength - pointer);
-                },
-                previous: function () {
-                    pointer = pointer + 2;
-                    pointer >= recordLength ? this.current() : GLOBAL.system.play(recordLength - (1 + pointer), recordLength - pointer);
-                },
-                current: function () {
-                    GLOBAL.system.play(recordLength - 2, recordLength - 1);
-                }
-            }
-        },
-    };
+  
 
     GLOBAL.utility = {
         execSurpressError: function (o, e, context, notificationInfo) {
@@ -782,6 +712,30 @@ var light = (typeof light === "undefined") ? (function () {
 
             f.call(GLOBAL.getCurrentContext(GLOBAL._GLOBAL_SCOPE_NAME, chainService()), chainService());
             GLOBAL._TEST_OBJECTS_ = undefined
+        },
+        play: function (records,i, j) {
+           
+            i = i || 0;
+            j = j || (GLOBAL.track.records.length - 1);
+
+            _light(function (service) {
+                var inter = service;
+                for (var m = i; m <= j; m++) {
+                    var playGround = records && (records || [])[m] || [];
+                    if (!playGround) {
+                        throw "unable to find service to play service";
+                    }
+
+                    if ((playGround.methodType === GLOBAL.serviceTag) && (playGround.dataType === GLOBAL.entranceTag)) {
+                        if ((m === i)) {
+                            inter = inter[playGround.methodName].call(GLOBAL.getCurrentContext(playGround.methodName, playGround.data, playGround.state), playGround.data);
+                        } else {
+                            inter = inter[playGround.methodName]();
+                        }
+                    }
+                }
+                var result = inter.result();
+            });
         }
     };
 
@@ -871,6 +825,47 @@ var light = (typeof light === "undefined") ? (function () {
     };
 
     init();
+
+    GLOBAL.system = {
+        records: [],
+        getRecord: function (i) {
+            return GLOBAL.system.records && (GLOBAL.system.records || [])[i] || [];
+        },
+        getLastRecord: function () {
+            GLOBAL.system.records = GLOBAL.system.records || [];
+            return GLOBAL.system.records.length ? GLOBAL.system.records[GLOBAL.system.records.length - 1] : [];
+        },
+        play: function (i,j) {
+            _light.advanced.play(GLOBAL.system.records,i,j)
+        },
+       
+        startRecording: function () {
+            GLOBAL.recordServices = true;
+        },
+        stopRecording: function () {
+            GLOBAL.recordServices = false;
+        },
+      
+        timeMachine: function () {
+            var records = GLOBAL.system.records;
+            var recordLength = records.length;
+            var pointer = -1;
+
+            return {
+                next: function () {
+                    pointer = pointer - 2;
+                    pointer === -1 ? this.current() : _light.advanced.play(GLOBAL.system.records,recordLength - (1 + pointer), recordLength - pointer);
+                },
+                previous: function () {
+                    pointer = pointer + 2;
+                    pointer >= recordLength ? this.current() : _light.advanced.play(GLOBAL.system.records,recordLength - (1 + pointer), recordLength - pointer);
+                },
+                current: function () {
+                    _light.advanced.play(GLOBAL.system.records,recordLength - 2, recordLength - 1);
+                }
+            }
+        },
+    };
 
     return _light;
 })() : console.log("light script already exists");

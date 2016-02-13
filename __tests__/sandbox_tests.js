@@ -27,9 +27,9 @@ describe('light', function () {
         light(function (system) {
             this.system.startRecording();
             var answer = this.service[haccess_1]({ x: 0 }).result();
-            console.log(this.system.getAllRecords());
+           // console.log(this.system.getAllRecords());
             this.system.play(0, 1);
-            console.log(this.system.getAllRecords());
+          //  console.log(this.system.getAllRecords());
             expect(answer.x).toBe(10);
         });
     });
