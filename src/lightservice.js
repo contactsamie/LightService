@@ -154,15 +154,13 @@ var light = (typeof light === "undefined") ? (function () {
                 infoType: arg.infoType,
                 link: typeof arg.link === "function" ? arg.link.toString() : arg.link,
                 state: GLOBAL.$getState(arg.methodName),
-                event: arg.event
+                event: arg.event,
+                eventType: arg.eventType
             };
             //todo use an immutable library
 
-            //recordObject.link = arg.link;
             var recordStr = JSON.stringify(recordObject)
             GLOBAL.track.records.push(JSON.parse(recordStr));
-            // GLOBAL.track.records[GLOBAL.track.records.length - 1].link = arg.link;
-            //  GLOBAL.track.records = JSON.parse(JSON.stringify(GLOBAL.track.records));
 
             // notify event subscribers
             _light[arg.event].notify(JSON.parse(recordStr));
@@ -369,7 +367,8 @@ var light = (typeof light === "undefined") ? (function () {
             isFirstCallInServiceRun: GLOBAL.unknownTag,
             isLastCallInServiceRun: GLOBAL.unknownTag,
             link: testhandle,
-            event: GLOBAL.systemEventName.beforeHandleRun
+            event: GLOBAL.systemEventName.beforeHandleRun,
+            eventType: GLOBAL.serviceEventName.before
         });
 
         tmpDefinition = testhandle.call(GLOBAL.getCurrentContext(serviceName, definition), definition);
@@ -385,7 +384,8 @@ var light = (typeof light === "undefined") ? (function () {
             isFirstCallInServiceRun: GLOBAL.unknownTag,
             isLastCallInServiceRun: GLOBAL.unknownTag,
             link: testhandle,
-            event: GLOBAL.systemEventName.afterHandleRun
+            event: GLOBAL.systemEventName.afterHandleRun,
+            eventType: GLOBAL.serviceEventName.after
         });
         return tmpDefinition;
     };
@@ -413,7 +413,8 @@ var light = (typeof light === "undefined") ? (function () {
                     isFirstCallInServiceRun: GLOBAL.unknownTag,
                     isLastCallInServiceRun: GLOBAL.unknownTag,
                     link: (testhandle || handle.definition),
-                    event: GLOBAL.systemEventName.beforeHandleRun
+                    event: GLOBAL.systemEventName.beforeHandleRun,
+                    eventType: GLOBAL.serviceEventName.before
                 });
 
                 tmpDefinition = (testhandle || handle.definition).call(GLOBAL.getCurrentContext(handleName, definition), definition);
@@ -429,7 +430,8 @@ var light = (typeof light === "undefined") ? (function () {
                     isFirstCallInServiceRun: GLOBAL.unknownTag,
                     isLastCallInServiceRun: GLOBAL.unknownTag,
                     link: (testhandle || handle.definition),
-                    event: GLOBAL.systemEventName.afterHandleRun
+                    event: GLOBAL.systemEventName.afterHandleRun,
+                    eventType: GLOBAL.serviceEventName.after
                 });
 
                 break;
@@ -486,10 +488,10 @@ var light = (typeof light === "undefined") ? (function () {
     };
 
     var createServiceDefinitionFromSuppliedFn = function (context, serviceItem, handleName, definition, serviceName) {
-        setUpServiceEvent(serviceItem, "before", serviceName + ".before");
-        setUpServiceEvent(serviceItem, "after", serviceName + ".after");
-        setUpServiceEvent(serviceItem, "error", serviceName + ".error");
-        setUpServiceEvent(serviceItem, "success", serviceName + ".success");
+        setUpServiceEvent(serviceItem, GLOBAL.serviceEventName.before, serviceName + "." + GLOBAL.serviceEventName.before);
+        setUpServiceEvent(serviceItem, GLOBAL.serviceEventName.after, serviceName + "." + GLOBAL.serviceEventName.after);
+        setUpServiceEvent(serviceItem, GLOBAL.serviceEventName.error, serviceName + "." + GLOBAL.serviceEventName.error);
+        setUpServiceEvent(serviceItem, GLOBAL.serviceEventName.success, serviceName + "." + GLOBAL.serviceEventName.success);
 
         return function (arg, callerContext) {
             var tArg = {};
@@ -498,7 +500,7 @@ var light = (typeof light === "undefined") ? (function () {
             var result;
             context.callerContext = callerContext;
             GLOBAL.utility.tryCatch(context, function () {
-                return serviceItem["before"].notify();
+                return serviceItem[GLOBAL.serviceEventName.before].notify();
             }, function (o) {
             }, function (o) {
             });
@@ -515,7 +517,8 @@ var light = (typeof light === "undefined") ? (function () {
                     isFirstCallInServiceRun: GLOBAL.unknownTag,
                     isLastCallInServiceRun: GLOBAL.unknownTag,
                     link: definition,
-                    event: GLOBAL.systemEventName.beforeServiceRun
+                    event: GLOBAL.systemEventName.beforeServiceRun,
+                    eventType: GLOBAL.serviceEventName.before
                 });
 
                 result = runSuppliedServiceFunction(context, serviceItem, handleName, definition, serviceName, tArg.arg);
@@ -531,7 +534,8 @@ var light = (typeof light === "undefined") ? (function () {
                     isFirstCallInServiceRun: GLOBAL.unknownTag,
                     isLastCallInServiceRun: GLOBAL.unknownTag,
                     link: definition,
-                    event: GLOBAL.systemEventName.afterServiceRun
+                    event: GLOBAL.systemEventName.afterServiceRun,
+                    eventType: GLOBAL.serviceEventName.after
                 });
 
                 return result;
@@ -547,10 +551,11 @@ var light = (typeof light === "undefined") ? (function () {
                 //    isFirstCallInServiceRun: GLOBAL.unknownTag,
                 //    isLastCallInServiceRun: GLOBAL.unknownTag,
                 //    link: definition,
-                //    event: GLOBAL.systemEventName.onServiceSuccess
+                //    event: GLOBAL.systemEventName.onServiceSuccess,
+                //    eventType: GLOBAL.serviceEventName.success
                 //});
 
-                return serviceItem["success"].notify(o, context, "service-success");
+                return serviceItem[GLOBAL.serviceEventName.success].notify(o, context, "service-success");
             }, function (o) {
                 //GLOBAL.track.record({
                 //    entranceOrExit: GLOBAL.exitTag,
@@ -563,13 +568,14 @@ var light = (typeof light === "undefined") ? (function () {
                 //    isFirstCallInServiceRun: GLOBAL.unknownTag,
                 //    isLastCallInServiceRun: GLOBAL.unknownTag,
                 //    link: definition,
-                //    event: GLOBAL.systemEventName.onServiceError
+                //    event: GLOBAL.systemEventName.onServiceError,
+                //    eventType: GLOBAL.serviceEventName.error
                 //});
 
-                return serviceItem["error"].notify(o, context, "service-error");
+                return serviceItem[GLOBAL.serviceEventName.error].notify(o, context, "service-error");
             });
 
-            GLOBAL.utility.tryCatch(context, function () { return serviceItem["after"].notify(); }, function () { }, function () { });
+            GLOBAL.utility.tryCatch(context, function () { return serviceItem[GLOBAL.serviceEventName.after].notify(); }, function () { }, function () { });
             return result;
         }
     };
@@ -843,17 +849,15 @@ var light = (typeof light === "undefined") ? (function () {
             beforeHandleRun: "beforeHandleRun",
             afterHandleRun: "afterHandleRun",
             onServiceError: "onServiceError",
-            onServiceSuccess: "onServiceSuccess"
+            onServiceSuccess: "onServiceSuccess",
         };
-        /*
-        ==SERVICE EVENTS API ==
-        =======================
-        setUpServiceEvent(serviceItem, "before", serviceName + ".before");
-        setUpServiceEvent(serviceItem, "after", serviceName + ".after");
-        setUpServiceEvent(serviceItem, "error", serviceName + ".error");
-        setUpServiceEvent(serviceItem, "success", serviceName + ".success");
-
-        */
+        // ==SERVICE EVENTS API ==
+        GLOBAL.serviceEventName = {
+            before: "before",
+            after: "after",
+            error: "error",
+            success: "success"
+        };
 
         GLOBAL._TEST_OBJECTS_ = {};
         GLOBAL.systemServices = {};
@@ -873,12 +877,12 @@ var light = (typeof light === "undefined") ? (function () {
         _light.version = 1;
         _light.service = defineService;
 
-        setUpSystemEvent(_light, "beforeServiceRun", GLOBAL.generateUniqueSystemName("system_event"));
-        setUpSystemEvent(_light, "afterServiceRun", GLOBAL.generateUniqueSystemName("system_event"));
-        setUpSystemEvent(_light, "beforeHandleRun", GLOBAL.generateUniqueSystemName("system_event"));
-        setUpSystemEvent(_light, "afterHandleRun", GLOBAL.generateUniqueSystemName("system_event"));
-        setUpSystemEvent(_light, "onServiceError", GLOBAL.generateUniqueSystemName("system_event"));
-        setUpSystemEvent(_light, "onServiceSuccess", GLOBAL.generateUniqueSystemName("system_event"));
+        setUpSystemEvent(_light, GLOBAL.systemEventName.beforeServiceRun, GLOBAL.generateUniqueSystemName("system_event"));
+        setUpSystemEvent(_light, GLOBAL.systemEventName.afterServiceRun, GLOBAL.generateUniqueSystemName("system_event"));
+        setUpSystemEvent(_light, GLOBAL.systemEventName.beforeHandleRun, GLOBAL.generateUniqueSystemName("system_event"));
+        setUpSystemEvent(_light, GLOBAL.systemEventName.afterHandleRun, GLOBAL.generateUniqueSystemName("system_event"));
+        setUpSystemEvent(_light, GLOBAL.systemEventName.onServiceError, GLOBAL.generateUniqueSystemName("system_event"));
+        setUpSystemEvent(_light, GLOBAL.systemEventName.onServiceSuccess, GLOBAL.generateUniqueSystemName("system_event"));
 
         _light.handle(GLOBAL.DEFAULT_HANDLE_NAME, function (definition) { return definition; });
     };
@@ -887,6 +891,31 @@ var light = (typeof light === "undefined") ? (function () {
 
     return _light;
 })() : console.log("light script already exists");
+
+/*
+(e)=>eventArg
+                dataType:
+                methodType:
+                methodName:
+                time:
+                position:
+                isFirst:
+                isLast:
+                data:
+                isTest:
+                info:
+                infoType:
+                link:
+                state:
+                event:
+
+light.beforeServiceRun(function (e) { });
+light.afterServiceRun(function (e) { });
+light.beforeHandleRun(function (e) { });
+light.afterHandleRun(function (e) { });
+light.onServiceError(function (e) { });
+light.onServiceSuccess(function (e) { });
+*/
 
 if (typeof module !== "undefined" && ('exports' in module)) {
     module.exports = light;
