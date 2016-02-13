@@ -1,84 +1,10 @@
 jest.dontMock('../src/lightservice');
+jest.dontMock('../src/tm.lightservice');
+
 var light = require('../src/lightservice') || light;
+require('../src/tm.lightservice') ;
 
 
-light.service("timemachine_next", function (arg) {
-    var records = this.service.timemachine_record().result();
-    var recordLength = records.length;
-    var pointer = this.service.timemachine_pointer().result();
-    pointer = pointer - 2;
-    this.service.timemachine_pointer(pointer);
-
-    pointer === -1 ? this.current() : light.advanced.play(records, recordLength - (1 + pointer), recordLength - pointer);
-
-});
-light.service("timemachine_previous", function (arg) {
-    var records = this.service.timemachine_record().result();
-    var recordLength = records.length;
-    var pointer = this.service.timemachine_pointer().result();
-    pointer = pointer + 2;
-    this.service.timemachine_pointer(pointer);
-
-    pointer >= recordLength ? this.current() : light.advanced.play(records, recordLength - (1 + pointer), recordLength - pointer);
-
-});
-light.service("timemachine_current", function (arg) {
-    var records = this.service.timemachine_record().result();
-    var recordLength = records.length;
-    this.service.timemachine_pointer(-1);
-
-    light.advanced.play(records, recordLength - 2, recordLength - 1);
-
-});
-
-
-
-
-
-light.service("timemachine_play", function (arg) {
-    var records = this.service.timemachine_record().result();
-    light.advanced.play(records,arg. i,arg. j)
-});
-
-light.service("timemachine_getLastRecord", function (p) {
-    var records = this.service.timemachine_record().result();
-    return records.length ? records[records.length - 1] : [];
-});
-
-light.service("timemachine_getRecord", function (i) {
- return   this.service.timemachine_record().result()[i];
-});
-
-light.service("timemachine_pointer", function (p) {
-
-    var pointer = this.state.get("pointer") || -1;
-    if (p) {      
-        this.state.set("pointer", p);
-        return p;
-    } else {
-        return pointer;
-    }
-
-});
-
-light.service("timemachine_record", function (record) {
-    var records = this.state.get("records") || [];
-    if (record) {
-        records.push(record);
-        this.state.set("records", records);
-        return records;
-    } else {
-        return records;
-    }
-});
-
-light.onSystemRecordEvent(function (e) {
-    light(function () {
-        this.system.stopRecording();
-        this.service.timemachine_record(JSON.parse(e));
-        this.system.startRecording();
-    });
-});
 
 light.service("test", function (arg) { });
 light.service("test-2", function (arg) { });
@@ -91,7 +17,7 @@ light.service("sample2", function (arg) {
 
 describe('light', function () {
     /*
-    
+
      it('recording history', function () {
         var haccess_1;
 
@@ -1333,26 +1259,27 @@ describe('light', function () {
         });
 
         light(function () {
+            this.system.startRecording();
+
             this.service[service]();
             this.service[service]();
             this.service[service]()
             var answer = this.service[service]().result();
 
-            this.system.stopRecording();         
+            this.system.stopRecording();
 
-          this.service.timemachine_previous();
-          this.service.timemachine_previous();
-          this.service.timemachine_previous();
-          this.service.timemachine_next();
-          this.service.timemachine_previous();
-          this.service.timemachine_next();
-          this.service.timemachine_next();
-          this.service.timemachine_previous();
-          this.service.timemachine_current();
-
+            this.service.timemachine_previous();
+            this.service.timemachine_previous();
+            this.service.timemachine_previous();
+            this.service.timemachine_next();
+            this.service.timemachine_previous();
+            this.service.timemachine_next();
+            this.service.timemachine_next();
+            this.service.timemachine_previous();
+            this.service.timemachine_current();
+            expect(log).toBe(",1,2,3,4,4,3,2,3,2,3,4,3,4");
 
             expect(answer).toBe(4);
-            expect(log).toBe(",1,2,3,4,4,3,2,3,2,3,4,3,4");
         });
     });
 });

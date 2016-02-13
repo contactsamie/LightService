@@ -95,7 +95,7 @@ light.service("draw", function (arg) {
 });
 light.service("visual", function (arg) {
     arg = arg || {}; 
-    var records = this.system.getAllRecords();
+    var records = this.service.timemachine_record().result();
     for (var i = 0; i < records.length; i++) {
         var currentRecord = records[i];
         var nextRecord = records[i + 1] || {
