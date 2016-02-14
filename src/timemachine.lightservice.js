@@ -39,26 +39,10 @@ light.service("timemachine_getRecord", function (i) {
     return this.service.timemachine_record().result()[i];
 });
 
-light.service("timemachine_pointer", function (p) {
-    var pointer = this.state.get("pointer") || -1;
-    if (p) {
-        this.state.set("pointer", p);
-        return p;
-    } else {
-        return pointer;
-    }
-});
+light.ServiceDataObject("timemachine_pointer",-1);
 
-light.service("timemachine_record", function (record) {
-    var records = this.state.get("records") || [];
-    if (record) {
-        records.push(record);
-        this.state.set("records", records);
-        return records;
-    } else {
-        return records;
-    }
-});
+
+light.ServiceDataList("timemachine_record");
 
 light.onSystemRecordEvent(function (e) {
     light(function () {

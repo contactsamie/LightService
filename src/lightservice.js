@@ -154,19 +154,19 @@ var light = (typeof light === "undefined") ? (function () {
             var recordStr = JSON.stringify(recordObject);
 
             if (INTERNAL.recordServices) {
-                _light[INTERNAL.systemEventName.onSystemRecordEvent].dispatch(recordStr);
+                _light[INTERNAL.systemEventName.onSystemRecordEvent].send(recordStr);
             }
 
             if (arg.serviceOrHandleMethodName === INTERNAL.serviceTag) {
-                INTERNAL.systemServices[arg.methodName][INTERNAL.serviceEventName[arg.eventType]].dispatch(recordStr);
+                INTERNAL.systemServices[arg.methodName][INTERNAL.serviceEventName[arg.eventType]].send(recordStr);
                 if ((arg.eventType === INTERNAL.serviceEventName.error) || (arg.eventType === INTERNAL.serviceEventName.success)) {
-                    INTERNAL.systemServices[arg.methodName][INTERNAL.serviceEventName[INTERNAL.serviceEventName.after]].dispatch(recordStr);
+                    INTERNAL.systemServices[arg.methodName][INTERNAL.serviceEventName[INTERNAL.serviceEventName.after]].send(recordStr);
                 }
             }
 
             // notify event subscribers
-            _light[arg.event].dispatch(recordStr);
-            _light[INTERNAL.systemEventName.onSystemEvent].dispatch(recordStr);
+            _light[arg.event].send(recordStr);
+            _light[INTERNAL.systemEventName.onSystemEvent].send(recordStr);
         }
     }
 
@@ -247,7 +247,7 @@ var light = (typeof light === "undefined") ? (function () {
     var createEventEmitter = function (id, f) {
         INTERNAL.eventSubscribers[id] = INTERNAL.eventSubscribers[id] || {};
         INTERNAL.eventSubscribers[id].sub = INTERNAL.eventSubscribers[id].sub || [];
-        INTERNAL.eventSubscribers[id].dispatch = INTERNAL.eventSubscribers[id].dispatch || function (o, context, notificationType) {
+        INTERNAL.eventSubscribers[id].send = INTERNAL.eventSubscribers[id].send || function (o, context, notificationType) {
             var _id = id;
             var l = INTERNAL.eventSubscribers[_id].sub.length;
             for (var i = 0; i < l; i++) {
@@ -271,7 +271,7 @@ var light = (typeof light === "undefined") ? (function () {
         that[event] = function (e) {
             setUpEventSubscriberBase(id, e);
         };
-        that["on"] = that["on"] || function (name, o) {
+        that["receive"] = that["receive"] || function (name, o) {
             that[name](o);
         };
     };
@@ -297,12 +297,12 @@ var light = (typeof light === "undefined") ? (function () {
             }
         };
         setUpNotification(id);
-        that[event].dispatch = INTERNAL.eventSubscribers[id].dispatch;
+        that[event].send = INTERNAL.eventSubscribers[id].send;
     };
 
     var publishSystemEvent = function (that, event, name) {
         publishSystemEventSubscriptionFx(that, event, name + "." + event);
-        that[event].dispatch = INTERNAL.eventSubscribers[name + "." + event].dispatch;
+        that[event].send = INTERNAL.eventSubscribers[name + "." + event].send;
     };
 
     var getServiceByName = function (serviceName) {
@@ -823,7 +823,7 @@ var light = (typeof light === "undefined") ? (function () {
         INTERNAL.DEFAULT_HANDLE_NAME = INTERNAL.generateUniqueSystemName();
         /*
            setup like publishSystemEvent(_light, "event", INTERNAL.generateUniqueSystemName("some id"));
-           notify like  _light.event.dispatch(e, context, notificationInfo);
+           notify like  _light.event.send(e, context, notificationInfo);
            subscribe like light.event(function (e, context,notificationInfo) {}));
         */
 
@@ -857,36 +857,36 @@ var light = (typeof light === "undefined") ? (function () {
         },
     };
 
+    /***********************EXTENSIONS*********************************************/
+    _light.ServiceDataList = function (dataServiceName, initialData) {
+        return _light.service(dataServiceName, function (data) {
+            var records = this.state.get("records") || initialData || [];
+            if (data) {
+                records.push(data);
+                this.state.set("records", records);
+            }
+            return records;
+        });
+    };
+    _light.ServiceDataObject = function (dataServiceName, initialData) {
+        return _light.service(dataServiceName, function (data) {
+            var record = this.state.get("record");
+            if (data) {
+                this.state.set("record", data);
+                return data;
+            } else {
+                if (typeof record === "undefined") {
+                    record = initialData;
+                    this.state.set("record", record);
+                }
+                return record;
+            }
+        });
+    };
+    /********************************************************************/
+
     return _light;
 })() : console.log("light script already exists");
-
-/*
-(e)=>eventArg
-                dataType:
-                methodType:
-                methodName:
-                time:
-                position:
-                isFirst:
-                isLast:
-                data:
-                isTest:
-                info:
-                infoType:
-                link:
-                state:
-                event:
-
-light.onSystemEvent(function (e) { });
-
-light.beforeServiceRun(function (e) { });
-light.afterServiceRun(function (e) { });
-light.beforeHandleRun(function (e) { });
-light.afterHandleRun(function (e) { });
-light.onServiceError(function (e) { });
-light.onServiceSuccess(function (e) { });
-
-*/
 
 if (typeof module !== "undefined" && ('exports' in module)) {
     module.exports = light;
