@@ -10,9 +10,6 @@ LightService
 
 LightService is a Service Framework 
 
-#demo
-http://codepen.io/contactsamie/pen/jWezvz
-http://codepen.io/contactsamie/pen/RrqXqZ
 
 GOALS: 
 
@@ -23,7 +20,9 @@ Provides a Simple, convinient and consistent interface for service consumption
 It provides a way for client to define services and also specify how those service definition should be interpreted
 
 
-
+#demo
+http://codepen.io/contactsamie/pen/jWezvz
+http://codepen.io/contactsamie/pen/RrqXqZ
 
 #todo use
 

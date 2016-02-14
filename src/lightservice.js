@@ -1,107 +1,107 @@
 var light = (typeof light === "undefined") ? (function () {
-    var GLOBAL = {};
-    GLOBAL.getCurrentContext = function (stateName, arg, stateOverride) {
+    var INTERNAL = {};
+    INTERNAL.getCurrentContext = function (stateName, arg, stateOverride) {
         var state = stateOverride ? JSON.parse(JSON.stringify({ data: stateOverride })).data : stateOverride
 
         var incontext = {
-            event: GLOBAL.systemServices,
+            event: INTERNAL.systemServices,
             service: chainService(),
             arg: arg,
-            system: GLOBAL.system,
-            state: GLOBAL._STATE_[stateName].api(state)
+            system: INTERNAL.system,
+            state: INTERNAL._STATE_[stateName].api(state)
         };
         return incontext;
     };
-    GLOBAL.forbiddenNames = {
+    INTERNAL.forbiddenNames = {
         result: true,
         service: true,
         handle: true
     };
 
-    GLOBAL.expectNoForbiddenName = function (name) {
-        if (GLOBAL.forbiddenNames[name]) {
+    INTERNAL.expectNoForbiddenName = function (name) {
+        if (INTERNAL.forbiddenNames[name]) {
             throw "You cannot use the name '" + name + "'";
         }
     };
 
-    GLOBAL.registry = {
+    INTERNAL.registry = {
         service: {},
         handle: {},
         scripts: {}
     };
 
-    GLOBAL.isRegistered = function (str) {
-        if (GLOBAL.registry.service[str] || GLOBAL.registry.handle[str]) {
+    INTERNAL.isRegistered = function (str) {
+        if (INTERNAL.registry.service[str] || INTERNAL.registry.handle[str]) {
             return true;
         }
         return false;
     };
 
-    GLOBAL.generateUniqueSystemName = function (prefix) {
+    INTERNAL.generateUniqueSystemName = function (prefix) {
         prefix = prefix || "";
         var str = (prefix + '_xxxxxxxx_xxxx_4xxx_yxxx_xxxxxxxxxxxx')["replace"](/[xy]/g, function (c) { var r = Math.random() * 16 | 0, v = c == 'x' ? r : r & 0x3 | 0x8; return v.toString(16); });
 
-        if (GLOBAL.isRegistered(str)) {
-            return GLOBAL.generateUniqueSystemName(prefix);
+        if (INTERNAL.isRegistered(str)) {
+            return INTERNAL.generateUniqueSystemName(prefix);
         }
         return str;
     }
 
-    GLOBAL.$setState = function (systemName, name, obj) {
-        GLOBAL._STATE_[systemName]["ref"][name] = { data: obj };
-        GLOBAL._STATE_[systemName]["state"][name] = JSON.stringify(GLOBAL._STATE_[systemName]["ref"][name]);
+    INTERNAL.$setState = function (systemName, name, obj) {
+        INTERNAL._STATE_[systemName]["ref"][name] = { data: obj };
+        INTERNAL._STATE_[systemName]["state"][name] = JSON.stringify(INTERNAL._STATE_[systemName]["ref"][name]);
     };
-    GLOBAL.$getState = function (systemName) {
-        var stateRoot = GLOBAL._STATE_[systemName];
-        return stateRoot && (GLOBAL._STATE_[systemName]["state"] || {});
+    INTERNAL.$getState = function (systemName) {
+        var stateRoot = INTERNAL._STATE_[systemName];
+        return stateRoot && (INTERNAL._STATE_[systemName]["state"] || {});
     };
 
     //$stateOverride
 
-    GLOBAL.stateFactory = function (systemName) {
-        GLOBAL._STATE_[systemName] = {
+    INTERNAL.stateFactory = function (systemName) {
+        INTERNAL._STATE_[systemName] = {
             state: {},
             ref: {},
             api: function (stateOverride) {
                 if (stateOverride) {
-                    GLOBAL._STATE_[systemName]["state"] = stateOverride;
+                    INTERNAL._STATE_[systemName]["state"] = stateOverride;
                 }
 
                 return {
                     get: function (name) {
-                        var data = GLOBAL.$getState(systemName)[name];
+                        var data = INTERNAL.$getState(systemName)[name];
                         if (!data) {
                             return data;
                         };
                         return JSON.parse(data).data;
                     },
                     set: function (name, obj) {
-                        GLOBAL.$setState(systemName, name, obj);
+                        INTERNAL.$setState(systemName, name, obj);
                     },
                     getRef: function (name) {
-                        GLOBAL._STATE_[systemName]["ref"][name] = GLOBAL._STATE_[systemName]["ref"][name] || {};
-                        return GLOBAL._STATE_[systemName]["ref"][name].data;
+                        INTERNAL._STATE_[systemName]["ref"][name] = INTERNAL._STATE_[systemName]["ref"][name] || {};
+                        return INTERNAL._STATE_[systemName]["ref"][name].data;
                     }
                 };
             }
         }
     };
 
-    GLOBAL.burnThread = function (seconds) {
+    INTERNAL.burnThread = function (seconds) {
         var e = new Date().getTime() + (seconds * 1000);
         while (new Date().getTime() <= e) { }
     };
 
-    GLOBAL.loadScript = function (src, onload) {
+    INTERNAL.loadScript = function (src, onload) {
         // todo wrap require js
         //if (src) {
         //    return require(src);
         //}
 
-        onload ? GLOBAL.loadScriptAsync(src, onload) : GLOBAL.loadScriptSync(src);
+        onload ? INTERNAL.loadScriptAsync(src, onload) : INTERNAL.loadScriptSync(src);
     };
 
-    GLOBAL.loadScriptAsync = function (src, onload) {
+    INTERNAL.loadScriptAsync = function (src, onload) {
         if (!document) {
             throw "Cannot load script : no document";
             return;
@@ -113,7 +113,7 @@ var light = (typeof light === "undefined") ? (function () {
         document.getElementsByTagName('head')[0].appendChild(script);
     };
 
-    GLOBAL.loadScriptSync = function (src) {
+    INTERNAL.loadScriptSync = function (src) {
         if (!document) {
             throw "Cannot load script : no document";
             return;
@@ -128,9 +128,9 @@ var light = (typeof light === "undefined") ? (function () {
         document.getElementsByTagName('head')[0].appendChild(se);
     };
 
-    GLOBAL.track = {
+    INTERNAL.track = {
         record: function (arg) {
-            if (arg.methodName === GLOBAL.DEFAULT_HANDLE_NAME) {
+            if (arg.methodName === INTERNAL.DEFAULT_HANDLE_NAME) {
                 return;
             }
 
@@ -146,31 +146,31 @@ var light = (typeof light === "undefined") ? (function () {
                 info: arg.info,
                 infoType: arg.infoType,
                 link: typeof arg.link === "function" ? arg.link.toString() : arg.link,
-                state: GLOBAL.$getState(arg.methodName),
+                state: INTERNAL.$getState(arg.methodName),
                 event: arg.event,
                 eventType: arg.eventType
             };
 
             var recordStr = JSON.stringify(recordObject);
 
-            if (GLOBAL.recordServices) {
-                _light[GLOBAL.systemEventName.onSystemRecordEvent].dispatch(recordStr);
+            if (INTERNAL.recordServices) {
+                _light[INTERNAL.systemEventName.onSystemRecordEvent].dispatch(recordStr);
             }
 
-            if (arg.serviceOrHandleMethodName === GLOBAL.serviceTag) {
-                GLOBAL.systemServices[arg.methodName][GLOBAL.serviceEventName[arg.eventType]].dispatch(recordStr);
-                if ((arg.eventType === GLOBAL.serviceEventName.error) || (arg.eventType === GLOBAL.serviceEventName.success)) {
-                    GLOBAL.systemServices[arg.methodName][GLOBAL.serviceEventName[GLOBAL.serviceEventName.after]].dispatch(recordStr);
+            if (arg.serviceOrHandleMethodName === INTERNAL.serviceTag) {
+                INTERNAL.systemServices[arg.methodName][INTERNAL.serviceEventName[arg.eventType]].dispatch(recordStr);
+                if ((arg.eventType === INTERNAL.serviceEventName.error) || (arg.eventType === INTERNAL.serviceEventName.success)) {
+                    INTERNAL.systemServices[arg.methodName][INTERNAL.serviceEventName[INTERNAL.serviceEventName.after]].dispatch(recordStr);
                 }
             }
 
             // notify event subscribers
             _light[arg.event].dispatch(recordStr);
-            _light[GLOBAL.systemEventName.onSystemEvent].dispatch(recordStr);
+            _light[INTERNAL.systemEventName.onSystemEvent].dispatch(recordStr);
         }
     }
 
-    GLOBAL.utility = {
+    INTERNAL.utility = {
         execSurpressError: function (o, e, context, notificationInfo) {
             if (typeof o === "function") {
                 try { o(e, context, notificationInfo); } catch (ex) {
@@ -181,34 +181,34 @@ var light = (typeof light === "undefined") ? (function () {
         tryCatch: function (context, f, success, error) {
             try {
                 var result = f();
-                GLOBAL.utility.execSurpressError(function () {
+                INTERNAL.utility.execSurpressError(function () {
                     success(result, context);
                 }, null, context, "trying-service");
             } catch (e) {
-                GLOBAL.utility.execSurpressError(function () {
+                INTERNAL.utility.execSurpressError(function () {
                     error(e, context);
                 }, e, context, "service-throws");
             }
         }
     };
 
-    GLOBAL.messageReceivers = {};
+    INTERNAL.messageReceivers = {};
 
-    GLOBAL.send = function (messageName, messageArg) {
-        GLOBAL.messageReceivers[messageName] = GLOBAL.messageReceivers[messageName] || [];
-        var total = GLOBAL.messageReceivers[messageName].length;
+    INTERNAL.send = function (messageName, messageArg) {
+        INTERNAL.messageReceivers[messageName] = INTERNAL.messageReceivers[messageName] || [];
+        var total = INTERNAL.messageReceivers[messageName].length;
         for (var i = 0; i < total; i++) {
-            var receiver = GLOBAL.messageReceivers[messageName][i];
+            var receiver = INTERNAL.messageReceivers[messageName][i];
             _light(function () {
                 this.service[receiver.link](messageArg);
             });
         }
     };
-    GLOBAL.receive = function (messageName, fn) {
-        GLOBAL.messageReceivers[messageName] = GLOBAL.messageReceivers[messageName] || [];
+    INTERNAL.receive = function (messageName, fn) {
+        INTERNAL.messageReceivers[messageName] = INTERNAL.messageReceivers[messageName] || [];
         var messageItem = { message: messageName };
-        messageItem.link = _light.service(GLOBAL.generateUniqueSystemName(), fn);
-        GLOBAL.messageReceivers[messageName].push(messageItem);
+        messageItem.link = _light.service(INTERNAL.generateUniqueSystemName(), fn);
+        INTERNAL.messageReceivers[messageName].push(messageItem);
     };
 
     var XMLHttpFactories = [
@@ -235,9 +235,9 @@ var light = (typeof light === "undefined") ? (function () {
     var setUpEventSubscriberBase = function (id, o) {
         setUpEventSubscriberBase.ref = setUpEventSubscriberBase.ref || 0;
         setUpEventSubscriberBase.ref++;
-        GLOBAL.eventSubscribers[id] = GLOBAL.eventSubscribers[id] || {};
-        GLOBAL.eventSubscribers[id].sub = GLOBAL.eventSubscribers[id].sub || [];
-        GLOBAL.eventSubscribers[id].sub.push({
+        INTERNAL.eventSubscribers[id] = INTERNAL.eventSubscribers[id] || {};
+        INTERNAL.eventSubscribers[id].sub = INTERNAL.eventSubscribers[id].sub || [];
+        INTERNAL.eventSubscribers[id].sub.push({
             service: o,
             ref: setUpEventSubscriberBase.ref
         });
@@ -245,13 +245,13 @@ var light = (typeof light === "undefined") ? (function () {
     };
 
     var createEventEmitter = function (id, f) {
-        GLOBAL.eventSubscribers[id] = GLOBAL.eventSubscribers[id] || {};
-        GLOBAL.eventSubscribers[id].sub = GLOBAL.eventSubscribers[id].sub || [];
-        GLOBAL.eventSubscribers[id].dispatch = GLOBAL.eventSubscribers[id].dispatch || function (o, context, notificationType) {
+        INTERNAL.eventSubscribers[id] = INTERNAL.eventSubscribers[id] || {};
+        INTERNAL.eventSubscribers[id].sub = INTERNAL.eventSubscribers[id].sub || [];
+        INTERNAL.eventSubscribers[id].dispatch = INTERNAL.eventSubscribers[id].dispatch || function (o, context, notificationType) {
             var _id = id;
-            var l = GLOBAL.eventSubscribers[_id].sub.length;
+            var l = INTERNAL.eventSubscribers[_id].sub.length;
             for (var i = 0; i < l; i++) {
-                var item = GLOBAL.eventSubscribers[_id].sub[i];
+                var item = INTERNAL.eventSubscribers[_id].sub[i];
                 var notificationInfo = {
                     index: i,
                     notificationType: notificationType
@@ -263,7 +263,7 @@ var light = (typeof light === "undefined") ? (function () {
 
     var setUpNotification = function (id) {
         return createEventEmitter(id, function (item, o, context, notificationInfo) {
-            GLOBAL.utility.tryCatch(context, function () { return item.service(); }, function () { }, function () { GLOBAL.utility.execSurpressError(item.service.error, o, context, notificationInfo); });
+            INTERNAL.utility.tryCatch(context, function () { return item.service(); }, function () { }, function () { INTERNAL.utility.execSurpressError(item.service.error, o, context, notificationInfo); });
         });
     };
 
@@ -290,23 +290,23 @@ var light = (typeof light === "undefined") ? (function () {
     var publishServiceEvent = function (that, event, id) {
         setUpEventSubscriber(that, event, id);
         that[event].forEachSubscriber = that[event].forEachSubscriber || function (f) {
-            var l = GLOBAL.eventSubscribers[id].sub.length;
+            var l = INTERNAL.eventSubscribers[id].sub.length;
             for (var i = 0; i < l; i++) {
-                var item = GLOBAL.eventSubscribers[id].sub[i];
+                var item = INTERNAL.eventSubscribers[id].sub[i];
                 f && f(item);
             }
         };
         setUpNotification(id);
-        that[event].dispatch = GLOBAL.eventSubscribers[id].dispatch;
+        that[event].dispatch = INTERNAL.eventSubscribers[id].dispatch;
     };
 
     var publishSystemEvent = function (that, event, name) {
         publishSystemEventSubscriptionFx(that, event, name + "." + event);
-        that[event].dispatch = GLOBAL.eventSubscribers[name + "." + event].dispatch;
+        that[event].dispatch = INTERNAL.eventSubscribers[name + "." + event].dispatch;
     };
 
     var getServiceByName = function (serviceName) {
-        var item = GLOBAL.systemServices[serviceName];
+        var item = INTERNAL.systemServices[serviceName];
         return item;
     };
 
@@ -318,40 +318,40 @@ var light = (typeof light === "undefined") ? (function () {
     }
 
     var getApplicablehandle_Test = function (context, serviceItem, definition, serviceName, arg) {
-        var testhandleName = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handleName;
+        var testhandleName = INTERNAL._TEST_OBJECTS_ && INTERNAL._TEST_OBJECTS_[serviceName] && INTERNAL._TEST_OBJECTS_[serviceName].handleName;
 
-        var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handle;
+        var testhandle = INTERNAL._TEST_OBJECTS_ && INTERNAL._TEST_OBJECTS_[serviceName] && INTERNAL._TEST_OBJECTS_[serviceName].handle;
 
-        GLOBAL.track.record({
-            entranceOrExit: GLOBAL.entranceTag,
-            serviceOrHandleMethodName: GLOBAL.handleTag,
+        INTERNAL.track.record({
+            entranceOrExit: INTERNAL.entranceTag,
+            serviceOrHandleMethodName: INTERNAL.handleTag,
             methodName: testhandleName,
             argumentOrReturnData: serviceName,
             info: arg,
-            infoType: GLOBAL.serviceArgTag,
+            infoType: INTERNAL.serviceArgTag,
             isTest: true,
-            isFirstCallInServiceRun: GLOBAL.unknownTag,
-            isLastCallInServiceRun: GLOBAL.unknownTag,
+            isFirstCallInServiceRun: INTERNAL.unknownTag,
+            isLastCallInServiceRun: INTERNAL.unknownTag,
             link: testhandle,
-            event: GLOBAL.systemEventName.beforeHandleRun,
-            eventType: GLOBAL.serviceEventName.before
+            event: INTERNAL.systemEventName.beforeHandleRun,
+            eventType: INTERNAL.serviceEventName.before
         });
 
-        tmpDefinition = testhandle.call(GLOBAL.getCurrentContext(serviceName, definition), definition);
+        tmpDefinition = testhandle.call(INTERNAL.getCurrentContext(serviceName, definition), definition);
 
-        GLOBAL.track.record({
-            entranceOrExit: GLOBAL.exitTag,
-            serviceOrHandleMethodName: GLOBAL.handleTag,
+        INTERNAL.track.record({
+            entranceOrExit: INTERNAL.exitTag,
+            serviceOrHandleMethodName: INTERNAL.handleTag,
             methodName: testhandleName,
             argumentOrReturnData: serviceName,
-            info: GLOBAL.unknownTag,
-            infoType: GLOBAL.unknownTag,
+            info: INTERNAL.unknownTag,
+            infoType: INTERNAL.unknownTag,
             isTest: true,
-            isFirstCallInServiceRun: GLOBAL.unknownTag,
-            isLastCallInServiceRun: GLOBAL.unknownTag,
+            isFirstCallInServiceRun: INTERNAL.unknownTag,
+            isLastCallInServiceRun: INTERNAL.unknownTag,
             link: testhandle,
-            event: GLOBAL.systemEventName.afterHandleRun,
-            eventType: GLOBAL.serviceEventName.after
+            event: INTERNAL.systemEventName.afterHandleRun,
+            eventType: INTERNAL.serviceEventName.after
         });
         return tmpDefinition;
     };
@@ -363,41 +363,41 @@ var light = (typeof light === "undefined") ? (function () {
         var lastResult;
 
         var isAMatch = false;
-        var length = GLOBAL.handles.length;
+        var length = INTERNAL.handles.length;
         for (var j = 0; j < length; j++) {
-            var handle = GLOBAL.handles[j];
+            var handle = INTERNAL.handles[j];
             isAMatch = handleName && (handle.name === handleName);
             if (isAMatch) {
-                GLOBAL.track.record({
-                    entranceOrExit: GLOBAL.entranceTag,
-                    serviceOrHandleMethodName: GLOBAL.handleTag,
+                INTERNAL.track.record({
+                    entranceOrExit: INTERNAL.entranceTag,
+                    serviceOrHandleMethodName: INTERNAL.handleTag,
                     methodName: handleName,
                     argumentOrReturnData: serviceName,
                     info: arg,
-                    infoType: GLOBAL.serviceArgTag,
+                    infoType: INTERNAL.serviceArgTag,
                     isTest: false,
-                    isFirstCallInServiceRun: GLOBAL.unknownTag,
-                    isLastCallInServiceRun: GLOBAL.unknownTag,
+                    isFirstCallInServiceRun: INTERNAL.unknownTag,
+                    isLastCallInServiceRun: INTERNAL.unknownTag,
                     link: (testhandle || handle.definition),
-                    event: GLOBAL.systemEventName.beforeHandleRun,
-                    eventType: GLOBAL.serviceEventName.before
+                    event: INTERNAL.systemEventName.beforeHandleRun,
+                    eventType: INTERNAL.serviceEventName.before
                 });
 
-                tmpDefinition = (testhandle || handle.definition).call(GLOBAL.getCurrentContext(handleName, definition), definition);
+                tmpDefinition = (testhandle || handle.definition).call(INTERNAL.getCurrentContext(handleName, definition), definition);
 
-                GLOBAL.track.record({
-                    entranceOrExit: GLOBAL.exitTag,
-                    serviceOrHandleMethodName: GLOBAL.handleTag,
+                INTERNAL.track.record({
+                    entranceOrExit: INTERNAL.exitTag,
+                    serviceOrHandleMethodName: INTERNAL.handleTag,
                     methodName: handleName,
                     argumentOrReturnData: serviceName,
-                    info: GLOBAL.unknownTag,
-                    infoType: GLOBAL.unknownTag,
+                    info: INTERNAL.unknownTag,
+                    infoType: INTERNAL.unknownTag,
                     isTest: false,
-                    isFirstCallInServiceRun: GLOBAL.unknownTag,
-                    isLastCallInServiceRun: GLOBAL.unknownTag,
+                    isFirstCallInServiceRun: INTERNAL.unknownTag,
+                    isLastCallInServiceRun: INTERNAL.unknownTag,
                     link: (testhandle || handle.definition),
-                    event: GLOBAL.systemEventName.afterHandleRun,
-                    eventType: GLOBAL.serviceEventName.after
+                    event: INTERNAL.systemEventName.afterHandleRun,
+                    eventType: INTERNAL.serviceEventName.after
                 });
 
                 break;
@@ -409,9 +409,9 @@ var light = (typeof light === "undefined") ? (function () {
 
     var getApplicablehandle = function (context, serviceItem, handleName, definition, serviceName, arg) {
         var tmpDefinition;
-        var testhandleName = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handleName;
+        var testhandleName = INTERNAL._TEST_OBJECTS_ && INTERNAL._TEST_OBJECTS_[serviceName] && INTERNAL._TEST_OBJECTS_[serviceName].handleName;
 
-        var testhandle = GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].handle;
+        var testhandle = INTERNAL._TEST_OBJECTS_ && INTERNAL._TEST_OBJECTS_[serviceName] && INTERNAL._TEST_OBJECTS_[serviceName].handle;
         if (testhandle && !testhandleName) {
             tmpDefinition = getApplicablehandle_Test(context, serviceItem, definition, serviceName, arg);
         }
@@ -423,9 +423,9 @@ var light = (typeof light === "undefined") ? (function () {
 
     var runSuppliedServiceFunction = function (context, serviceItem, handleNames, definition, serviceName, arg) {
         //start testing
-        if (GLOBAL._TEST_OBJECTS_ && GLOBAL._TEST_OBJECTS_[serviceName] && GLOBAL._TEST_OBJECTS_[serviceName].service) {
-            handleNames = GLOBAL._TEST_OBJECTS_[serviceName].handleNames || handleNames;
-            definition = GLOBAL._TEST_OBJECTS_[serviceName].service || definition;
+        if (INTERNAL._TEST_OBJECTS_ && INTERNAL._TEST_OBJECTS_[serviceName] && INTERNAL._TEST_OBJECTS_[serviceName].service) {
+            handleNames = INTERNAL._TEST_OBJECTS_[serviceName].handleNames || handleNames;
+            definition = INTERNAL._TEST_OBJECTS_[serviceName].service || definition;
         }
         handleNames = isArray(handleNames) ? handleNames : (handleNames ? [handleNames] : []);
 
@@ -447,17 +447,17 @@ var light = (typeof light === "undefined") ? (function () {
                 throw message;
             }
 
-            lastResult = returnDefinitionFromHandle.call(GLOBAL.getCurrentContext(serviceName, lastResult), lastResult);
+            lastResult = returnDefinitionFromHandle.call(INTERNAL.getCurrentContext(serviceName, lastResult), lastResult);
         }
 
         return lastResult;
     };
 
     var createServiceDefinitionFromSuppliedFn = function (context, serviceItem, handleName, definition, serviceName) {
-        publishServiceEvent(serviceItem, GLOBAL.serviceEventName.before, serviceName + "." + GLOBAL.serviceEventName.before);
-        publishServiceEvent(serviceItem, GLOBAL.serviceEventName.after, serviceName + "." + GLOBAL.serviceEventName.after);
-        publishServiceEvent(serviceItem, GLOBAL.serviceEventName.error, serviceName + "." + GLOBAL.serviceEventName.error);
-        publishServiceEvent(serviceItem, GLOBAL.serviceEventName.success, serviceName + "." + GLOBAL.serviceEventName.success);
+        publishServiceEvent(serviceItem, INTERNAL.serviceEventName.before, serviceName + "." + INTERNAL.serviceEventName.before);
+        publishServiceEvent(serviceItem, INTERNAL.serviceEventName.after, serviceName + "." + INTERNAL.serviceEventName.after);
+        publishServiceEvent(serviceItem, INTERNAL.serviceEventName.error, serviceName + "." + INTERNAL.serviceEventName.error);
+        publishServiceEvent(serviceItem, INTERNAL.serviceEventName.success, serviceName + "." + INTERNAL.serviceEventName.success);
 
         return function (arg, callerContext) {
             var tArg = {};
@@ -465,58 +465,58 @@ var light = (typeof light === "undefined") ? (function () {
 
             var result;
             context.callerContext = callerContext;
-            GLOBAL.utility.tryCatch(context, function () {
-                GLOBAL.track.record({
-                    entranceOrExit: GLOBAL.entranceTag,
-                    serviceOrHandleMethodName: GLOBAL.serviceTag,
+            INTERNAL.utility.tryCatch(context, function () {
+                INTERNAL.track.record({
+                    entranceOrExit: INTERNAL.entranceTag,
+                    serviceOrHandleMethodName: INTERNAL.serviceTag,
                     methodName: serviceName,
                     argumentOrReturnData: tArg.arg,
                     info: handleName,
-                    infoType: GLOBAL.handleTag,
+                    infoType: INTERNAL.handleTag,
                     isTest: false,
-                    isFirstCallInServiceRun: GLOBAL.unknownTag,
-                    isLastCallInServiceRun: GLOBAL.unknownTag,
+                    isFirstCallInServiceRun: INTERNAL.unknownTag,
+                    isLastCallInServiceRun: INTERNAL.unknownTag,
                     link: definition,
-                    event: GLOBAL.systemEventName.beforeServiceRun,
-                    eventType: GLOBAL.serviceEventName.before
+                    event: INTERNAL.systemEventName.beforeServiceRun,
+                    eventType: INTERNAL.serviceEventName.before
                 });
             }, function (o) {
             }, function (o) {
             });
 
-            GLOBAL.utility.tryCatch(context, function () {
+            INTERNAL.utility.tryCatch(context, function () {
                 result = runSuppliedServiceFunction(context, serviceItem, handleName, definition, serviceName, tArg.arg);
 
                 return result;
             }, function (o) {
-                GLOBAL.track.record({
-                    entranceOrExit: GLOBAL.exitTag,
-                    serviceOrHandleMethodName: GLOBAL.serviceTag,
+                INTERNAL.track.record({
+                    entranceOrExit: INTERNAL.exitTag,
+                    serviceOrHandleMethodName: INTERNAL.serviceTag,
                     methodName: serviceName,
                     argumentOrReturnData: o,
                     info: "event:success",
-                    infoType: GLOBAL.eventTag,
+                    infoType: INTERNAL.eventTag,
                     isTest: false,
-                    isFirstCallInServiceRun: GLOBAL.unknownTag,
-                    isLastCallInServiceRun: GLOBAL.unknownTag,
+                    isFirstCallInServiceRun: INTERNAL.unknownTag,
+                    isLastCallInServiceRun: INTERNAL.unknownTag,
                     link: definition,
-                    event: GLOBAL.systemEventName.onServiceSuccess,
-                    eventType: GLOBAL.serviceEventName.success
+                    event: INTERNAL.systemEventName.onServiceSuccess,
+                    eventType: INTERNAL.serviceEventName.success
                 });
             }, function (o) {
-                GLOBAL.track.record({
-                    entranceOrExit: GLOBAL.exitTag,
-                    serviceOrHandleMethodName: GLOBAL.serviceTag,
+                INTERNAL.track.record({
+                    entranceOrExit: INTERNAL.exitTag,
+                    serviceOrHandleMethodName: INTERNAL.serviceTag,
                     methodName: serviceName,
                     argumentOrReturnData: o,
                     info: "event:error",
-                    infoType: GLOBAL.eventTag,
+                    infoType: INTERNAL.eventTag,
                     isTest: false,
-                    isFirstCallInServiceRun: GLOBAL.unknownTag,
-                    isLastCallInServiceRun: GLOBAL.unknownTag,
+                    isFirstCallInServiceRun: INTERNAL.unknownTag,
+                    isLastCallInServiceRun: INTERNAL.unknownTag,
                     link: definition,
-                    event: GLOBAL.systemEventName.onServiceError,
-                    eventType: GLOBAL.serviceEventName.error
+                    event: INTERNAL.systemEventName.onServiceError,
+                    eventType: INTERNAL.serviceEventName.error
                 });
             });
 
@@ -534,14 +534,14 @@ var light = (typeof light === "undefined") ? (function () {
         if (arguments.length == 1) {
             if (typeof serviceName === "function") {
                 fn = serviceName;
-                serviceName = GLOBAL.generateUniqueSystemName(servicePrefix);
-                handleNamesOrDefinition = GLOBAL.DEFAULT_HANDLE_NAME;
+                serviceName = INTERNAL.generateUniqueSystemName(servicePrefix);
+                handleNamesOrDefinition = INTERNAL.DEFAULT_HANDLE_NAME;
             } else {
-                if (!GLOBAL.registry.scripts[serviceName]) {
-                    GLOBAL.registry.scripts[serviceName] = true;
+                if (!INTERNAL.registry.scripts[serviceName]) {
+                    INTERNAL.registry.scripts[serviceName] = true;
                     return {
                         load: function (onload) {
-                            GLOBAL.loadScript(serviceName, onload && function () {
+                            INTERNAL.loadScript(serviceName, onload && function () {
                                 _light(onload);
                             });
                         }
@@ -564,20 +564,20 @@ var light = (typeof light === "undefined") ? (function () {
 
             if (isArray(serviceName)) {
                 handleNamesOrDefinition = serviceName;
-                serviceName = GLOBAL.generateUniqueSystemName(servicePrefix);
+                serviceName = INTERNAL.generateUniqueSystemName(servicePrefix);
             } else {
                 //service name is provided
-                handleNamesOrDefinition = GLOBAL.DEFAULT_HANDLE_NAME;
+                handleNamesOrDefinition = INTERNAL.DEFAULT_HANDLE_NAME;
             }
         }
 
         // todo check for unique name
-        if (GLOBAL.isRegistered(serviceName)) {
+        if (INTERNAL.isRegistered(serviceName)) {
             throw "Unable to create service with name '" + serviceName + "'.Name already exists in registry";
             return;
         }
 
-        GLOBAL.expectNoForbiddenName(serviceName);
+        INTERNAL.expectNoForbiddenName(serviceName);
 
         //!!!!
         //experiment ----start
@@ -599,11 +599,11 @@ var light = (typeof light === "undefined") ? (function () {
         serviceItem.redefinition = createServiceDefinitionFromSuppliedFn(context, serviceItem, handleNamesOrDefinition, definition, serviceName);
 
         serviceItem.me = serviceName;
-        GLOBAL.systemServices[serviceName] = serviceItem;
+        INTERNAL.systemServices[serviceName] = serviceItem;
         //!! reg
-        GLOBAL.registry.service[serviceName] = {};
+        INTERNAL.registry.service[serviceName] = {};
 
-        GLOBAL.stateFactory(serviceName);
+        INTERNAL.stateFactory(serviceName);
 
         return serviceName;
     };
@@ -634,7 +634,7 @@ var light = (typeof light === "undefined") ? (function () {
                     res.previousOrMostCurrentResultToBePassedToTheNextActor = arguments.length ? arg : result;
                     var previousOrMostCurrentResultToBePassedToTheNextActor = JSON.parse(JSON.stringify(res)).previousOrMostCurrentResultToBePassedToTheNextActor;
 
-                    result = GLOBAL.systemServices[serviceName](previousOrMostCurrentResultToBePassedToTheNextActor);
+                    result = INTERNAL.systemServices[serviceName](previousOrMostCurrentResultToBePassedToTheNextActor);
                     return chain;
                 };
             })(actor);
@@ -642,11 +642,11 @@ var light = (typeof light === "undefined") ? (function () {
 
         if (cb) {
             //todo use async to speed up things
-            eachAsync(GLOBAL.systemServices, buildFn, function () {
+            eachAsync(INTERNAL.systemServices, buildFn, function () {
                 cb(chain);
             });
         } else {
-            for (var actor in GLOBAL.systemServices) {
+            for (var actor in INTERNAL.systemServices) {
                 buildFn(actor);
             }
         }
@@ -678,7 +678,7 @@ var light = (typeof light === "undefined") ? (function () {
         // (function (f) {
         //   setTimeout(function () {
         chainService(function (cs) {
-            typeof f === "function" && f.call(GLOBAL.getCurrentContext(GLOBAL._GLOBAL_SCOPE_NAME, cs), cs);
+            typeof f === "function" && f.call(INTERNAL.getCurrentContext(INTERNAL._INTERNAL_SCOPE_NAME, cs), cs);
         });
         //    },0);
         // })(f);
@@ -701,36 +701,36 @@ var light = (typeof light === "undefined") ? (function () {
                 return;
             }
             definition = handleName;
-            handleName = GLOBAL.generateUniqueSystemName(handleePrefix);
+            handleName = INTERNAL.generateUniqueSystemName(handleePrefix);
         }
 
-        if (GLOBAL.isRegistered(handleName)) {
+        if (INTERNAL.isRegistered(handleName)) {
             throw "Unable to create handle with name '" + handleName + "'.Name already exists in registry";
             return;
         }
 
-        GLOBAL.expectNoForbiddenName(handleName);
+        INTERNAL.expectNoForbiddenName(handleName);
 
-        GLOBAL.registry.handle[handleName] = {};
+        INTERNAL.registry.handle[handleName] = {};
 
-        GLOBAL.handles.push({
+        INTERNAL.handles.push({
             name: handleName,
             definition: definition
         });
-        GLOBAL.stateFactory(handleName);
+        INTERNAL.stateFactory(handleName);
         return handleName;
     }
 
     _light.advanced = {
         test: function (setup, f) {
-            GLOBAL._TEST_OBJECTS_ = setup;
+            INTERNAL._TEST_OBJECTS_ = setup;
 
-            f.call(GLOBAL.getCurrentContext(GLOBAL._GLOBAL_SCOPE_NAME, chainService()), chainService());
-            GLOBAL._TEST_OBJECTS_ = undefined
+            f.call(INTERNAL.getCurrentContext(INTERNAL._INTERNAL_SCOPE_NAME, chainService()), chainService());
+            INTERNAL._TEST_OBJECTS_ = undefined
         },
         play: function (records, i, j) {
             i = i || 0;
-            j = j || (GLOBAL.track.records.length - 1);
+            j = j || (INTERNAL.track.records.length - 1);
 
             _light(function (service) {
                 var inter = service;
@@ -740,9 +740,9 @@ var light = (typeof light === "undefined") ? (function () {
                         throw "unable to find service to play service";
                     }
 
-                    if ((playGround.methodType === GLOBAL.serviceTag) && (playGround.dataType === GLOBAL.entranceTag)) {
+                    if ((playGround.methodType === INTERNAL.serviceTag) && (playGround.dataType === INTERNAL.entranceTag)) {
                         if ((m === i)) {
-                            inter = inter[playGround.methodName].call(GLOBAL.getCurrentContext(playGround.methodName, playGround.data, playGround.state), playGround.data);
+                            inter = inter[playGround.methodName].call(INTERNAL.getCurrentContext(playGround.methodName, playGround.data, playGround.state), playGround.data);
                         } else {
                             inter = inter[playGround.methodName]();
                         }
@@ -754,47 +754,47 @@ var light = (typeof light === "undefined") ? (function () {
     };
 
     if (typeof Immutable === "undefined") {
-        GLOBAL.Immutable = {
+        INTERNAL.Immutable = {
             List: function (obj) {
                 return this.Map(obj);
             },
             Map: function (obj) {
-                var name = GLOBAL.generateUniqueSystemName("immu");
+                var name = INTERNAL.generateUniqueSystemName("immu");
                 var data = { data: obj }
-                GLOBAL.ImmutableStore[name] = JSON.stringify(data);
+                INTERNAL.ImmutableStore[name] = JSON.stringify(data);
                 return {
                     get: function (n) {
-                        var out = JSON.parse(GLOBAL.ImmutableStore[name]);
+                        var out = JSON.parse(INTERNAL.ImmutableStore[name]);
                         return out.data[n];
                     },
                     set: function (n, o) {
-                        var out = JSON.parse(GLOBAL.ImmutableStore[name]);
+                        var out = JSON.parse(INTERNAL.ImmutableStore[name]);
                         out.data[n] = o;
                         var newData = JSON.parse(JSON.stringify(out)).data;
 
-                        return GLOBAL.Immutable.Map(newData);
+                        return INTERNAL.Immutable.Map(newData);
                     }
                 };
             }
         };
     } else {
-        GLOBAL.Immutable = Immutable;
+        INTERNAL.Immutable = Immutable;
     }
 
-    GLOBAL.copy = function (obj) {
-        GLOBAL.Immutable.Map({ data: obj }).get('data');
+    INTERNAL.copy = function (obj) {
+        INTERNAL.Immutable.Map({ data: obj }).get('data');
     };
 
     var init = function () {
-        GLOBAL.entranceTag = "argument";
-        GLOBAL.exitTag = "result";
-        GLOBAL.serviceTag = "service";
-        GLOBAL.handleTag = "handle";
-        GLOBAL.eventTag = "event";
-        GLOBAL.unknownTag = "unknown";
+        INTERNAL.entranceTag = "argument";
+        INTERNAL.exitTag = "result";
+        INTERNAL.serviceTag = "service";
+        INTERNAL.handleTag = "handle";
+        INTERNAL.eventTag = "event";
+        INTERNAL.unknownTag = "unknown";
 
         //SYSTEM EVENTS API
-        GLOBAL.systemEventName = {
+        INTERNAL.systemEventName = {
             beforeServiceRun: "beforeServiceRun",
             afterServiceRun: "afterServiceRun",
             beforeHandleRun: "beforeHandleRun",
@@ -805,55 +805,55 @@ var light = (typeof light === "undefined") ? (function () {
             onSystemRecordEvent: "onSystemRecordEvent"
         };
         // ==SERVICE EVENTS API ==
-        GLOBAL.serviceEventName = {
+        INTERNAL.serviceEventName = {
             before: "before",
             after: "after",
             error: "error",
             success: "success"
         };
 
-        GLOBAL._TEST_OBJECTS_ = {};
-        GLOBAL.systemServices = {};
-        GLOBAL.ImmutableStore = {};
-        GLOBAL._STATE_ = {};
-        GLOBAL.eventSubscribers = {};
-        GLOBAL.handles = [];
-        GLOBAL._GLOBAL_SCOPE_NAME = GLOBAL.generateUniqueSystemName();
-        GLOBAL.stateFactory(GLOBAL._GLOBAL_SCOPE_NAME);
-        GLOBAL.DEFAULT_HANDLE_NAME = GLOBAL.generateUniqueSystemName();
+        INTERNAL._TEST_OBJECTS_ = {};
+        INTERNAL.systemServices = {};
+        INTERNAL.ImmutableStore = {};
+        INTERNAL._STATE_ = {};
+        INTERNAL.eventSubscribers = {};
+        INTERNAL.handles = [];
+        INTERNAL._INTERNAL_SCOPE_NAME = INTERNAL.generateUniqueSystemName();
+        INTERNAL.stateFactory(INTERNAL._INTERNAL_SCOPE_NAME);
+        INTERNAL.DEFAULT_HANDLE_NAME = INTERNAL.generateUniqueSystemName();
         /*
-           setup like publishSystemEvent(_light, "event", GLOBAL.generateUniqueSystemName("some id"));
+           setup like publishSystemEvent(_light, "event", INTERNAL.generateUniqueSystemName("some id"));
            notify like  _light.event.dispatch(e, context, notificationInfo);
            subscribe like light.event(function (e, context,notificationInfo) {}));
         */
 
         _light.version = "6.0.0";
         _light.service = defineService;
-        _light.Immutable = GLOBAL.Immutable;
-        _light.send = GLOBAL.send;
-        _light.receive = GLOBAL.receive;
+        _light.Immutable = INTERNAL.Immutable;
+        _light.send = INTERNAL.send;
+        _light.receive = INTERNAL.receive;
 
-        publishSystemEvent(_light, GLOBAL.systemEventName.onSystemEvent, GLOBAL.generateUniqueSystemName());
-        publishSystemEvent(_light, GLOBAL.systemEventName.onSystemRecordEvent, GLOBAL.generateUniqueSystemName());
+        publishSystemEvent(_light, INTERNAL.systemEventName.onSystemEvent, INTERNAL.generateUniqueSystemName());
+        publishSystemEvent(_light, INTERNAL.systemEventName.onSystemRecordEvent, INTERNAL.generateUniqueSystemName());
 
-        publishSystemEvent(_light, GLOBAL.systemEventName.beforeServiceRun, GLOBAL.generateUniqueSystemName());
-        publishSystemEvent(_light, GLOBAL.systemEventName.afterServiceRun, GLOBAL.generateUniqueSystemName());
-        publishSystemEvent(_light, GLOBAL.systemEventName.beforeHandleRun, GLOBAL.generateUniqueSystemName());
-        publishSystemEvent(_light, GLOBAL.systemEventName.afterHandleRun, GLOBAL.generateUniqueSystemName());
-        publishSystemEvent(_light, GLOBAL.systemEventName.onServiceError, GLOBAL.generateUniqueSystemName());
-        publishSystemEvent(_light, GLOBAL.systemEventName.onServiceSuccess, GLOBAL.generateUniqueSystemName());
+        publishSystemEvent(_light, INTERNAL.systemEventName.beforeServiceRun, INTERNAL.generateUniqueSystemName());
+        publishSystemEvent(_light, INTERNAL.systemEventName.afterServiceRun, INTERNAL.generateUniqueSystemName());
+        publishSystemEvent(_light, INTERNAL.systemEventName.beforeHandleRun, INTERNAL.generateUniqueSystemName());
+        publishSystemEvent(_light, INTERNAL.systemEventName.afterHandleRun, INTERNAL.generateUniqueSystemName());
+        publishSystemEvent(_light, INTERNAL.systemEventName.onServiceError, INTERNAL.generateUniqueSystemName());
+        publishSystemEvent(_light, INTERNAL.systemEventName.onServiceSuccess, INTERNAL.generateUniqueSystemName());
 
-        _light.handle(GLOBAL.DEFAULT_HANDLE_NAME, function (definition) { return definition; });
+        _light.handle(INTERNAL.DEFAULT_HANDLE_NAME, function (definition) { return definition; });
     };
 
     init();
 
-    GLOBAL.system = {
+    INTERNAL.system = {
         startRecording: function () {
-            GLOBAL.recordServices = true;
+            INTERNAL.recordServices = true;
         },
         stopRecording: function () {
-            GLOBAL.recordServices = false;
+            INTERNAL.recordServices = false;
         },
     };
 
