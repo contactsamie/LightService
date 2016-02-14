@@ -33,13 +33,16 @@ gulp.task('clean', function () {
 });
 
 gulp.task('build',["clean"], function () {
-    var scripts = gulp.src(['./src/*.js']).pipe(uglify()).pipe(rename({suffix: '.min'})).pipe(header(banner, { pkg: pkg })).pipe(gulp.dest('./dist'));
-    return es.concat.apply(null, [scripts]);
+    var scripts = gulp.src(['./src/*.js']).pipe(uglify()).pipe(rename({ suffix: '.min' })).pipe(header(banner, { pkg: pkg })).pipe(gulp.dest('./dist'));
+    var cdn = gulp.src(['./src/*.js']).pipe(uglify()).pipe(rename({ suffix: '.min' })).pipe(header(banner, { pkg: pkg })).pipe(gulp.dest('./cdn/'+pkg.version));
+    return es.concat.apply(null, [scripts,cdn]);
 });
 
 gulp.task('post-build', ["build"], function () {
     var scripts = gulp.src(['lib/js/cytoscape-dagre.js', 'lib/js/dagre.min.js', 'lib/js/cytoscape.min.js', './dist/visual.lightservice.min.js']).pipe(concat("visual.lightservice.min.js")).pipe(gulp.dest('./dist'));
-    return es.concat.apply(null, [scripts]);
+    var cdn = gulp.src(['lib/js/cytoscape-dagre.js', 'lib/js/dagre.min.js', 'lib/js/cytoscape.min.js', './dist/visual.lightservice.min.js']).pipe(concat("visual.lightservice.min.js")).pipe(gulp.dest('./cdn/' + pkg.version));
+
+    return es.concat.apply(null, [scripts,cdn]);
 });
 
 gulp.task('default', ['post-build'], function () { });

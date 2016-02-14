@@ -1,0 +1,8 @@
+﻿{
+  "packageManager": "github",
+  "name": "lightservice.js",
+  "repo": "contactsamie/LightService",
+  "files": {
+    "include": ["lightservice.min.js", "lightservice.js","timemachine.lightservice.js","timemachine.lightservice.min.js"]
+  }
+}
