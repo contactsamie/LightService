@@ -8,7 +8,23 @@ LightService
 [![Coverage Status](https://coveralls.io/repos/github/contactsamie/LightService/badge.svg?branch=master)](https://coveralls.io/github/contactsamie/LightService?branch=master)
 
 
-LightService is a Service Framework 
+
+examples:
+
+
+demo
+
+http://codepen.io/contactsamie/pen/jWezvz
+
+http://codepen.io/contactsamie/pen/RrqXqZ
+
+code
+
+https://tonicdev.com/contactsamie/lightservice
+
+https://tonicdev.com/contactsamie/lightservice-timemachine
+
+
 
 
 GOALS: 
@@ -18,13 +34,4 @@ It is based on the idea that a system is predictable when it is defined as a pur
 Provides a Simple, convinient and consistent interface for service consumption
 
 It provides a way for client to define services and also specify how those service definition should be interpreted
-
-
-#demo
-http://codepen.io/contactsamie/pen/jWezvz
-http://codepen.io/contactsamie/pen/RrqXqZ
-
-#todo use
-
-http://www.jointjs.com/demos/devs
 
