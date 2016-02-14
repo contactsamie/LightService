@@ -1074,30 +1074,30 @@ describe('light', function () {
         });
     });
 
-    it('providing local temporary state', function () {
+    it('providing local temporary store', function () {
         var haccess_1;
 
-        haccess_2 = light.service(function (arg, system, state) {
+        haccess_2 = light.service(function (arg, system, store) {
             arg = arg || {};
             arg.x = arg.x || 0;
-            if (this.state.get("answer")) {
-                return { x: 555 * this.state.get("answer").x };
+            if (this.store.get("answer")) {
+                return { x: 555 * this.store.get("answer").x };
             }
 
             arg.x = arg.x + 100;
-            this.state.set("answer", arg);
-            return this.state.get("answer");
+            this.store.set("answer", arg);
+            return this.store.get("answer");
         });
-        haccess_1 = light.service(function (arg, system, state) {
+        haccess_1 = light.service(function (arg, system, store) {
             arg = arg || {};
             arg.x = arg.x || 0;
-            if (this.state.get("answer")) {
-                return { x: 555 * this.state.get("answer").x };
+            if (this.store.get("answer")) {
+                return { x: 555 * this.store.get("answer").x };
             }
 
             arg.x = arg.x + 10;
-            this.state.set("answer", arg);
-            return this.state.get("answer");
+            this.store.set("answer", arg);
+            return this.store.get("answer");
         });
 
         light(function () {
@@ -1119,15 +1119,15 @@ describe('light', function () {
             expect(this.service[haccess_2]().result().x).toBe(55500);
         });
 
-        haccess_1r = light.service(function (arg, system, state) {
+        haccess_1r = light.service(function (arg, system, store) {
             arg = arg || {};
             arg.x = arg.x || 10;
-            var ref = this.state.getRef("answer");
+            var ref = this.store.getRef("answer");
             if (ref && ref.fn && ref.fn()) {
                 return ref;
             }
-            this.state.set("answer", { fn: function () { return arg; } });
-            return this.state.getRef("answer");
+            this.store.set("answer", { fn: function () { return arg; } });
+            return this.store.getRef("answer");
         });
         light(function () {
             var answer = this.service[haccess_1r]().result();
@@ -1139,30 +1139,30 @@ describe('light', function () {
             expect(answer.fn().x).toBe(11);
         });
 
-        haccess_1rr = light.service(function (arg, system, state) {
+        haccess_1rr = light.service(function (arg, system, store) {
             arg = arg || {};
             arg.x = arg.x || 10;
-            var ref = this.state.get("answer");
+            var ref = this.store.get("answer");
             if (ref && ref.fn && ref.fn()) {
                 return ref;
             }
-            this.state.set("answer", { fn: function () { return arg; } });
-            return this.state.get("answer");
+            this.store.set("answer", { fn: function () { return arg; } });
+            return this.store.get("answer");
         });
         light(function () {
             var answer = this.service[haccess_1rr]().result();
             expect(typeof answer.fn).toBe("undefined");
         });
 
-        haccess_1r1 = light.service(function (arg, system, state) {
+        haccess_1r1 = light.service(function (arg, system, store) {
             arg = arg || {};
             arg.x = arg.x || 10;
-            var ref = this.state.getRef("answer");
+            var ref = this.store.getRef("answer");
             if (ref && ref.fn && ref.fn.arg) {
                 return ref;
             }
-            this.state.set("answer", { fn: { arg: arg } });
-            return this.state.getRef("answer");
+            this.store.set("answer", { fn: { arg: arg } });
+            return this.store.getRef("answer");
         });
         light(function () {
             var answer = this.service[haccess_1r1]().result();
@@ -1174,15 +1174,15 @@ describe('light', function () {
             expect(answer.fn.arg.x).toBe(11);
         });
 
-        haccess_1r1r = light.service(function (arg, system, state) {
+        haccess_1r1r = light.service(function (arg, system, store) {
             arg = arg || {};
             arg.x = arg.x || 10;
-            var ref = this.state.get("answer");
+            var ref = this.store.get("answer");
             if (ref && ref.fn && ref.fn.arg) {
                 return ref;
             }
-            this.state.set("answer", { fn: { arg: arg } });
-            return this.state.get("answer");
+            this.store.set("answer", { fn: { arg: arg } });
+            return this.store.get("answer");
         });
         light(function () {
             var answer = this.service[haccess_1r1r]().result();
@@ -1208,10 +1208,10 @@ describe('light', function () {
         var log = "";
 
         var service = light.service(function () {
-            var i = this.state.get("i");
+            var i = this.store.get("i");
             i = i || 0;
             i++;
-            this.state.set("i", i);
+            this.store.set("i", i);
             log = log + "," + i;
             return i;
         });
@@ -1245,10 +1245,10 @@ describe('light', function () {
         var log = "";
 
         var service = light.receive("DELETE_USER_MESSAGE", function () {
-            var i = this.state.get("i");
+            var i = this.store.get("i");
             i = i || 0;
             i++;
-            this.state.set("i", i);
+            this.store.set("i", i);
             log = log + "," + i;
             return i;
         });
@@ -1282,10 +1282,10 @@ describe('light', function () {
         light.send("ADD_USER_MESSAGE", { arg: 100 });
         var service = light.receive("ADD_USER_MESSAGE", function (arg) {
             data = arg.arg;
-            var i = this.state.get("i");
+            var i = this.store.get("i");
             i = i || 0;
             i++;
-            this.state.set("i", i);
+            this.store.set("i", i);
             log = log + "," + i;
             return i;
         });
