@@ -118,6 +118,15 @@ light.service("visual", function (arg) {
     }
     this.service.draw(arg);
 });
+
+
+light.onSystemRecordEvent(function (e) {
+    light(function () {
+        this.system.stopRecording();
+        this.service.visual();
+        this.system.startRecording();
+    });
+});
 /*
 
 light.service("one", function() {

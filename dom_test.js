@@ -30,12 +30,17 @@ describe('light used in the dom', function () {
             expect(answer.x).toBe(4012);
             var answer = this.service.loadedService({ x: 0 }).result();
             expect(answer.x).toBe(4012);
+           
         });
     });
 
-    it('visualize calls', function () {
-        light(function () {
-            this.service.visual();
-        });
-    });
+    //it('visualize calls', function () {
+    //    light(function () {
+    //        this.service.visual();
+    //    });
+    //});
+
+ 
+
+
 });

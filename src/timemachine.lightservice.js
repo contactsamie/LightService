@@ -51,6 +51,10 @@ light.onSystemRecordEvent(function (e) {
         this.system.startRecording();
     });
 });
+
+
+
+
 var timemachine = {};
 
 if (typeof module !== "undefined" && ('exports' in module)) {
