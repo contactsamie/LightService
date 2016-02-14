@@ -8,7 +8,7 @@ var light = (typeof light === "undefined") ? (function () {
             service: chainService(),
             arg: arg,
             system: INTERNAL.system,
-            state: INTERNAL._STATE_[stateName].api(state)
+            state: INTERNAL._STORE_[stateName].api(state)
         };
         return incontext;
     };
@@ -53,23 +53,23 @@ var light = (typeof light === "undefined") ? (function () {
     }
 
     INTERNAL.$setState = function (systemName, name, obj) {
-        INTERNAL._STATE_[systemName]["ref"][name] = { data: obj };
-        INTERNAL._STATE_[systemName]["state"][name] = JSON.stringify(INTERNAL._STATE_[systemName]["ref"][name]);
+        INTERNAL._STORE_[systemName]["ref"][name] = { data: obj };
+        INTERNAL._STORE_[systemName]["state"][name] = JSON.stringify(INTERNAL._STORE_[systemName]["ref"][name]);
     };
     INTERNAL.$getState = function (systemName) {
-        var stateRoot = INTERNAL._STATE_[systemName];
-        return stateRoot && (INTERNAL._STATE_[systemName]["state"] || {});
+        var stateRoot = INTERNAL._STORE_[systemName];
+        return stateRoot && (INTERNAL._STORE_[systemName]["state"] || {});
     };
 
     //$stateOverride
 
     INTERNAL.stateFactory = function (systemName) {
-        INTERNAL._STATE_[systemName] = {
+        INTERNAL._STORE_[systemName] = {
             state: {},
             ref: {},
             api: function (stateOverride) {
                 if (stateOverride) {
-                    INTERNAL._STATE_[systemName]["state"] = stateOverride;
+                    INTERNAL._STORE_[systemName]["state"] = stateOverride;
                 }
 
                 return {
@@ -84,8 +84,8 @@ var light = (typeof light === "undefined") ? (function () {
                         INTERNAL.$setState(systemName, name, obj);
                     },
                     getRef: function (name) {
-                        INTERNAL._STATE_[systemName]["ref"][name] = INTERNAL._STATE_[systemName]["ref"][name] || {};
-                        return INTERNAL._STATE_[systemName]["ref"][name].data;
+                        INTERNAL._STORE_[systemName]["ref"][name] = INTERNAL._STORE_[systemName]["ref"][name] || {};
+                        return INTERNAL._STORE_[systemName]["ref"][name].data;
                     }
                 };
             }
@@ -822,7 +822,7 @@ var light = (typeof light === "undefined") ? (function () {
         INTERNAL._TEST_OBJECTS_ = {};
         INTERNAL.systemServices = {};
         INTERNAL.ImmutableStore = {};
-        INTERNAL._STATE_ = {};
+        INTERNAL._STORE_ = {};
         INTERNAL.eventSubscribers = {};
         INTERNAL.handles = [];
         INTERNAL._INTERNAL_SCOPE_NAME = INTERNAL.generateUniqueSystemName();
