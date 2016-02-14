@@ -20,7 +20,7 @@ var light = (typeof light === "undefined") ? (function () {
         before: true,
         after: true,
         error: true,
-        success:true
+        success: true
     };
 
     INTERNAL.expectNoForbiddenName = function (name) {
