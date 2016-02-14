@@ -45,4 +45,6 @@ gulp.task('post-build', ["build"], function () {
     return es.concat.apply(null, [scripts,cdn]);
 });
 
-gulp.task('default', ['post-build'], function () { });
+gulp.task('default', ['post-build'], function () {
+    gulp.src(['src/lightservice-timemachine.js', 'dist/lightservice-timemachine.min.js']).pipe(gulp.dest('./dist-lightservice-timemachine/'));
+});

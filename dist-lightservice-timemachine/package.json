@@ -1,6 +1,6 @@
 {
   "version": "8.0.2",
-  "name": "lightservice",
+  "name": "lightservice-timemachine",
   "homepage": "https://github.com/contactsamie/LightService",
   "bugs": {
     "url": "https://github.com/contactsamie/LightService/issues",
@@ -10,8 +10,8 @@
     "type": "git",
     "url": "https://github.com/contactsamie/LightService.git"
   },
-  "description": "Simple and convinient interface for service consumption",
-  "main": "src/lightservice.js",
+  "description": "timemachine for lightservice",
+  "main": "lightservice-timemachine.js",
   "scripts": {
     "test": "jest"
   },
@@ -45,5 +45,8 @@
     "jest-cli": "^0.8.2",
     "merge-stream": "^1.0.0",
     "util": "^0.10.3"
+  },
+  "dependencies": {
+    "lightservice": "^8.0.1"
   }
 }
