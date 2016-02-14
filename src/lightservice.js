@@ -154,7 +154,9 @@ var light = (typeof light === "undefined") ? (function () {
             var recordStr = JSON.stringify(recordObject);
 
             if (INTERNAL.recordServices) {
+                INTERNAL.recordServices = false;
                 _light[INTERNAL.systemEventName.onSystemRecordEvent].send(recordStr);
+                INTERNAL.recordServices = true;
             }
 
             if (arg.serviceOrHandleMethodName === INTERNAL.serviceTag) {

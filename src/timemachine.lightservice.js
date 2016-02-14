@@ -46,9 +46,9 @@ light.ServiceDataList("timemachine_record");
 
 light.onSystemRecordEvent(function (e) {
     light(function () {
-        this.system.stopRecording();
+      
         this.service.timemachine_record(JSON.parse(e));
-        this.system.startRecording();
+      
     });
 });
 

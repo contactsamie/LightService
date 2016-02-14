@@ -93,7 +93,7 @@ light.service("draw", function (arg) {
         });
     });
 });
-light.service("visual", function (arg) {
+light.receive("UI_RESPONSE_TO_EVENT_CHANGE_MESSAGE", function (arg) {
     arg = arg || {};
     var records = this.service.timemachine_record().result();
     for (var i = 0; i < records.length; i++) {
@@ -121,10 +121,8 @@ light.service("visual", function (arg) {
 
 
 light.onSystemRecordEvent(function (e) {
-    light(function () {
-        this.system.stopRecording();
-        this.service.visual();
-        this.system.startRecording();
+    light(function () {      
+        light.send("UI_RESPONSE_TO_EVENT_CHANGE_MESSAGE");       
     });
 });
 /*
