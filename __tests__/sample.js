@@ -32,7 +32,7 @@ describe('light', function () {
         light(function () {
             light.send("CALCULATION_STARTED");
             var result = this.service.double(10).lastResult().square().result()
-            light.send("CALCULATION_STARTED", result);
+            light.send("CALCULATION_ENDED", result);
         });
 
         expect(result1).toBe(result2);
