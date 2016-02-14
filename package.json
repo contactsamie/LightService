@@ -11,7 +11,7 @@
     "url": "https://github.com/contactsamie/LightService.git"
   },
   "description": "Simple and convinient interface for service consumption",
-  "main": "src/lightservice.min.js",
+  "main": "src/lightservice.js",
   "scripts": {
     "test": "jest"
   },

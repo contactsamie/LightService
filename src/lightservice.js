@@ -15,7 +15,12 @@ var light = (typeof light === "undefined") ? (function () {
     INTERNAL.forbiddenNames = {
         result: true,
         service: true,
-        handle: true
+        handle: true,
+        on: true,
+        before: true,
+        after: true,
+        error: true,
+        success:true
     };
 
     INTERNAL.expectNoForbiddenName = function (name) {
