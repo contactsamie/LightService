@@ -49,7 +49,7 @@ var light = (typeof light === "undefined") ? (function () {
         _$.genName.num = _$.genName.num || 0;
         _$.genName.num++;
         prefix = prefix || "ls";
-       // var str = (prefix + '_xxxxxxxx_xxxx_4xxx_yxxx_xxxxxxxxxxxx')["replace"](/[xy]/g, function (c) { var r = Math.random() * 16 | 0, v = c == 'x' ? r : r & 0x3 | 0x8; return v.toString(16); });
+        // var str = (prefix + '_xxxxxxxx_xxxx_4xxx_yxxx_xxxxxxxxxxxx')["replace"](/[xy]/g, function (c) { var r = Math.random() * 16 | 0, v = c == 'x' ? r : r & 0x3 | 0x8; return v.toString(16); });
         var str = prefix + _$.genName.num;
         if (_$.isRegistered(str)) {
             return _$.genName(prefix);
@@ -209,12 +209,17 @@ var light = (typeof light === "undefined") ? (function () {
     _$.send = function (messageName, messageArg) {
         _$.messageReceivers[messageName] = _$.messageReceivers[messageName] || [];
         var total = _$.messageReceivers[messageName].length;
+        var results = [];
         for (var i = 0; i < total; i++) {
             var receiver = _$.messageReceivers[messageName][i];
-            _light(function () {
-                this.serviceChain()[receiver.link](messageArg).result();
+            receiver && receiver.link && _light(function () {
+                var result = this.service()[receiver.link](messageArg);
+                if (typeof result !== "undefined") {
+                    results.push(result);
+                }
             });
         }
+        return results;
     };
     _$.receive = function (messageName, fn) {
         _$.messageReceivers[messageName] = _$.messageReceivers[messageName] || [];
@@ -687,11 +692,9 @@ var light = (typeof light === "undefined") ? (function () {
     };
 
     var _light = function (f) {
-       
         chainService(function (cs) {
             typeof f === "function" && f.call(_$.getCurrentContext(_$.__$_SCOPE_NAME, cs), cs);
         });
-        
     };
 
     _light.startService = function (f) {
@@ -740,7 +743,7 @@ var light = (typeof light === "undefined") ? (function () {
         canPlay: function (methodType, dataType) {
             return (methodType === _$.serviceTag) && (dataType === _$.entranceTag);
         },
-        playService: function ( methodName,  data,  store) {
+        playService: function (methodName, data, store) {
             _light(function (serviceChain) {
                 return _light.advanced.playServiceChain(serviceChain, methodName, _$.serviceTag, data, _$.entranceTag, store || {}, false).result();
             });
@@ -759,7 +762,6 @@ var light = (typeof light === "undefined") ? (function () {
             i = i || 0;
             j = j || (records.length - 1);
             _light(function (serviceChain) {
-               
                 for (var m = i; m <= j; m++) {
                     var playGround = records && (records || [])[m] || [];
                     if (!playGround) {
