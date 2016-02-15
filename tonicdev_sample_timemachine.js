@@ -1,54 +1,44 @@
-﻿var light = require("lightservice");
+﻿var light = require("lightservice") || light;
 require("lightservice-timemachine");
 
-light(function () { this.system.startRecording(); });
-
-light.service("double", function (arg) {
-    console.log("running double");
-    arg = arg || 0;
-    return arg * 2;
+light(function () {
+    this.system.startRecording();
 });
-light.service("lastResult", function (arg) {
-    console.log("running lastResult");
-    if (arg) {
-        this.store.set("result", arg);
+
+light.service("first", function (arg) {
+    console.log("running first " + arg);
+});
+light.service("second", function (arg) {
+    if (!this.store.get("arg")) {
+        this.store.set("arg", arg);
+    } else {
+        arg = this.store.get("arg");
     }
-    console.log(arg);
-    return this.store.get("result");
+    console.log("running second " + arg);
 });
-light.service("square", function (arg) {
-    console.log("running square");
-    arg = arg || 0;
-    var result = arg * arg;
-    this.service.lastResult(result);
-    return result;
+light.service("third", function (arg) {
+    console.log("running third " + arg);
 });
-
-light.receive("CALCULATION_STARTED", function () {
-    console.log("receiving CALCULATION_STARTED");
+light.receive("FORTH", function (arg) {
+    console.log("receiving forth " + arg);
 });
-light.receive("CALCULATION_ENDED", function (arg) {
-    console.log("receiving CALCULATION_ENDED");
-    result1 = arg;
-    result2 = this.service.lastResult().result()
-    console.log("calculation ended as " + result2);
-    console.log("and I received a last result of " + arg);
+light.receive("END", function () {
+    console.log("ENDING ");
 });
-
-
-
 
 light(function () {
-    light.send("CALCULATION_STARTED");
-    var result = this.service.double(10).lastResult().square().result()
-    light.send("CALCULATION_ENDED", result);
-
+    light.send("FORTH", 4);
+    this.service.first(1).second(2).third(3);
+    light.send("END", 44);
+});
+light(function () {
+    this.system.stopRecording();
 });
 light(function () {
     this.service.timemachine_previous();
     this.service.timemachine_previous();
     this.service.timemachine_previous();
     this.service.timemachine_previous();
-    light.send("CALCULATION_ENDED");
+    this.service.timemachine_previous();
+    this.service.timemachine_previous();
 });
-
