@@ -1402,19 +1402,22 @@ describe('light', function () {
             light.send("fast3message", arg);
         });
         light.receive("fast1message", function (arg) {
-            light.send("fast2message",arg);
+            light.send("fast2message", arg);
         });
         light.receive("fast1message", function (arg) {
             light.send("fast2message", arg);
         });
 
+        light.advanced.test(testSetup, function () {
+            light.send("fast1message", { x: 3, y: 10 });
+            expect(result).toBe(13);
+            expect(this.service().fast1({ x: 3, y: 10 })).toBe(13);
+        });
+
         light(function () {
-            light.advanced.test(testSetup, function () {
-                light.send("fast1message", { x: 3, y: 10 });
-                expect(result).toBe(13);
-            });
             light.send("fast1message", { x: 3, y: 10 });
             expect(result).toBe(30);
+            expect(this.service().fast1({ x: 3, y: 10 })).toBe(30);
         });
     });
 
