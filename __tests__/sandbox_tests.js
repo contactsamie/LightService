@@ -2,7 +2,7 @@ jest.dontMock('../src/lightservice');
 jest.dontMock('../src/lightservice-timemachine');
 
 var light = require('../src/lightservice') || light;
-require('../src/lightservice-timemachine');
+ require('../src/lightservice-timemachine') 
 
 light.service("test", function (arg) { });
 light.service("test-2", function (arg) { });
@@ -1221,7 +1221,7 @@ describe('light', function () {
 
             this.service[service]();
             this.service[service]();
-            this.service[service]()
+            this.service[service]();
             var answer = this.service[service]().result();
 
             this.system.stopRecording();
@@ -1234,9 +1234,8 @@ describe('light', function () {
             this.service.timemachine_next();
             this.service.timemachine_next();
             this.service.timemachine_previous();
-            this.service.timemachine_current();
-            expect(log).toBe(",1,2,3,4,4,3,2,3,2,3,4,3,4");
-
+            this.service.timemachine_last();
+            expect(log).toBe(",1,2,3,4,3,2,1,2,1,2,3,2,4");
             expect(answer).toBe(4);
         });
     });
@@ -1250,7 +1249,7 @@ describe('light', function () {
             i++;
             this.store.set("i", i);
             log = log + "," + i;
-            return i;
+          
         });
 
         light(function () {
@@ -1271,8 +1270,8 @@ describe('light', function () {
             this.service.timemachine_next();
             this.service.timemachine_next();
             this.service.timemachine_previous();
-            this.service.timemachine_current();
-            expect(log).toBe(",1,2,3,4,4,3,2,3,2,3,4,3,4");
+            this.service.timemachine_last();
+            expect(log).toBe(",1,2,3,4,3,2,1,2,1,2,3,2,4");
         });
     });
 
@@ -1287,7 +1286,7 @@ describe('light', function () {
             i++;
             this.store.set("i", i);
             log = log + "," + i;
-            return i;
+        
         });
 
         light(function () {
@@ -1308,8 +1307,8 @@ describe('light', function () {
             this.service.timemachine_next();
             this.service.timemachine_next();
             this.service.timemachine_previous();
-            this.service.timemachine_current();
-            expect(log).toBe(",1,2,3,4,4,3,2,3,2,3,4,3,4");
+            this.service.timemachine_last();
+            expect(log).toBe(",1,2,3,4,3,2,1,2,1,2,3,2,4");
 
             expect(data).toBe(500);
         });

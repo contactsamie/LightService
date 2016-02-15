@@ -1,5 +1,6 @@
 ﻿var light = require("lightservice") || light;
-require("lightservice-timemachine");
+ require("lightservice-timemachine") ;
+
 var log = [];
 light(function () {
     this.system.startRecording();

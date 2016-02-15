@@ -181,7 +181,7 @@ var light = (typeof light === "undefined") ? (function () {
         execSurpressError: function (o, e, context, notificationInfo) {
             if (typeof o === "function") {
                 try { o(e, context, notificationInfo); } catch (ex) {
-                    console.error("SUPRESSED ERROR : " + ex);
+                    console.error("ERROR : " + ex);
                 }
             }
         },
@@ -193,6 +193,7 @@ var light = (typeof light === "undefined") ? (function () {
                 }, null, context, "trying-service");
             } catch (e) {
                 INTERNAL.utility.execSurpressError(function () {
+                    console.error("ERROR : " + e);
                     error(e, context);
                 }, e, context, "service-throws");
             }
@@ -207,14 +208,14 @@ var light = (typeof light === "undefined") ? (function () {
         for (var i = 0; i < total; i++) {
             var receiver = INTERNAL.messageReceivers[messageName][i];
             _light(function () {
-                this.service[receiver.link](messageArg);
+                this.service[receiver.link](messageArg).result();
             });
         }
     };
     INTERNAL.receive = function (messageName, fn) {
         INTERNAL.messageReceivers[messageName] = INTERNAL.messageReceivers[messageName] || [];
         var messageItem = { message: messageName };
-        messageItem.link = _light.service(INTERNAL.generateUniqueSystemName(), fn);
+        messageItem.link = _light.service(INTERNAL.generateUniqueSystemName(), INTERNAL.DEFAULT_HANDLE_NAME, fn);
         INTERNAL.messageReceivers[messageName].push(messageItem);
     };
 

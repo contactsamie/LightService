@@ -1,5 +1,5 @@
 {
-  "version": "8.0.4",
+   "version": "8.1.0",
   "name": "lightservice-timemachine",
   "homepage": "https://github.com/contactsamie/LightService",
   "bugs": {
@@ -18,6 +18,6 @@
   "author": "Samuel Bamgboye <contactsamie@gmail.com> ",
   "license": "MIT",
   "dependencies": {
-    "lightservice": "^8.0.4"
+    "lightservice": "^8.1.0"
   }
 }
