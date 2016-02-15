@@ -39,20 +39,21 @@ light(function () {
 });
 light(function () {
     log.push("playback starting");
-    this.serviceChain().timemachine_last();
-    this.serviceChain().timemachine_previous();
-    this.serviceChain().timemachine_previous();
-    this.serviceChain().timemachine_previous();
-    this.serviceChain().timemachine_previous();
-    this.serviceChain().timemachine_next();
-    this.serviceChain().timemachine_next();
-    this.serviceChain().timemachine_next();
-    this.serviceChain().timemachine_next();
-    this.serviceChain().timemachine_first();
-    this.serviceChain().timemachine_next();
-    this.serviceChain().timemachine_next();
-    this.serviceChain().timemachine_next();
-    this.serviceChain().timemachine_next();
+    this.serviceChain()
+        .timemachine_last()
+    .timemachine_previous()
+    .timemachine_previous()
+    .timemachine_previous()
+    .timemachine_previous()
+    .timemachine_next()
+    .timemachine_next()
+    .timemachine_next()
+    .timemachine_next()
+    .timemachine_first()
+    .timemachine_next()
+    .timemachine_next()
+    .timemachine_next()
+    .timemachine_next();
     log.push("playback ended");
     console.log(log);
 });

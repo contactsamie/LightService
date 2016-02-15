@@ -205,7 +205,7 @@ describe('light', function () {
             var path = [];
             this.event.sample2.receive("before", function () { path.push("before"); });
             this.event.sample2.receive("after", function () { path.push("after"); });
-            this.event.sample2.receive("error", function (o) { path.push("error");  });
+            this.event.sample2.receive("error", function (o) { path.push("error"); });
             var answer = test().result();
             expect(path[0]).toBe("before");
             expect(path[1]).toBe("after");
@@ -216,12 +216,12 @@ describe('light', function () {
 
     it('should run 2', function () {
         light.startService("sample1", function () {
-            var test = this.serviceChain().sample1;
+            var test = this.service().sample1;
             var path = [];
             this.event.sample1.receive("before", function () { path.push("before"); });
             this.event.sample1.receive("after", function () { path.push("after"); });
-            this.event.sample1.receive("error", function (o) { path.push("error");  });
-            var answer = test({ x: 2, y: 3 }).result();
+            this.event.sample1.receive("error", function (o) { path.push("error"); });
+            var answer = test({ x: 2, y: 3 });
             expect(path[0]).toBe("before");
             expect(path[1]).toBe("after");
             expect(path.length).toBe(2);
@@ -231,11 +231,11 @@ describe('light', function () {
 
     it('event listening are not available in service method', function () {
         light.service("sample_no_event", function (arg) {
-            return this.serviceChain().sample1({ x: 2, y: 3 }).result();
+            return this.service().sample1({ x: 2, y: 3 });
         });
 
         light(function () {
-            this.serviceChain().sample_no_event().result();
+            this.service().sample_no_event();
         });
     });
 
@@ -250,12 +250,12 @@ describe('light', function () {
     it('native tests', function () {
         light(function () {
             light.advanced.test(testObj, function () {
-                var test = this.serviceChain().sample2;
+                var test = this.service().sample2;
                 var path = [];
                 this.event.sample2.receive("before", function () { path.push("before"); });
                 this.event.sample2.receive("after", function () { path.push("after"); });
-                this.event.sample2.receive("error", function (o) { path.push("error");  });
-                var answer = test().result();
+                this.event.sample2.receive("error", function (o) { path.push("error"); });
+                var answer = test();
                 expect(path[0]).toBe("before");
                 expect(path[1]).toBe("after");
                 expect(path.length).toBe(2);
@@ -275,8 +275,8 @@ describe('light', function () {
     it('native tests 2', function () {
         light(function () {
             light.advanced.test(testObj, function () {
-                var test = this.serviceChain().sample2;
-                var answer = test().result();
+                var test = this.service().sample2;
+                var answer = test();
                 expect(answer).toBe(5);
             });
             var test = this.serviceChain().sample2;
@@ -799,8 +799,6 @@ describe('light', function () {
         });
     });
 
-  
-
     it('test service in a service', function () {
         light.service("pass1", function (arg) {
             arg = arg || {};
@@ -888,10 +886,10 @@ describe('light', function () {
             });
 
         light(function (system) {
-            var answer = this.serviceChain().pass100().result();
+            var answer = this.service().pass100();
             expect(answer.x).toBe(3);
 
-            answer = this.serviceChain().pass200().result();
+            answer = this.service().pass200();
             expect(answer.x).toBe(8);
 
             answer = this.serviceChain().pass300().result();
@@ -902,10 +900,10 @@ describe('light', function () {
         });
 
         light(function () {
-            var answer = this.serviceChain().pass100().result();
+            var answer = this.service().pass100();
             expect(answer.x).toBe(3);
 
-            answer = this.serviceChain().pass200().result();
+            answer = this.service().pass200();
             expect(answer.x).toBe(8);
 
             answer = this.serviceChain().pass300().result();
@@ -1101,9 +1099,9 @@ describe('light', function () {
         });
 
         light(function () {
-            expect(this.serviceChain()[haccess_1]().result().x).toBe(10);
-            expect(this.serviceChain()[haccess_1]().result().x).toBe(5550);
-            expect(this.serviceChain()[haccess_1]().result().x).toBe(5550);
+            expect(this.service()[haccess_1]().x).toBe(10);
+            expect(this.service()[haccess_1]().x).toBe(5550);
+            expect(this.service()[haccess_1]().x).toBe(5550);
 
             var answer = this.serviceChain()[haccess_1]().result();
             answer.x = 1;
@@ -1219,22 +1217,22 @@ describe('light', function () {
         light(function () {
             this.system.startRecording();
 
-            this.serviceChain()[service]();
-            this.serviceChain()[service]();
-            this.serviceChain()[service]();
+            this.service()[service]();
+            this.service()[service]();
+            this.service()[service]();
             var answer = this.serviceChain()[service]().result();
 
             this.system.stopRecording();
 
-            this.serviceChain().timemachine_previous();
-            this.serviceChain().timemachine_previous();
-            this.serviceChain().timemachine_previous();
-            this.serviceChain().timemachine_next();
-            this.serviceChain().timemachine_previous();
-            this.serviceChain().timemachine_next();
-            this.serviceChain().timemachine_next();
-            this.serviceChain().timemachine_previous();
-            this.serviceChain().timemachine_last();
+            this.serviceChain().timemachine_previous()
+            .timemachine_previous()
+            .timemachine_previous()
+            .timemachine_next()
+            .timemachine_previous()
+            .timemachine_next()
+            .timemachine_next()
+            .timemachine_previous()
+            .timemachine_last();
             expect(log).toBe(",1,2,3,4,3,2,1,2,1,2,3,2,4");
             expect(answer).toBe(4);
         });
@@ -1249,7 +1247,6 @@ describe('light', function () {
             i++;
             this.store.set("i", i);
             log = log + "," + i;
-          
         });
 
         light(function () {
@@ -1286,7 +1283,6 @@ describe('light', function () {
             i++;
             this.store.set("i", i);
             log = log + "," + i;
-        
         });
 
         light(function () {
