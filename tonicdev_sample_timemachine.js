@@ -1,5 +1,5 @@
-﻿var light = require("lightservice") || light;
- require("lightservice-timemachine") ;
+﻿var light = require('lightservice');
+require("lightservice-timemachine");
 
 var log = [];
 light(function () {
@@ -39,12 +39,20 @@ light(function () {
 });
 light(function () {
     log.push("playback starting");
+    this.service.timemachine_last();
     this.service.timemachine_previous();
     this.service.timemachine_previous();
     this.service.timemachine_previous();
     this.service.timemachine_previous();
-    this.service.timemachine_previous();
-    this.service.timemachine_previous();
+    this.service.timemachine_next();
+    this.service.timemachine_next();
+    this.service.timemachine_next();
+    this.service.timemachine_next();
+    this.service.timemachine_first();
+    this.service.timemachine_next();
+    this.service.timemachine_next();
+    this.service.timemachine_next();
+    this.service.timemachine_next();
     log.push("playback ended");
     console.log(log);
 });

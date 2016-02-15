@@ -6,7 +6,8 @@
  * @license Samuel Bamgboye <contactsamie@gmail.com> 
  */
 var light = ((typeof require !== "undefined") && require('lightservice')) || light;
-
+ 
+var timemachine= (function () {
     light.service("timemachine_next", function (arg) {
         var records = this.service.timemachine_record().result();
         var pointer = this.service.timemachine_pointer().result();
@@ -70,7 +71,8 @@ var light = ((typeof require !== "undefined") && require('lightservice')) || lig
             this.service.timemachine_record(JSON.parse(e));
         });
     });
-    var timemachine={};
+
+})();
     if (typeof module !== "undefined" && ('exports' in module)) {
         module.exports = timemachine;
     }

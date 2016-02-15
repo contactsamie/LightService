@@ -1,7 +1,7 @@
 
 
 var jest = jest || { dontMock: function () { } };
-var require = require || function () {  };
+var require = require || function () {   };
 var describe = describe || function (o, f) {
     describe.o = o;
     f();
