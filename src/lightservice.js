@@ -735,31 +735,40 @@ var light = (typeof light === "undefined") ? (function () {
     _light.advanced = {
         test: function (setup, f) {
             INTERNAL._TEST_OBJECTS_ = setup;
-
             f.call(INTERNAL.getCurrentContext(INTERNAL._INTERNAL_SCOPE_NAME, chainService), chainService);
             INTERNAL._TEST_OBJECTS_ = undefined
+        },
+        canPlay: function (methodType, dataType) {
+            return (methodType === INTERNAL.serviceTag) && (dataType === INTERNAL.entranceTag);
+        },
+        playService: function ( methodName,  data,  store) {
+            _light(function (serviceChain) {
+                return _light.advanced.playServiceChain(serviceChain, methodName, INTERNAL.serviceTag, data, INTERNAL.entranceTag, store || {}, false).result();
+            });
+        },
+        playServiceChain: function (serviceChain, methodName, methodType, data, dataType, store, notFirstInChain) {
+            if (_light.advanced.canPlay(methodType, dataType)) {
+                if (!notFirstInChain) {
+                    serviceChain = serviceChain[methodName].call(INTERNAL.getCurrentContext(methodName, data, store), data);
+                } else {
+                    serviceChain = serviceChain[methodName]();
+                }
+            }
+            return serviceChain;
         },
         play: function (records, i, j) {
             i = i || 0;
             j = j || (records.length - 1);
-
-            _light(function (service) {
-                var inter = service;
+            _light(function (serviceChain) {
+               
                 for (var m = i; m <= j; m++) {
                     var playGround = records && (records || [])[m] || [];
                     if (!playGround) {
                         throw "unable to find service to play service";
                     }
-
-                    if ((playGround.methodType === INTERNAL.serviceTag) && (playGround.dataType === INTERNAL.entranceTag)) {
-                        if ((m === i)) {
-                            inter = inter[playGround.methodName].call(INTERNAL.getCurrentContext(playGround.methodName, playGround.data, playGround.store), playGround.data);
-                        } else {
-                            inter = inter[playGround.methodName]();
-                        }
-                    }
+                    serviceChain = _light.advanced.playServiceChain(serviceChain, playGround.methodName, playGround.methodType, playGround.data, playGround.dataType, playGround.store, m !== i);
                 }
-                var result = inter.result();
+                var result = serviceChain.result();
             });
         }
     };
