@@ -5,7 +5,7 @@ var light = (typeof light === "undefined") ? (function () {
 
         var incontext = {
             event: INTERNAL.systemServices,
-            service: chainService(),
+            service: chainService,
             arg: arg,
             system: INTERNAL.system,
             store: INTERNAL._STORE_[storeName].api(store)
@@ -208,7 +208,7 @@ var light = (typeof light === "undefined") ? (function () {
         for (var i = 0; i < total; i++) {
             var receiver = INTERNAL.messageReceivers[messageName][i];
             _light(function () {
-                this.service[receiver.link](messageArg).result();
+                this.service()[receiver.link](messageArg).result();
             });
         }
     };
@@ -271,7 +271,7 @@ var light = (typeof light === "undefined") ? (function () {
 
     var setUpNotification = function (id) {
         return createEventEmitter(id, function (item, o, context, notificationInfo) {
-            INTERNAL.utility.tryCatch(context, function () { return item.service(); }, function () { }, function () { INTERNAL.utility.execSurpressError(item.service.error, o, context, notificationInfo); });
+            INTERNAL.utility.tryCatch(context, function () { return item.service(); }, function () { }, function () { INTERNAL.utility.execSurpressError(item.service().error, o, context, notificationInfo); });
         });
     };
 
@@ -733,7 +733,7 @@ var light = (typeof light === "undefined") ? (function () {
         test: function (setup, f) {
             INTERNAL._TEST_OBJECTS_ = setup;
 
-            f.call(INTERNAL.getCurrentContext(INTERNAL._INTERNAL_SCOPE_NAME, chainService()), chainService());
+            f.call(INTERNAL.getCurrentContext(INTERNAL._INTERNAL_SCOPE_NAME, chainService), chainService);
             INTERNAL._TEST_OBJECTS_ = undefined
         },
         play: function (records, i, j) {

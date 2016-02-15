@@ -49,7 +49,7 @@ light.service("addNode", function (arg) {
 });
 light.service("connect", function (arg) {
     if (!nodes[arg.from]) {
-        this.service.addNode({
+        this.service().addNode({
             id: arg.from,
             error: arg.fromError,
             success: arg.fromSuccess,
@@ -58,7 +58,7 @@ light.service("connect", function (arg) {
         });
     }
     if (!nodes[arg.to]) {
-        this.service.addNode({
+        this.service().addNode({
             id: arg.to,
             error: arg.toError,
             success: arg.toSuccess,
@@ -95,7 +95,7 @@ light.service("draw", function (arg) {
 });
 light.receive("UI_RESPONSE_TO_EVENT_CHANGE_MESSAGE", function (arg) {
     arg = arg || {};
-    var records = this.service.timemachine_record().result();
+    var records = this.service().timemachine_record().result();
     for (var i = 0; i < records.length; i++) {
         var currentRecord = records[i];
         var nextRecord = records[i + 1] || {
@@ -114,9 +114,9 @@ light.receive("UI_RESPONSE_TO_EVENT_CHANGE_MESSAGE", function (arg) {
             from: (arg.useShortNames ? currentRecord.position : ((currentRecord.dataType === "argument" ? "in:" : "out:") + currentRecord.methodType + ":" + currentRecord.methodName)) + (arg.streatchOutCalls ? ("# " + currentRecord.position) : ""),
             to: (arg.useShortNames ? nextRecord.position : ((nextRecord.dataType === "argument" ? "in:" : "out:") + nextRecord.methodType + ":" + nextRecord.methodName)) + (arg.streatchOutCalls ? ("# " + nextRecord.position) : ""),
         };
-        this.service.connect(connectObj);
+        this.service().connect(connectObj);
     }
-    this.service.draw(arg);
+    this.service().draw(arg);
 });
 
 
