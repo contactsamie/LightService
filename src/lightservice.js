@@ -6,6 +6,9 @@ var light = (typeof light === "undefined") ? (function () {
         var incontext = {
             event: INTERNAL.systemServices,
             serviceChain: chainService,
+            service: function () {
+                return chainService(undefined, true);
+            },
             arg: arg,
             system: INTERNAL.system,
             store: INTERNAL._STORE_[storeName].api(store)
@@ -623,7 +626,7 @@ var light = (typeof light === "undefined") ? (function () {
         cb();
     }
 
-    var chainService = function (cb) {
+    var chainService = function (cb,noChain) {
         chainService.totalChain = chainService.totalChain || 0;
 
         var chain = {};
@@ -643,7 +646,7 @@ var light = (typeof light === "undefined") ? (function () {
                     var previousOrMostCurrentResultToBePassedToTheNextActor = JSON.parse(JSON.stringify(res)).previousOrMostCurrentResultToBePassedToTheNextActor;
 
                     result = INTERNAL.systemServices[serviceName](previousOrMostCurrentResultToBePassedToTheNextActor);
-                    return chain;
+                    return noChain?result: chain;
                 };
             })(actor);
         };
