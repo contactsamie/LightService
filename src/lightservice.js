@@ -214,9 +214,9 @@ var light = (typeof light === "undefined") ? (function () {
             var receiver = _$.messageReceivers[messageName][i];
             receiver && receiver.link && _light(function () {
                 var result = this.service()[receiver.link](messageArg);
-                if (typeof result !== "undefined") {
-                    results.push(result);
-                }
+               // if (typeof result !== "undefined") {
+                results.push({ result: result });
+              //  }
             });
         }
         return results;
