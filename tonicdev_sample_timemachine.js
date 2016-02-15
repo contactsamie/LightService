@@ -1,12 +1,13 @@
 ﻿var light = require("lightservice") || light;
 require("lightservice-timemachine");
-
+var log = [];
 light(function () {
     this.system.startRecording();
+    log.push("recording started");
 });
 
 light.service("first", function (arg) {
-    console.log("running first " + arg);
+    log.push("running first " + arg);
 });
 light.service("second", function (arg) {
     if (!this.store.get("arg")) {
@@ -14,16 +15,16 @@ light.service("second", function (arg) {
     } else {
         arg = this.store.get("arg");
     }
-    console.log("running second " + arg);
+    log.push("running second " + arg);
 });
 light.service("third", function (arg) {
-    console.log("running third " + arg);
+    log.push("running third " + arg);
 });
 light.receive("FORTH", function (arg) {
-    console.log("receiving forth " + arg);
+    log.push("receiving forth " + arg);
 });
 light.receive("END", function () {
-    console.log("ENDING ");
+    log.push("ENDING ");
 });
 
 light(function () {
@@ -33,12 +34,16 @@ light(function () {
 });
 light(function () {
     this.system.stopRecording();
+    log.push("recording ended");
 });
 light(function () {
+    log.push("playback starting");
     this.service.timemachine_previous();
     this.service.timemachine_previous();
     this.service.timemachine_previous();
     this.service.timemachine_previous();
     this.service.timemachine_previous();
     this.service.timemachine_previous();
+    log.push("playback ended");
+    console.log(log);
 });
