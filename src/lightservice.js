@@ -116,7 +116,6 @@ var light = (typeof light === "undefined") ? (function () {
             throw "Cannot load script : no document";
             return;
         }
-
         var script = document.createElement('script');
         script.src = src;
         script.onload = typeof onload === "function" ? onload : function () { };
