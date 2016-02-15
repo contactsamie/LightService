@@ -33,18 +33,25 @@ gulp.task('clean', function () {
 });
 
 gulp.task('build',["clean"], function () {
-    var scripts = gulp.src(['./src/*.js']).pipe(uglify()).pipe(rename({ suffix: '.min' })).pipe(header(banner, { pkg: pkg })).pipe(gulp.dest('./dist'));
-    var cdn = gulp.src(['./src/*.js']).pipe(uglify()).pipe(rename({ suffix: '.min' })).pipe(header(banner, { pkg: pkg })).pipe(gulp.dest('./cdn/lightservice/' + pkg.version));
-    return es.concat.apply(null, [scripts,cdn]);
+    var scripts1 = gulp.src(['./src/*.js']).pipe(uglify()).pipe(rename({ suffix: '.min' })).pipe(header(banner, { pkg: pkg })).pipe(gulp.dest('./dist'));
+    var scripts2 = gulp.src(['./src/*.js']).pipe(header(banner, { pkg: pkg })).pipe(gulp.dest('./dist'));
+
+    var cdn1 = gulp.src(['./src/*.js']).pipe(uglify()).pipe(rename({ suffix: '.min' })).pipe(header(banner, { pkg: pkg })).pipe(gulp.dest('./cdn/lightservice/' + pkg.version));
+    var cdn2 = gulp.src(['./src/*.js']).pipe(header(banner, { pkg: pkg })).pipe(gulp.dest('./cdn/lightservice/' + pkg.version));
+
+    return es.concat.apply(null, [scripts1, cdn1, scripts2, cdn2]);
 });
 
-gulp.task('post-build', ["build"], function () {
-    var scripts = gulp.src(['lib/js/cytoscape-dagre.js', 'lib/js/dagre.min.js', 'lib/js/cytoscape.min.js', './dist/visual.lightservice.min.js']).pipe(concat("visual.lightservice.min.js")).pipe(gulp.dest('./dist'));
-    var cdn = gulp.src(['lib/js/cytoscape-dagre.js', 'lib/js/dagre.min.js', 'lib/js/cytoscape.min.js', './dist/visual.lightservice.min.js']).pipe(concat("visual.lightservice.min.js")).pipe(gulp.dest('./cdn/lightservice/' + pkg.version));
+gulp.task('post-build-visual-component', ["build"], function () {
+    var scripts1 = gulp.src(['lib/js/cytoscape-dagre.js', 'lib/js/dagre.min.js', 'lib/js/cytoscape.min.js', './dist/visual.lightservice.min.js']).pipe(concat("visual.lightservice.min.js")).pipe(gulp.dest('./dist'));
+    var scripts2 = gulp.src(['lib/js/cytoscape-dagre.js', 'lib/js/dagre.min.js', 'lib/js/cytoscape.min.js', './dist/visual.lightservice.js']).pipe(concat("visual.lightservice.js")).pipe(gulp.dest('./dist'));
 
-    return es.concat.apply(null, [scripts,cdn]);
+    var cdn1 = gulp.src(['lib/js/cytoscape-dagre.js', 'lib/js/dagre.min.js', 'lib/js/cytoscape.min.js', './dist/visual.lightservice.min.js']).pipe(concat("visual.lightservice.min.js")).pipe(gulp.dest('./cdn/lightservice/' + pkg.version));
+    var cdn2 = gulp.src(['lib/js/cytoscape-dagre.js', 'lib/js/dagre.min.js', 'lib/js/cytoscape.min.js', './dist/visual.lightservice.js']).pipe(concat("visual.lightservice.js")).pipe(gulp.dest('./cdn/lightservice/' + pkg.version));
+
+    return es.concat.apply(null, [scripts1, cdn1, scripts2, cdn2]);
 });
 
-gulp.task('default', ['post-build'], function () {
-    gulp.src(['src/lightservice-timemachine.js', 'dist/lightservice-timemachine.min.js']).pipe(gulp.dest('./dist-lightservice-timemachine/'));
+gulp.task('default', ['post-build-visual-component'], function () {
+    gulp.src(['src/lightservice-timemachine.js', 'dist/lightservice-timemachine.min.js']).pipe(header(banner, { pkg: pkg })).pipe(gulp.dest('./dist-lightservice-timemachine/'));
 });
