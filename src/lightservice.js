@@ -145,13 +145,13 @@ var light = (typeof light === "undefined") ? (function () {
             }
 
             var recordObject = {
-                dataType: arg.entranceOrExit,
-                methodType: arg.serviceOrHandleMethodName,
+                dataType: arg.dataType,
+                methodType: arg.methodType,
                 methodName: arg.methodName,
                 time: Date.now ? Date.now() : new Date().getTime(),
-                isFirst: arg.isFirstCallInServiceRun,
-                isLast: arg.isLastCallInServiceRun,
-                data: arg.argumentOrReturnData,
+                isFirst: arg.isFirst,
+                isLast: arg.isLast,
+                data: arg.data,
                 isTest: arg.isTest || false,
                 info: arg.info,
                 infoType: arg.infoType,
@@ -169,7 +169,7 @@ var light = (typeof light === "undefined") ? (function () {
                 INTERNAL.recordServices = true;
             }
 
-            if (arg.serviceOrHandleMethodName === INTERNAL.serviceTag) {
+            if (arg.methodType === INTERNAL.serviceTag) {
                 INTERNAL.sysServ[arg.methodName][INTERNAL.serviceEventName[arg.eventType]].send(recordStr);
                 if ((arg.eventType === INTERNAL.serviceEventName.error) || (arg.eventType === INTERNAL.serviceEventName.success)) {
                     INTERNAL.sysServ[arg.methodName][INTERNAL.serviceEventName[INTERNAL.serviceEventName.after]].send(recordStr);
@@ -336,15 +336,15 @@ var light = (typeof light === "undefined") ? (function () {
         var testhandle = INTERNAL._TEST_OBJECTS_ && INTERNAL._TEST_OBJECTS_[serviceName] && INTERNAL._TEST_OBJECTS_[serviceName].handle;
 
         INTERNAL.track.record({
-            entranceOrExit: INTERNAL.entranceTag,
-            serviceOrHandleMethodName: INTERNAL.handleTag,
+            dataType: INTERNAL.entranceTag,
+            methodType: INTERNAL.handleTag,
             methodName: testhandleName,
-            argumentOrReturnData: serviceName,
+            data: serviceName,
             info: arg,
             infoType: INTERNAL.serviceArgTag,
             isTest: true,
-            isFirstCallInServiceRun: INTERNAL.unknownTag,
-            isLastCallInServiceRun: INTERNAL.unknownTag,
+            isFirst: INTERNAL.unknownTag,
+            isLast: INTERNAL.unknownTag,
             link: testhandle,
             event: INTERNAL.sysEvName.beforeHandleRun,
             eventType: INTERNAL.serviceEventName.before
@@ -353,15 +353,15 @@ var light = (typeof light === "undefined") ? (function () {
         tmpDefinition = testhandle.call(INTERNAL.getCurrentContext(serviceName, definition), definition);
 
         INTERNAL.track.record({
-            entranceOrExit: INTERNAL.exitTag,
-            serviceOrHandleMethodName: INTERNAL.handleTag,
+            dataType: INTERNAL.exitTag,
+            methodType: INTERNAL.handleTag,
             methodName: testhandleName,
-            argumentOrReturnData: serviceName,
+            data: serviceName,
             info: INTERNAL.unknownTag,
             infoType: INTERNAL.unknownTag,
             isTest: true,
-            isFirstCallInServiceRun: INTERNAL.unknownTag,
-            isLastCallInServiceRun: INTERNAL.unknownTag,
+            isFirst: INTERNAL.unknownTag,
+            isLast: INTERNAL.unknownTag,
             link: testhandle,
             event: INTERNAL.sysEvName.afterHandleRun,
             eventType: INTERNAL.serviceEventName.after
@@ -382,15 +382,15 @@ var light = (typeof light === "undefined") ? (function () {
             isAMatch = handleName && (handle.name === handleName);
             if (isAMatch) {
                 INTERNAL.track.record({
-                    entranceOrExit: INTERNAL.entranceTag,
-                    serviceOrHandleMethodName: INTERNAL.handleTag,
+                    dataType: INTERNAL.entranceTag,
+                    methodType: INTERNAL.handleTag,
                     methodName: handleName,
-                    argumentOrReturnData: serviceName,
+                    data: serviceName,
                     info: arg,
                     infoType: INTERNAL.serviceArgTag,
                     isTest: false,
-                    isFirstCallInServiceRun: INTERNAL.unknownTag,
-                    isLastCallInServiceRun: INTERNAL.unknownTag,
+                    isFirst: INTERNAL.unknownTag,
+                    isLast: INTERNAL.unknownTag,
                     link: (testhandle || handle.definition),
                     event: INTERNAL.sysEvName.beforeHandleRun,
                     eventType: INTERNAL.serviceEventName.before
@@ -399,15 +399,15 @@ var light = (typeof light === "undefined") ? (function () {
                 tmpDefinition = (testhandle || handle.definition).call(INTERNAL.getCurrentContext(handleName, definition), definition);
 
                 INTERNAL.track.record({
-                    entranceOrExit: INTERNAL.exitTag,
-                    serviceOrHandleMethodName: INTERNAL.handleTag,
+                    dataType: INTERNAL.exitTag,
+                    methodType: INTERNAL.handleTag,
                     methodName: handleName,
-                    argumentOrReturnData: serviceName,
+                    data: serviceName,
                     info: INTERNAL.unknownTag,
                     infoType: INTERNAL.unknownTag,
                     isTest: false,
-                    isFirstCallInServiceRun: INTERNAL.unknownTag,
-                    isLastCallInServiceRun: INTERNAL.unknownTag,
+                    isFirst: INTERNAL.unknownTag,
+                    isLast: INTERNAL.unknownTag,
                     link: (testhandle || handle.definition),
                     event: INTERNAL.sysEvName.afterHandleRun,
                     eventType: INTERNAL.serviceEventName.after
@@ -480,15 +480,15 @@ var light = (typeof light === "undefined") ? (function () {
             context.callerContext = callerContext;
             INTERNAL.utility.tc(context, function () {
                 INTERNAL.track.record({
-                    entranceOrExit: INTERNAL.entranceTag,
-                    serviceOrHandleMethodName: INTERNAL.serviceTag,
+                    dataType: INTERNAL.entranceTag,
+                    methodType: INTERNAL.serviceTag,
                     methodName: serviceName,
-                    argumentOrReturnData: tArg.arg,
+                    data: tArg.arg,
                     info: handleName,
                     infoType: INTERNAL.handleTag,
                     isTest: false,
-                    isFirstCallInServiceRun: INTERNAL.unknownTag,
-                    isLastCallInServiceRun: INTERNAL.unknownTag,
+                    isFirst: INTERNAL.unknownTag,
+                    isLast: INTERNAL.unknownTag,
                     link: definition,
                     event: INTERNAL.sysEvName.beforeServiceRun,
                     eventType: INTERNAL.serviceEventName.before
@@ -503,30 +503,30 @@ var light = (typeof light === "undefined") ? (function () {
                 return result;
             }, function (o) {
                 INTERNAL.track.record({
-                    entranceOrExit: INTERNAL.exitTag,
-                    serviceOrHandleMethodName: INTERNAL.serviceTag,
+                    dataType: INTERNAL.exitTag,
+                    methodType: INTERNAL.serviceTag,
                     methodName: serviceName,
-                    argumentOrReturnData: o,
+                    data: o,
                     info: "event:success",
                     infoType: INTERNAL.eventTag,
                     isTest: false,
-                    isFirstCallInServiceRun: INTERNAL.unknownTag,
-                    isLastCallInServiceRun: INTERNAL.unknownTag,
+                    isFirst: INTERNAL.unknownTag,
+                    isLast: INTERNAL.unknownTag,
                     link: definition,
                     event: INTERNAL.sysEvName.onServiceSuccess,
                     eventType: INTERNAL.serviceEventName.success
                 });
             }, function (o) {
                 INTERNAL.track.record({
-                    entranceOrExit: INTERNAL.exitTag,
-                    serviceOrHandleMethodName: INTERNAL.serviceTag,
+                    dataType: INTERNAL.exitTag,
+                    methodType: INTERNAL.serviceTag,
                     methodName: serviceName,
-                    argumentOrReturnData: o,
+                    data: o,
                     info: "event:error",
                     infoType: INTERNAL.eventTag,
                     isTest: false,
-                    isFirstCallInServiceRun: INTERNAL.unknownTag,
-                    isLastCallInServiceRun: INTERNAL.unknownTag,
+                    isFirst: INTERNAL.unknownTag,
+                    isLast: INTERNAL.unknownTag,
                     link: definition,
                     event: INTERNAL.sysEvName.onServiceError,
                     eventType: INTERNAL.serviceEventName.error
