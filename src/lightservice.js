@@ -848,7 +848,7 @@ var light = (typeof light === "undefined") ? (function () {
            subscribe like light.event(function (e, context,notificationInfo) {}));
         */
 
-        _light.version = "6.0.0";
+        _light.version = "9.1.0";
         _light.service = defineService;
         _light.Immutable = _$.Immutable;
         _light.send = _$.send;
