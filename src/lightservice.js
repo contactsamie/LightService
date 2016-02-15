@@ -603,8 +603,8 @@ var light = (typeof light === "undefined") ? (function () {
 
         var definition = fn;
         var context = {};
-        var serviceItem = function (previousOrMostCurrentResultToBePassedToTheNextActor) {
-            return serviceItem.redefinition(previousOrMostCurrentResultToBePassedToTheNextActor);
+        var serviceItem = function (nextArg) {
+            return serviceItem.redefinition(nextArg);
         };
 
         serviceItem.redefinition = createServiceDefinitionFromSuppliedFn(context, serviceItem, handleNamesOrDefinition, definition, serviceName);
@@ -642,10 +642,10 @@ var light = (typeof light === "undefined") ? (function () {
                     var currentResult;
                     var res = {};
 
-                    res.previousOrMostCurrentResultToBePassedToTheNextActor = arguments.length ? arg : result;
-                    var previousOrMostCurrentResultToBePassedToTheNextActor = JSON.parse(JSON.stringify(res)).previousOrMostCurrentResultToBePassedToTheNextActor;
+                    res.nextArg = arguments.length ? arg : result;
+                    var nextArg = JSON.parse(JSON.stringify(res)).nextArg;
 
-                    result = INTERNAL.systemServices[serviceName](previousOrMostCurrentResultToBePassedToTheNextActor);
+                    result = INTERNAL.systemServices[serviceName](nextArg);
                     return noChain ? result : chain;
                 };
             })(actor);
@@ -741,7 +741,7 @@ var light = (typeof light === "undefined") ? (function () {
         },
         play: function (records, i, j) {
             i = i || 0;
-            j = j || (INTERNAL.track.records.length - 1);
+            j = j || (records.length - 1);
 
             _light(function (service) {
                 var inter = service;

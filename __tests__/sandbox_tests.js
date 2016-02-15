@@ -1380,6 +1380,44 @@ describe('light', function () {
         expect(data).toBe(1);
     });
 
+    it('can test through a broadcast', function () {
+        var result;
+        var testSetup = {
+            fast1: {
+                service: function (arg) {
+                    return arg.x + arg.y;
+                }
+            }
+        };
+        light.service("fast1", function (arg) {
+            return arg.x * arg.y;
+        });
+        light.receive("fast3message", function (arg) {
+            result = this.service().fast1(arg);
+        });
+        light.receive("fast2message", function (arg) {
+            light.send("fast3message", arg);
+        });
+        light.receive("fast2message", function (arg) {
+            light.send("fast3message", arg);
+        });
+        light.receive("fast1message", function (arg) {
+            light.send("fast2message",arg);
+        });
+        light.receive("fast1message", function (arg) {
+            light.send("fast2message", arg);
+        });
+
+        light(function () {
+            light.advanced.test(testSetup, function () {
+                light.send("fast1message", { x: 3, y: 10 });
+                expect(result).toBe(13);
+            });
+            light.send("fast1message", { x: 3, y: 10 });
+            expect(result).toBe(30);
+        });
+    });
+
     /*
    it('speed', function () {
       var totalBuild = 1000;
