@@ -19,11 +19,6 @@ http://codepen.io/contactsamie/pen/jWezvz
 
 http://codepen.io/contactsamie/pen/RrqXqZ
 
-code
-
-https://tonicdev.com/contactsamie/lightservice
-
-https://tonicdev.com/contactsamie/lightservice-timemachine
 
 
 dev environment
