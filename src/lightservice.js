@@ -5,7 +5,7 @@ var light = (typeof light === "undefined") ? (function () {
 
         var incontext = {
             event: INTERNAL.systemServices,
-            service: chainService,
+            serviceChain: chainService,
             arg: arg,
             system: INTERNAL.system,
             store: INTERNAL._STORE_[storeName].api(store)
@@ -208,7 +208,7 @@ var light = (typeof light === "undefined") ? (function () {
         for (var i = 0; i < total; i++) {
             var receiver = INTERNAL.messageReceivers[messageName][i];
             _light(function () {
-                this.service()[receiver.link](messageArg).result();
+                this.serviceChain()[receiver.link](messageArg).result();
             });
         }
     };

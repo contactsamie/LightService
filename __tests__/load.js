@@ -2,9 +2,9 @@
 var light = require('../src/lightservice') || light;
 var __haccess_11=light.handle(function (method) {
     return function (arg) {
-        arg = this.service()["__haccess_2"](arg).result();
+        arg = this.serviceChain()["__haccess_2"](arg).result();
         result = method(arg);
-        result = this.service()["__haccess_2"](result).result();
+        result = this.serviceChain()["__haccess_2"](result).result();
         return result;
     };
 });

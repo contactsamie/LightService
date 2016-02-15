@@ -30,7 +30,7 @@ light.receive("END", function () {
 
 light(function () {
     light.send("FORTH", 4);
-    this.service().first(1).second(2).third(3);
+    this.serviceChain().first(1).second(2).third(3);
     light.send("END", 44);
 });
 light(function () {
@@ -39,20 +39,20 @@ light(function () {
 });
 light(function () {
     log.push("playback starting");
-    this.service().timemachine_last();
-    this.service().timemachine_previous();
-    this.service().timemachine_previous();
-    this.service().timemachine_previous();
-    this.service().timemachine_previous();
-    this.service().timemachine_next();
-    this.service().timemachine_next();
-    this.service().timemachine_next();
-    this.service().timemachine_next();
-    this.service().timemachine_first();
-    this.service().timemachine_next();
-    this.service().timemachine_next();
-    this.service().timemachine_next();
-    this.service().timemachine_next();
+    this.serviceChain().timemachine_last();
+    this.serviceChain().timemachine_previous();
+    this.serviceChain().timemachine_previous();
+    this.serviceChain().timemachine_previous();
+    this.serviceChain().timemachine_previous();
+    this.serviceChain().timemachine_next();
+    this.serviceChain().timemachine_next();
+    this.serviceChain().timemachine_next();
+    this.serviceChain().timemachine_next();
+    this.serviceChain().timemachine_first();
+    this.serviceChain().timemachine_next();
+    this.serviceChain().timemachine_next();
+    this.serviceChain().timemachine_next();
+    this.serviceChain().timemachine_next();
     log.push("playback ended");
     console.log(log);
 });
