@@ -257,7 +257,7 @@ Licensed under The MIT License (http://opensource.org/licenses/MIT)
 
 /**
  * lightservice - Simple and convinient interface for service consumption
- * @version v9.0.2
+ * @version v9.0.1
  * @link https://github.com/contactsamie/LightService
  * @license MIT
  * @license Samuel Bamgboye <contactsamie@gmail.com> 

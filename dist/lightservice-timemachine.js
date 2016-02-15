@@ -1,20 +1,33 @@
 /**
  * lightservice - Simple and convinient interface for service consumption
- * @version v9.0.0
+ * @version v9.0.2
  * @link https://github.com/contactsamie/LightService
  * @license MIT
  * @license Samuel Bamgboye <contactsamie@gmail.com> 
  */
-var light = require('../src/lightservice') || light;
- 
-var timemachine= (function () {
+
+
+ var module_exists = function (name) {
+        try {
+            return (typeof require === "function") && require(name);
+        }
+        catch (e) { return false }
+    }
+
+    var light = module_exists('../src/lightservice') || module_exists('lightservice')||light;
+
+   
+
+var timemachine = (function () {
+
+
     light.service("timemachine_next", function (arg) {
         var records = this.service().timemachine_record();
         var pointer = this.service().timemachine_pointer();
         pointer = pointer - 2;
         this.service().timemachine_pointer(pointer);
 
-        pointer === -1 ? this.service().timemachine_last() : this.service().timemachine_point(pointer);
+        pointer === 1 ? this.service().timemachine_last() : this.service().timemachine_point(pointer);
     });
     light.service("timemachine_previous", function (arg) {
         var records = this.service().timemachine_record();
@@ -71,12 +84,12 @@ var timemachine= (function () {
             this.service().timemachine_record(JSON.parse(e));
         });
     });
-
 })();
-    if (typeof module !== "undefined" && ('exports' in module)) {
-        module.exports = timemachine;
-    }
 
-    if (typeof define === 'function' && define.amd) {
-        define('light', [], function () { return timemachine; });
-    }
+if (typeof module !== "undefined" && ('exports' in module)) {
+    module.exports = timemachine;
+}
+
+if (typeof define === 'function' && define.amd) {
+    define('light', [], function () { return timemachine; });
+}

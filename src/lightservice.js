@@ -626,7 +626,7 @@ var light = (typeof light === "undefined") ? (function () {
         cb();
     }
 
-    var chainService = function (cb,noChain) {
+    var chainService = function (cb, noChain) {
         chainService.totalChain = chainService.totalChain || 0;
 
         var chain = {};
@@ -646,7 +646,7 @@ var light = (typeof light === "undefined") ? (function () {
                     var previousOrMostCurrentResultToBePassedToTheNextActor = JSON.parse(JSON.stringify(res)).previousOrMostCurrentResultToBePassedToTheNextActor;
 
                     result = INTERNAL.systemServices[serviceName](previousOrMostCurrentResultToBePassedToTheNextActor);
-                    return noChain?result: chain;
+                    return noChain ? result : chain;
                 };
             })(actor);
         };

@@ -5,7 +5,7 @@
  * @license MIT
  * @license Samuel Bamgboye <contactsamie@gmail.com> 
  */
-var light = require('../src/lightservice') || light;
+var light = require('../src/lightservice') || require('lightservice') || light;
  
 var timemachine= (function () {
     light.service("timemachine_next", function (arg) {
