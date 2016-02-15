@@ -4,14 +4,14 @@ var light = (typeof light === "undefined") ? (function () {
         var store = storeOverride ? JSON.parse(JSON.stringify({ data: storeOverride })).data : storeOverride
 
         var incontext = {
-            event: INTERNAL.systemServices,
+            event: INTERNAL.sysServ,
             serviceChain: chainService,
             service: function () {
                 return chainService(undefined, true);
             },
             arg: arg,
             system: INTERNAL.system,
-            store: INTERNAL._STORE_[storeName].api(store)
+            store: INTERNAL.STR[storeName].api(store)
         };
         return incontext;
     };
@@ -26,53 +26,55 @@ var light = (typeof light === "undefined") ? (function () {
         success: true
     };
 
-    INTERNAL.expectNoForbiddenName = function (name) {
+    INTERNAL.noForbName = function (name) {
         if (INTERNAL.forbiddenNames[name]) {
             throw "You cannot use the name '" + name + "'";
         }
     };
 
-    INTERNAL.registry = {
+    INTERNAL.rgi = {
         service: {},
         handle: {},
         scripts: {}
     };
 
     INTERNAL.isRegistered = function (str) {
-        if (INTERNAL.registry.service[str] || INTERNAL.registry.handle[str]) {
+        if (INTERNAL.rgi.service[str] || INTERNAL.rgi.handle[str]) {
             return true;
         }
         return false;
     };
 
-    INTERNAL.generateUniqueSystemName = function (prefix) {
-        prefix = prefix || "";
-        var str = (prefix + '_xxxxxxxx_xxxx_4xxx_yxxx_xxxxxxxxxxxx')["replace"](/[xy]/g, function (c) { var r = Math.random() * 16 | 0, v = c == 'x' ? r : r & 0x3 | 0x8; return v.toString(16); });
-
+    INTERNAL.genName = function (prefix) {
+        INTERNAL.genName.num = INTERNAL.genName.num || 0;
+        INTERNAL.genName.num++;
+        prefix = prefix || "ls";
+       // var str = (prefix + '_xxxxxxxx_xxxx_4xxx_yxxx_xxxxxxxxxxxx')["replace"](/[xy]/g, function (c) { var r = Math.random() * 16 | 0, v = c == 'x' ? r : r & 0x3 | 0x8; return v.toString(16); });
+        var str = prefix + INTERNAL.genName.num;
         if (INTERNAL.isRegistered(str)) {
-            return INTERNAL.generateUniqueSystemName(prefix);
+            return INTERNAL.genName(prefix);
         }
         return str;
     }
 
     INTERNAL.$setState = function (systemName, name, obj) {
-        INTERNAL._STORE_[systemName]["ref"][name] = { data: obj };
-        INTERNAL._STORE_[systemName]["store"][name] = JSON.stringify(INTERNAL._STORE_[systemName]["ref"][name]);
+        INTERNAL.STR[systemName]["ref"][name] = { data: obj };
+        INTERNAL.STR[systemName]["store"][name] = JSON.stringify(INTERNAL.STR[systemName]["ref"][name]);
     };
     INTERNAL.$getState = function (systemName) {
-        var storeRoot = INTERNAL._STORE_[systemName];
-        return storeRoot && (INTERNAL._STORE_[systemName]["store"] || {});
+        var storeRoot = INTERNAL.STR[systemName];
+        return storeRoot && (INTERNAL.STR[systemName]["store"] || {});
     };
 
     //$storeOverride
 
     INTERNAL.storeFactory = function (systemName) {
-        INTERNAL._STORE_[systemName] = {
+        INTERNAL.STR[systemName] = {
             store: {},
             ref: {},
             api: function (storeOverride) {
                 if (storeOverride) {
-                    INTERNAL._STORE_[systemName]["store"] = storeOverride;
+                    INTERNAL.STR[systemName]["store"] = storeOverride;
                 }
 
                 return {
@@ -87,8 +89,8 @@ var light = (typeof light === "undefined") ? (function () {
                         INTERNAL.$setState(systemName, name, obj);
                     },
                     getRef: function (name) {
-                        INTERNAL._STORE_[systemName]["ref"][name] = INTERNAL._STORE_[systemName]["ref"][name] || {};
-                        return INTERNAL._STORE_[systemName]["ref"][name].data;
+                        INTERNAL.STR[systemName]["ref"][name] = INTERNAL.STR[systemName]["ref"][name] || {};
+                        return INTERNAL.STR[systemName]["ref"][name].data;
                     }
                 };
             }
@@ -138,7 +140,7 @@ var light = (typeof light === "undefined") ? (function () {
 
     INTERNAL.track = {
         record: function (arg) {
-            if (arg.methodName === INTERNAL.DEFAULT_HANDLE_NAME) {
+            if (arg.methodName === INTERNAL.DEF_HDLNM) {
                 return;
             }
 
@@ -163,39 +165,39 @@ var light = (typeof light === "undefined") ? (function () {
 
             if (INTERNAL.recordServices) {
                 INTERNAL.recordServices = false;
-                _light[INTERNAL.systemEventName.onSystemRecordEvent].send(recordStr);
+                _light[INTERNAL.sysEvName.onSystemRecordEvent].send(recordStr);
                 INTERNAL.recordServices = true;
             }
 
             if (arg.serviceOrHandleMethodName === INTERNAL.serviceTag) {
-                INTERNAL.systemServices[arg.methodName][INTERNAL.serviceEventName[arg.eventType]].send(recordStr);
+                INTERNAL.sysServ[arg.methodName][INTERNAL.serviceEventName[arg.eventType]].send(recordStr);
                 if ((arg.eventType === INTERNAL.serviceEventName.error) || (arg.eventType === INTERNAL.serviceEventName.success)) {
-                    INTERNAL.systemServices[arg.methodName][INTERNAL.serviceEventName[INTERNAL.serviceEventName.after]].send(recordStr);
+                    INTERNAL.sysServ[arg.methodName][INTERNAL.serviceEventName[INTERNAL.serviceEventName.after]].send(recordStr);
                 }
             }
 
             // notify event subscribers
             _light[arg.event].send(recordStr);
-            _light[INTERNAL.systemEventName.onSystemEvent].send(recordStr);
+            _light[INTERNAL.sysEvName.onSystemEvent].send(recordStr);
         }
     }
 
     INTERNAL.utility = {
-        execSurpressError: function (o, e, context, notificationInfo) {
+        xSupErr: function (o, e, context, notificationInfo) {
             if (typeof o === "function") {
                 try { o(e, context, notificationInfo); } catch (ex) {
                     console.error("ERROR : " + ex);
                 }
             }
         },
-        tryCatch: function (context, f, success, error) {
+        tc: function (context, f, success, error) {
             try {
                 var result = f();
-                INTERNAL.utility.execSurpressError(function () {
+                INTERNAL.utility.xSupErr(function () {
                     success(result, context);
                 }, null, context, "trying-service");
             } catch (e) {
-                INTERNAL.utility.execSurpressError(function () {
+                INTERNAL.utility.xSupErr(function () {
                     console.error("ERROR : " + e);
                     error(e, context);
                 }, e, context, "service-throws");
@@ -218,7 +220,7 @@ var light = (typeof light === "undefined") ? (function () {
     INTERNAL.receive = function (messageName, fn) {
         INTERNAL.messageReceivers[messageName] = INTERNAL.messageReceivers[messageName] || [];
         var messageItem = { message: messageName };
-        messageItem.link = _light.service(INTERNAL.generateUniqueSystemName(), INTERNAL.DEFAULT_HANDLE_NAME, fn);
+        messageItem.link = _light.service(INTERNAL.genName(), INTERNAL.DEF_HDLNM, fn);
         INTERNAL.messageReceivers[messageName].push(messageItem);
     };
 
@@ -274,7 +276,7 @@ var light = (typeof light === "undefined") ? (function () {
 
     var setUpNotification = function (id) {
         return createEventEmitter(id, function (item, o, context, notificationInfo) {
-            INTERNAL.utility.tryCatch(context, function () { return item.service(); }, function () { }, function () { INTERNAL.utility.execSurpressError(item.service().error, o, context, notificationInfo); });
+            INTERNAL.utility.tc(context, function () { return item.service(); }, function () { }, function () { INTERNAL.utility.xSupErr(item.service().error, o, context, notificationInfo); });
         });
     };
 
@@ -317,7 +319,7 @@ var light = (typeof light === "undefined") ? (function () {
     };
 
     var getServiceByName = function (serviceName) {
-        var item = INTERNAL.systemServices[serviceName];
+        var item = INTERNAL.sysServ[serviceName];
         return item;
     };
 
@@ -344,7 +346,7 @@ var light = (typeof light === "undefined") ? (function () {
             isFirstCallInServiceRun: INTERNAL.unknownTag,
             isLastCallInServiceRun: INTERNAL.unknownTag,
             link: testhandle,
-            event: INTERNAL.systemEventName.beforeHandleRun,
+            event: INTERNAL.sysEvName.beforeHandleRun,
             eventType: INTERNAL.serviceEventName.before
         });
 
@@ -361,7 +363,7 @@ var light = (typeof light === "undefined") ? (function () {
             isFirstCallInServiceRun: INTERNAL.unknownTag,
             isLastCallInServiceRun: INTERNAL.unknownTag,
             link: testhandle,
-            event: INTERNAL.systemEventName.afterHandleRun,
+            event: INTERNAL.sysEvName.afterHandleRun,
             eventType: INTERNAL.serviceEventName.after
         });
         return tmpDefinition;
@@ -390,7 +392,7 @@ var light = (typeof light === "undefined") ? (function () {
                     isFirstCallInServiceRun: INTERNAL.unknownTag,
                     isLastCallInServiceRun: INTERNAL.unknownTag,
                     link: (testhandle || handle.definition),
-                    event: INTERNAL.systemEventName.beforeHandleRun,
+                    event: INTERNAL.sysEvName.beforeHandleRun,
                     eventType: INTERNAL.serviceEventName.before
                 });
 
@@ -407,7 +409,7 @@ var light = (typeof light === "undefined") ? (function () {
                     isFirstCallInServiceRun: INTERNAL.unknownTag,
                     isLastCallInServiceRun: INTERNAL.unknownTag,
                     link: (testhandle || handle.definition),
-                    event: INTERNAL.systemEventName.afterHandleRun,
+                    event: INTERNAL.sysEvName.afterHandleRun,
                     eventType: INTERNAL.serviceEventName.after
                 });
 
@@ -432,7 +434,7 @@ var light = (typeof light === "undefined") ? (function () {
         return tmpDefinition;
     };
 
-    var runSuppliedServiceFunction = function (context, serviceItem, handleNames, definition, serviceName, arg) {
+    var runSupServFn = function (context, serviceItem, handleNames, definition, serviceName, arg) {
         //start testing
         if (INTERNAL._TEST_OBJECTS_ && INTERNAL._TEST_OBJECTS_[serviceName] && INTERNAL._TEST_OBJECTS_[serviceName].service) {
             handleNames = INTERNAL._TEST_OBJECTS_[serviceName].handleNames || handleNames;
@@ -476,7 +478,7 @@ var light = (typeof light === "undefined") ? (function () {
 
             var result;
             context.callerContext = callerContext;
-            INTERNAL.utility.tryCatch(context, function () {
+            INTERNAL.utility.tc(context, function () {
                 INTERNAL.track.record({
                     entranceOrExit: INTERNAL.entranceTag,
                     serviceOrHandleMethodName: INTERNAL.serviceTag,
@@ -488,15 +490,15 @@ var light = (typeof light === "undefined") ? (function () {
                     isFirstCallInServiceRun: INTERNAL.unknownTag,
                     isLastCallInServiceRun: INTERNAL.unknownTag,
                     link: definition,
-                    event: INTERNAL.systemEventName.beforeServiceRun,
+                    event: INTERNAL.sysEvName.beforeServiceRun,
                     eventType: INTERNAL.serviceEventName.before
                 });
             }, function (o) {
             }, function (o) {
             });
 
-            INTERNAL.utility.tryCatch(context, function () {
-                result = runSuppliedServiceFunction(context, serviceItem, handleName, definition, serviceName, tArg.arg);
+            INTERNAL.utility.tc(context, function () {
+                result = runSupServFn(context, serviceItem, handleName, definition, serviceName, tArg.arg);
 
                 return result;
             }, function (o) {
@@ -511,7 +513,7 @@ var light = (typeof light === "undefined") ? (function () {
                     isFirstCallInServiceRun: INTERNAL.unknownTag,
                     isLastCallInServiceRun: INTERNAL.unknownTag,
                     link: definition,
-                    event: INTERNAL.systemEventName.onServiceSuccess,
+                    event: INTERNAL.sysEvName.onServiceSuccess,
                     eventType: INTERNAL.serviceEventName.success
                 });
             }, function (o) {
@@ -526,7 +528,7 @@ var light = (typeof light === "undefined") ? (function () {
                     isFirstCallInServiceRun: INTERNAL.unknownTag,
                     isLastCallInServiceRun: INTERNAL.unknownTag,
                     link: definition,
-                    event: INTERNAL.systemEventName.onServiceError,
+                    event: INTERNAL.sysEvName.onServiceError,
                     eventType: INTERNAL.serviceEventName.error
                 });
             });
@@ -545,11 +547,11 @@ var light = (typeof light === "undefined") ? (function () {
         if (arguments.length == 1) {
             if (typeof serviceName === "function") {
                 fn = serviceName;
-                serviceName = INTERNAL.generateUniqueSystemName(servicePrefix);
-                handleNamesOrDefinition = INTERNAL.DEFAULT_HANDLE_NAME;
+                serviceName = INTERNAL.genName(servicePrefix);
+                handleNamesOrDefinition = INTERNAL.DEF_HDLNM;
             } else {
-                if (!INTERNAL.registry.scripts[serviceName]) {
-                    INTERNAL.registry.scripts[serviceName] = true;
+                if (!INTERNAL.rgi.scripts[serviceName]) {
+                    INTERNAL.rgi.scripts[serviceName] = true;
                     return {
                         load: function (onload) {
                             INTERNAL.loadScript(serviceName, onload && function () {
@@ -575,20 +577,20 @@ var light = (typeof light === "undefined") ? (function () {
 
             if (isArray(serviceName)) {
                 handleNamesOrDefinition = serviceName;
-                serviceName = INTERNAL.generateUniqueSystemName(servicePrefix);
+                serviceName = INTERNAL.genName(servicePrefix);
             } else {
                 //service name is provided
-                handleNamesOrDefinition = INTERNAL.DEFAULT_HANDLE_NAME;
+                handleNamesOrDefinition = INTERNAL.DEF_HDLNM;
             }
         }
 
         // todo check for unique name
         if (INTERNAL.isRegistered(serviceName)) {
-            throw "Unable to create service with name '" + serviceName + "'.Name already exists in registry";
+            throw "'" + serviceName + "' already exists";
             return;
         }
 
-        INTERNAL.expectNoForbiddenName(serviceName);
+        INTERNAL.noForbName(serviceName);
 
         //!!!!
         //experiment ----start
@@ -610,9 +612,9 @@ var light = (typeof light === "undefined") ? (function () {
         serviceItem.redefinition = createServiceDefinitionFromSuppliedFn(context, serviceItem, handleNamesOrDefinition, definition, serviceName);
 
         serviceItem.me = serviceName;
-        INTERNAL.systemServices[serviceName] = serviceItem;
+        INTERNAL.sysServ[serviceName] = serviceItem;
         //!! reg
-        INTERNAL.registry.service[serviceName] = {};
+        INTERNAL.rgi.service[serviceName] = {};
 
         INTERNAL.storeFactory(serviceName);
 
@@ -645,7 +647,7 @@ var light = (typeof light === "undefined") ? (function () {
                     res.nextArg = arguments.length ? arg : result;
                     var nextArg = JSON.parse(JSON.stringify(res)).nextArg;
 
-                    result = INTERNAL.systemServices[serviceName](nextArg);
+                    result = INTERNAL.sysServ[serviceName](nextArg);
                     return noChain ? result : chain;
                 };
             })(actor);
@@ -653,11 +655,11 @@ var light = (typeof light === "undefined") ? (function () {
 
         if (cb) {
             //todo use async to speed up things
-            eachAsync(INTERNAL.systemServices, buildFn, function () {
+            eachAsync(INTERNAL.sysServ, buildFn, function () {
                 cb(chain);
             });
         } else {
-            for (var actor in INTERNAL.systemServices) {
+            for (var actor in INTERNAL.sysServ) {
                 buildFn(actor);
             }
         }
@@ -686,13 +688,11 @@ var light = (typeof light === "undefined") ? (function () {
     };
 
     var _light = function (f) {
-        // (function (f) {
-        //   setTimeout(function () {
+       
         chainService(function (cs) {
             typeof f === "function" && f.call(INTERNAL.getCurrentContext(INTERNAL._INTERNAL_SCOPE_NAME, cs), cs);
         });
-        //    },0);
-        // })(f);
+        
     };
 
     _light.startService = function (f) {
@@ -702,27 +702,27 @@ var light = (typeof light === "undefined") ? (function () {
     _light.handle = function (handleName, definition) {
         var handleePrefix = "handle_";
         if ((arguments.length == 0) || (arguments.length > 2)) {
-            throw "Cannot create handle : problem with handle definition"
+            throw "handle definition error"
             return;
         }
 
         if (arguments.length == 1) {
             if (typeof handleName !== "function") {
-                throw "handle definition has to be a function";
+                throw "expects handle to be a function";
                 return;
             }
             definition = handleName;
-            handleName = INTERNAL.generateUniqueSystemName(handleePrefix);
+            handleName = INTERNAL.genName(handleePrefix);
         }
 
         if (INTERNAL.isRegistered(handleName)) {
-            throw "Unable to create handle with name '" + handleName + "'.Name already exists in registry";
+            throw " handle '" + handleName + "' already exists ";
             return;
         }
 
-        INTERNAL.expectNoForbiddenName(handleName);
+        INTERNAL.noForbName(handleName);
 
-        INTERNAL.registry.handle[handleName] = {};
+        INTERNAL.rgi.handle[handleName] = {};
 
         INTERNAL.handles.push({
             name: handleName,
@@ -764,7 +764,7 @@ var light = (typeof light === "undefined") ? (function () {
                 for (var m = i; m <= j; m++) {
                     var playGround = records && (records || [])[m] || [];
                     if (!playGround) {
-                        throw "unable to find service to play service";
+                        throw "no service to play";
                     }
                     serviceChain = _light.advanced.playServiceChain(serviceChain, playGround.methodName, playGround.methodType, playGround.data, playGround.dataType, playGround.store, m !== i);
                 }
@@ -779,7 +779,7 @@ var light = (typeof light === "undefined") ? (function () {
                 return this.Map(obj);
             },
             Map: function (obj) {
-                var name = INTERNAL.generateUniqueSystemName("immu");
+                var name = INTERNAL.genName("immu");
                 var data = { data: obj }
                 INTERNAL.ImmutableStore[name] = JSON.stringify(data);
                 return {
@@ -814,7 +814,7 @@ var light = (typeof light === "undefined") ? (function () {
         INTERNAL.unknownTag = "unknown";
 
         //SYSTEM EVENTS API
-        INTERNAL.systemEventName = {
+        INTERNAL.sysEvName = {
             beforeServiceRun: "beforeServiceRun",
             afterServiceRun: "afterServiceRun",
             beforeHandleRun: "beforeHandleRun",
@@ -833,16 +833,16 @@ var light = (typeof light === "undefined") ? (function () {
         };
 
         INTERNAL._TEST_OBJECTS_ = {};
-        INTERNAL.systemServices = {};
+        INTERNAL.sysServ = {};
         INTERNAL.ImmutableStore = {};
-        INTERNAL._STORE_ = {};
+        INTERNAL.STR = {};
         INTERNAL.eventSubscribers = {};
         INTERNAL.handles = [];
-        INTERNAL._INTERNAL_SCOPE_NAME = INTERNAL.generateUniqueSystemName();
+        INTERNAL._INTERNAL_SCOPE_NAME = INTERNAL.genName();
         INTERNAL.storeFactory(INTERNAL._INTERNAL_SCOPE_NAME);
-        INTERNAL.DEFAULT_HANDLE_NAME = INTERNAL.generateUniqueSystemName();
+        INTERNAL.DEF_HDLNM = INTERNAL.genName();
         /*
-           setup like publishSystemEvent(_light, "event", INTERNAL.generateUniqueSystemName("some id"));
+           setup like publishSystemEvent(_light, "event", INTERNAL.genName("some id"));
            notify like  _light.event.send(e, context, notificationInfo);
            subscribe like light.event(function (e, context,notificationInfo) {}));
         */
@@ -853,17 +853,17 @@ var light = (typeof light === "undefined") ? (function () {
         _light.send = INTERNAL.send;
         _light.receive = INTERNAL.receive;
 
-        publishSystemEvent(_light, INTERNAL.systemEventName.onSystemEvent, INTERNAL.generateUniqueSystemName());
-        publishSystemEvent(_light, INTERNAL.systemEventName.onSystemRecordEvent, INTERNAL.generateUniqueSystemName());
+        publishSystemEvent(_light, INTERNAL.sysEvName.onSystemEvent, INTERNAL.genName());
+        publishSystemEvent(_light, INTERNAL.sysEvName.onSystemRecordEvent, INTERNAL.genName());
 
-        publishSystemEvent(_light, INTERNAL.systemEventName.beforeServiceRun, INTERNAL.generateUniqueSystemName());
-        publishSystemEvent(_light, INTERNAL.systemEventName.afterServiceRun, INTERNAL.generateUniqueSystemName());
-        publishSystemEvent(_light, INTERNAL.systemEventName.beforeHandleRun, INTERNAL.generateUniqueSystemName());
-        publishSystemEvent(_light, INTERNAL.systemEventName.afterHandleRun, INTERNAL.generateUniqueSystemName());
-        publishSystemEvent(_light, INTERNAL.systemEventName.onServiceError, INTERNAL.generateUniqueSystemName());
-        publishSystemEvent(_light, INTERNAL.systemEventName.onServiceSuccess, INTERNAL.generateUniqueSystemName());
+        publishSystemEvent(_light, INTERNAL.sysEvName.beforeServiceRun, INTERNAL.genName());
+        publishSystemEvent(_light, INTERNAL.sysEvName.afterServiceRun, INTERNAL.genName());
+        publishSystemEvent(_light, INTERNAL.sysEvName.beforeHandleRun, INTERNAL.genName());
+        publishSystemEvent(_light, INTERNAL.sysEvName.afterHandleRun, INTERNAL.genName());
+        publishSystemEvent(_light, INTERNAL.sysEvName.onServiceError, INTERNAL.genName());
+        publishSystemEvent(_light, INTERNAL.sysEvName.onServiceSuccess, INTERNAL.genName());
 
-        _light.handle(INTERNAL.DEFAULT_HANDLE_NAME, function (definition) { return definition; });
+        _light.handle(INTERNAL.DEF_HDLNM, function (definition) { return definition; });
     };
 
     init();
