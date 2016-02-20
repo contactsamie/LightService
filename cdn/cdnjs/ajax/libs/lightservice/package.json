@@ -22,7 +22,8 @@
     "target": "git://github.com/contactsamie/LightService.git",
     "basePath": "cdn",
     "files": [
-      "lightservice*"
+      "lightservice.min.js",
+      "lightservice.js"
     ]
   }
 }
