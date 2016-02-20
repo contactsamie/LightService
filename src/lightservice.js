@@ -28,7 +28,7 @@ var light = (typeof light === "undefined") ? (function () {
 
     _$.noForbName = function (name) {
         if (_$.forbiddenNames[name]) {
-            throw "You cannot use the name '" + name + "'";
+            throw "'" + name + "' unuseable";
         }
     };
 

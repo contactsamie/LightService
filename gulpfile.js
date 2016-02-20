@@ -17,6 +17,26 @@ var fs = require('fs');
 var clean = require('gulp-clean');
 var rename = require('gulp-rename');
 
+// Reference the module 
+var D2UConverter = new require('dos2unix').dos2unix;
+ 
+// Setup default options 
+var defaultOptions = {
+  glob: {
+    cwd: __dirname
+  },
+  maxConcurrency: 50
+};
+ 
+// Create a new `dos2unix` instance and add important event listeners 
+var d2u = new D2UConverter(defaultOptions)
+  .on('error', function(err) {
+    console.error(err);
+  })
+  .on('end', function(stats) {
+    console.log(stats);
+  });
+
 var banner = ['/**',
   ' * <%= pkg.name %> - <%= pkg.description %>',
   ' * @version v<%= pkg.version %>',
@@ -57,4 +77,6 @@ gulp.task('post-build-visual-component', ["build"], function () {
 
 gulp.task('default', ['post-build-visual-component'], function () {
     gulp.src(['src/lightservice-timemachine.js', 'dist/lightservice-timemachine.min.js']).pipe(header(banner, { pkg: pkg })).pipe(gulp.dest('./dist-lightservice-timemachine/'));
+	d2u.process(['cdn/package.json']);
+	d2u.process(['cdn/cdnjs/ajax/libs/lightservice/package.json']);
 });

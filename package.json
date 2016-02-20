@@ -19,6 +19,7 @@
   "license": "MIT",
   "devDependencies": {
     "coveralls": "^2.11.6",
+    "dos2unix": "^1.1.2",
     "event-stream": "^3.3.1",
     "gulp": "^3.9.0",
     "gulp-angular-templatecache": "^1.7.0",
